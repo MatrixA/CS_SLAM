@@ -1,0 +1,5 @@
+/home/fernando/SonarSLAM/build/CMakeFiles/edit_cache.dir
+/home/fernando/SonarSLAM/build/CMakeFiles/test.dir
+/home/fernando/SonarSLAM/build/CMakeFiles/cave.dir
+/home/fernando/SonarSLAM/build/CMakeFiles/rebuild_cache.dir
+/home/fernando/SonarSLAM/build/CMakeFiles/CS_SLAM.dir
