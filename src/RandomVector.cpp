@@ -8,13 +8,18 @@ RandomVector::RandomVector(){
     hat = Eigen::Vector3d::Zero(3);
     P = Eigen::Matrix3d::Zero(3,3);
 }
+
 RandomVector::RandomVector(Eigen::VectorXd hat_, Eigen::MatrixXd P_):hat(hat_),P(P_){}
     
+
+
+/** 
+ * @brief compound two random vectors that are head to tail.
+ * Note: this compound is about two pose random vector.
+ * @param b - random vector to be compound with
+ * @return compounded random vector
+ */
 RandomVector RandomVector::compound(RandomVector b){
-/*
-输入：两个首尾相接的关系随机向量
-输出：两个关系随机向量的复合
-*/
     Eigen::VectorXd ij = this->hat;
     Eigen::VectorXd jk = b.hat;
     this->hat = Eigen::Vector3d(jk(0)*cos(ij(2))-jk(1)*sin(ij(2))+ij(0),
@@ -32,11 +37,13 @@ RandomVector RandomVector::compound(RandomVector b){
     return *this;
 }
 
+/**
+ * @brief compound 2D point random vector with this randomvector
+ * 
+ * @param b - 2D point to be compounded with
+ * @return compounded 2d RandomVector 
+ */
 RandomVector RandomVector::compoundP(RandomVector b){
-/*
-输入：两个首尾相接的关系随机向量
-输出：两个关系随机向量的复合
-*/
     Eigen::VectorXd oi = this->hat;
     Eigen::VectorXd ip = b.hat;
     this->hat = Eigen::Vector2d(oi(0)+ip(0)*cos(oi(2))-ip(1)*sin(oi(2)),
@@ -51,11 +58,12 @@ RandomVector RandomVector::compoundP(RandomVector b){
     return *this;
 }
 
+/**
+ * @brief compute inverse of the random vector transform
+ * 
+ * @return the inversed random vector
+ */
 RandomVector RandomVector::rinverse(){
-/*
-输入：关系随机向量
-输出：逆关系随机向量
-*/
     Eigen::VectorXd x = this->hat;
     this->hat << -x(0)*cos(x(2))-x(1)*sin(x(2)),x(0)*sin(x(2))-x(1)*cos(x(2)),-x(2);
     Eigen::MatrixXd J(3,3);
@@ -67,10 +75,23 @@ RandomVector RandomVector::rinverse(){
     return *this;
 }
 
+/**
+ * @brief calculate tail to tail transform about two tail to tail random vectors
+ * 
+ * @param b - the random vector to do with.
+ * @return resultant random vector 
+ */
 RandomVector RandomVector::tail2tail(RandomVector b){
     return (this->rinverse()).compound(b);
 }
 
+/**
+ * @brief check if two random vectors are equal
+ * Note: use isApprox in Eigen
+ * @param b - the random vector to be compared with
+ * @return true - equal
+ * @return false - not equal
+ */
 bool RandomVector::operator ==(const RandomVector& b){
     return (this->hat).isApprox(b.hat, 1e-5) && (this->P).isApprox(b.P);
 }
