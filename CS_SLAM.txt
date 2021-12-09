@@ -1,0 +1,305 @@
+@startuml
+class System{
+System();
+~System();
++ void TrackAHRS(MeasurementPackage meas,Eigen::VectorXd paramAHRS);
++ void TrackDVL(MeasurementPackage meas,Eigen::VectorXd paramDVL);
++ void TrackSonar(MeasurementPackage meas,Eigen::VectorXd paramSonar);
++ void TrackDS(MeasurementPackage meas,Eigen::VectorXd paramDS);
++ void TrackMono(MeasurementPackage meas,Eigen::VectorXd paramMono);
++ void SetUp();
++ void PlotTrajectory();
++ void Reset();
++ void SaveTrajectory(const string &filename);
++ int GetTrackingState();
++ bool isLost();
++ bool isFinished();
+
+- unsigned long long timestamp_now;
+- ASEKF* mpASEKF; //ASEKF里保存了所有KeyFrames的坐标及其方差
+- ScanFormer* mpScanFormer;
+- int scnt=0;
+- bool isSetUp = false;
+- bool mbReset = false;
+- std::thread* mptViewer;
+- int mTrackingState;
+- std::vector<MapPoint*> mTrackedMapPoints;
+}
+
+
+class KeyFrame{
+KeyFrame();
+~KeyFrame();
++ KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP);
++ Eigen::VectorXd GetPos();
++ Eigen::MatrixXd GetPosP();
++ void setPos(Eigen::VectorXd);
++ void setPosP(Eigen::MatrixXd);
++ void Transform(motion transform);
+
+- RandomVector mKfPose;
+}
+
+class EKF{
+EKF();
+EKF(Eigen::VectorXd x);
+~EKF();
++ Eigen::VectorXd GetX();
++ Eigen::MatrixXd GetP();
+
++ void initialize(Eigen::VectorXd x_in);
++ bool isInitialized();
++ void reset();
++ void ResetDeadReckoningXYZ();
+
++ void setP(Eigen::MatrixXd P_in);
++ void setQ(Eigen::MatrixXd Q_in);
++ void setH(Eigen::MatrixXd H_in);
++ void setR(Eigen::MatrixXd R_in);
+
++ pose prediction(double dt);
++ void update(Eigen::VectorXd z, double dt);
+
+- bool is_initialized_;
+- Eigen::VectorXd x_;
+- Eigen::MatrixXd P_;
+- Eigen::MatrixXd F_;
+- Eigen::MatrixXd Q_;
+- Eigen::MatrixXd H_;
+- Eigen::MatrixXd R_;
+
+}
+
+class ASEKF{
+ASEKF();
+~ASEKF();
+
++ void Initialize(KeyFrame kf_init);
++ bool IsInitialized();
++ void reset();
+
++ Eigen::MatrixXd GetX();
++ void AddPose(KeyFrame xn);
+
++ void SetP(Eigen::MatrixXd P_in);
++ void SetQ(Eigen::MatrixXd Q_in);
++ void SetH(Eigen::MatrixXd H_in);
++ void SetR(Eigen::MatrixXd R_in);
+
++ void Prediction(motion q_n);
++ void Update(Eigen::VectorXd z);
+
+- bool is_initialized_;
+- Eigen::VectorXd X_;
+- Eigen::MatrixXd P_;
+- Eigen::MatrixXd F_;
+- Eigen::MatrixXd Q_;
+- Eigen::MatrixXd H_;
+- Eigen::MatrixXd R_;
+}
+
+class Map{
+Map();
+~Map();
++ void AddMapPoint(MapPoint* pMP);
++ void AddKeyFrame(KeyFrame* pKF);
++ std::vector<KeyFrame *> Map::GetKeyFrames();
++ std::vector<MapPoint *> Map::GetMapPoints();
+
+- std::vector<MapPoint *>mapPoints;
+- std::vector<KeyFrame *>keyFrames;
+- ScanFormer* mpScanFormer;
+}
+
+class Converter{
++ static std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors);
+
++ static g2o::SE3Quat toSE3Quat(const cv::Mat &cvT);
++ static g2o::SE3Quat toSE3Quat(const g2o::Sim3 &gSim3);
+
++ static cv::Mat toCvMat(const g2o::SE3Quat &SE3);
++ static cv::Mat toCvMat(const g2o::Sim3 &Sim3);
++ static cv::Mat toCvMat(const Eigen::Matrix<double,4,4> &m);
++ static cv::Mat toCvMat(const Eigen::Matrix3d &m);
++ static cv::Mat toCvMat(const Eigen::Matrix<double,3,1> &m);
++ static cv::Mat toCvMat(const Eigen::MatrixXd &m);
+
++ static cv::Mat toCvSE3(const Eigen::Matrix<double,3,3> &R, const Eigen::Matrix<double,3,1> &t);
++ static cv::Mat tocvSkewMatrix(const cv::Mat &v);
+
++ static Eigen::Matrix<double,3,1> toVector3d(const cv::Mat &cvVector);
++ static Eigen::Matrix<double,3,1> toVector3d(const cv::Point3f &cvPoint);
++ static Eigen::Matrix<double,3,3> toMatrix3d(const cv::Mat &cvMat3);
++ static Eigen::Matrix<double,4,4> toMatrix4d(const cv::Mat &cvMat4);
++ static std::vector<float> toQuaternion(const cv::Mat &M);
+
++ static bool isRotationMatrix(const cv::Mat &R);
++ static std::vector<float> toEuler(const cv::Mat &R);
+}
+
+class MapDrawer{
++ Drawer(Map* pMap, const string &strSettingPath);
+
++ void DrawMapPoints();
+
+- float mKeyFrameSize;
+- float mKeyFrameLineWidth;
+- float mPointSize;
+- Map* mpMap;
+}
+
+class SonarDrawer{
++ Drawer(Map* pMap, const string &strSettingPath);
+
++ void DrawSonar();
+
+- ScanFormer* mpScanFormer;
+}
+
+class FrameDrawer{
++ Drawer(Map* pMap, const string &strSettingPath);
+
++ void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
+
+- float mKeyFrameSize;
+- float mKeyFrameLineWidth;
+- float mPointSize;
+- Map* mpMap;
+}
+
+class MapPoint{
+MapPoint(){}
++ Eigen::Vector2d GetWorldPos(); 
+
+- Eigen::Vector2d worldPose;
+- Eigen::Matrix2d worldPoseP;
+- KeyFrame * kfRef;
+}
+
+class RandomVector{
+RandomVector();
++ RandomVector(Eigen::VectorXd hat_, Eigen::MatrixXd P_);
+
++ RandomVector compound(RandomVector b);
+
++ RandomVector compoundP(RandomVector b);
+
+
++ RandomVector rinverse();
+
++ RandomVector tail2tail(RandomVector b);
+
++ bool operator ==(const RandomVector& b);
++ Eigen::VectorXd hat;
++ Eigen::MatrixXd P;
+}
+
+class ScanFormer{
+ScanFormer();
+~ScanFormer();
+
++ void Reset();
++ bool IsFull();
+
++ void BeamSegment(int thresh);
++ motion D(int i);
++ void Undistort(int thresh);
+
++ void UseDVL(Eigen::VectorXd data_dvl, double dt,Eigen::VectorXd paramDVL);
++ void UseAHRS(Eigen::VectorXd data_ahrs, double dt,Eigen::VectorXd paramAHRS);
++ void UseSonar(Eigen::VectorXd data_sonar, double dt,Eigen::VectorXd paramSonar);
++ void UseDS(Eigen::VectorXd data_ds, double dt,Eigen::VectorXd paramDS);
+
++ KeyFrame GetPose();
++ void ScanFormer::DrawFullScan();
+
+- int sonarCnt=0;
+- EKF scanEKF;
+- std::vector<Eigen::VectorXd> scan; //一个full_scan是NUM_BEAMS * NUM_BINS的强度矩阵
+- std::vector<point> z; //从full_scan能够得到扫描点
+- std::vector<KeyFrame> x_s; //声纳full_scan的每帧位姿
+- const int C = NUM_BEAMS/2;
+}
+
+class Utils{
++ static double MahDistance(const Eigen::Vector3d &ri, const Eigen::Matrix3d &Sigma, const Eigen::Vector3d &ni);
++ static Eigen::Vector2d Oplus(const Eigen::Vector3d &q,const Eigen::Vector2d &n);
++ static Eigen::Vector3d Odot(const Eigen::Vector3d &a, const Eigen::Vector3d &b);
+}
+
+
+class LoopClosing{
+LoopClosing();
+~LoopClosing();
++ void SetScanFormer();
++ void Run();
+
+- ScanFormer* mpScanFormer;
+}
+
+class LocalMapping{
+LocalMapping();
+~LocalMapping();
++ void Run();
+}
+
+class Frames{
+Frames();
+~Frames();
++ void Add(KeyFrame* pKF);
++ void erase(KeyFrame* pKF);
++ void clear();
++ void clearMap(Map* pMap);
+
+- std::mutex mMutex;
+}
+
+class Viewer{
+Viewer();
++ void Close();
++ void UpdateMap();
+
++ void ThreadLoop();
++ void DrawFrame();
++ void DrawMapPoints();
++ void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
++ cv::Mat PlotFrameImage();
++ std::thread viewer_thread_;
+
+- float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
+- Map* mpMap;
+- std::mutex viewer_data_mutex_;
+}
+
+RandomVector --up-> MapPoint
+RandomVector --up-> KeyFrame
+MapPoint --up-> Map
+KeyFrame --up-> Map
+KeyFrame --up-> Frames
+Frames --up-> FrameDrawer
+ASEKF --up-> ScanFormer
+EKF --up-> ScanFormer
+Map --up-> MapDrawer
+FrameDrawer --up-> Viewer
+MapDrawer --up-> Viewer
+SonarDrawer --up-> Viewer
+ScanFormer --up-> System
+Viewer --up-> System
+LoopClosing --up-> System
+LocalMapping --up-> System
+ScanFormer --up-> SonarDrawer
+@enduml
+
+
+ 
+
+/**
+ * @brief 1
+ * 1.System获得输入数据
+ * -1.交给Tracking线程
+ * --1.Tracking线程维护ScanFormer
+ * --2.Tracking线程
+ * -2.LocalMapping
+ * -3.LoopClosing线程利用声纳
+ * 
+ */

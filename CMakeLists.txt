@@ -76,7 +76,7 @@ src/MeasurementPackage.cpp
 src/System.cpp
 src/Utils.cpp
 include/ASEKF.h
-# include/Atlas.h
+# include/Map.h
 include/EKF.h
 include/RandomVector.h
 include/KeyFrame.h

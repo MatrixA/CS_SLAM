@@ -9,6 +9,7 @@
 #include "ScanFormer.h"
 #include "MeasurementPackage.h"
 #include "RandomVector.h"
+#include "LocalMapping.h"
 
 namespace CS_SLAM
 {
@@ -25,17 +26,27 @@ public:
     void TrackDVL(MeasurementPackage meas,Eigen::VectorXd paramDVL);
     void TrackSonar(MeasurementPackage meas,Eigen::VectorXd paramSonar);
     void TrackDS(MeasurementPackage meas,Eigen::VectorXd paramDS);
+    void TrackMono(MeasurementPackage meas,Eigen::VectorXd paramMono);
     void SetUp();
     //void Plot();
     void PlotTrajectory();
-
+    void Reset();
+    void SaveTrajectory(const string &filename);
+    int GetTrackingState();
+    bool isLost();
+    bool isFinished();
 private:
     unsigned long long timestamp_now;
-    ASEKF asekf; //ASEKF里保存了所有KeyFrames的坐标及其方差
+    ASEKF* asekf; //ASEKF里保存了所有KeyFrames的坐标及其方差
     ScanFormer scanFormer;
     int scnt=0;
-    bool isSetUp=false;
+    bool isSetUp = false;
+    bool mbReset = false;
     std::thread* mptViewer;
+    int mTrackingState;
+    std::vector<MapPoint*> mTrackedMapPoints;
+    LocalMapping* mpLocalMapper;
+    
     //std::thread viewer_thread_;
 };
 

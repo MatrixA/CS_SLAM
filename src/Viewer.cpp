@@ -2,7 +2,7 @@
 
 namespace CS_SLAM{
 
-Viewer::Viewer(Atlas* pAtlas):mpAtlas(pAtlas){
+Viewer::Viewer(Map* pMap):mpMap(pMap){
     //viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
 }
 

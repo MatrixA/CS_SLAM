@@ -3,7 +3,7 @@
 
 #include <thread>
 #include <pangolin/pangolin.h>
-#include "Atlas.h"
+#include "Map.h"
 
 namespace CS_SLAM{
 
@@ -23,7 +23,7 @@ private:
     std::thread viewer_thread_;
     
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
-    Atlas* mpAtlas;
+    Map* mpMap;
     std::mutex viewer_data_mutex_;
 };
 

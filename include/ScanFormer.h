@@ -41,13 +41,14 @@ public:
     //使用DS数据更新EKF
     void UseDS(Eigen::VectorXd data_ds, double dt,Eigen::VectorXd paramDS);
     
+    void SetEKF(EKF* ekf);
     //获得EKF的当前位姿(一般只在扫描一轮结束后调用)
     KeyFrame GetPose();
     void ScanFormer::DrawFullScan();
 
 private:
     int sonarCnt=0;
-    EKF scanEKF;
+    EKF* mpEKF;
     std::vector<Eigen::VectorXd> scan; //一个full_scan是NUM_BEAMS * NUM_BINS的强度矩阵
     // Eigen::Matrix<int, NUM_BEAMS, NUM_BINS> scan; //一个full_scan是NUM_BEAMS * NUM_BINS的强度矩阵
     std::vector<point> z; //从full_scan能够得到扫描点

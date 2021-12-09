@@ -26,7 +26,7 @@ public:
     void Transform(motion transform);
 
 private:
-    RandomVector kfPose;
+    RandomVector mKfPose;
     // Eigen::MatrixXd* Simg;
     // cv::mat* Cimg;
 };
