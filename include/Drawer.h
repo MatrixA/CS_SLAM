@@ -14,6 +14,7 @@ public:
     void DrawMapPoints();
     viod DrawSonar();
     void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
+
 private:
     float mKeyFrameSize;
     float mKeyFrameLineWidth;

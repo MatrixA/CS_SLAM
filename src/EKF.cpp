@@ -1,6 +1,7 @@
 #include "EKF.h"
 
 //MSIS 30Hz, DVL 1.5Hz, AHRS 10Hz.
+//state vector: (x y z theta u v w r)^T
 
 namespace CS_SLAM{
 EKF::EKF(){
