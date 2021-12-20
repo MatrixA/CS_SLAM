@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/fernando/SonarSLAM
+CMAKE_SOURCE_DIR = /home/fernando/Code/CS_SLAM
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/fernando/SonarSLAM/build
+CMAKE_BINARY_DIR = /home/fernando/Code/CS_SLAM/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/test.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/test.dir/flags.make
 
 CMakeFiles/test.dir/test/test_what.cpp.o: CMakeFiles/test.dir/flags.make
 CMakeFiles/test.dir/test/test_what.cpp.o: ../test/test_what.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fernando/SonarSLAM/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test.dir/test/test_what.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/test.dir/test/test_what.cpp.o -c /home/fernando/SonarSLAM/test/test_what.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fernando/Code/CS_SLAM/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test.dir/test/test_what.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/test.dir/test/test_what.cpp.o -c /home/fernando/Code/CS_SLAM/test/test_what.cpp
 
 CMakeFiles/test.dir/test/test_what.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test.dir/test/test_what.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fernando/SonarSLAM/test/test_what.cpp > CMakeFiles/test.dir/test/test_what.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fernando/Code/CS_SLAM/test/test_what.cpp > CMakeFiles/test.dir/test/test_what.cpp.i
 
 CMakeFiles/test.dir/test/test_what.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test.dir/test/test_what.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fernando/SonarSLAM/test/test_what.cpp -o CMakeFiles/test.dir/test/test_what.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fernando/Code/CS_SLAM/test/test_what.cpp -o CMakeFiles/test.dir/test/test_what.cpp.s
 
 # Object files for target test
 test_OBJECTS = \
@@ -80,60 +80,78 @@ test_EXTERNAL_OBJECTS =
 ../test/test: CMakeFiles/test.dir/test/test_what.cpp.o
 ../test/test: CMakeFiles/test.dir/build.make
 ../test/test: ../lib/libCS_SLAM.so
-../test/test: /usr/local/lib/libopencv_dnn.so.4.5.0
-../test/test: /usr/local/lib/libopencv_highgui.so.4.5.0
-../test/test: /usr/local/lib/libopencv_ml.so.4.5.0
-../test/test: /usr/local/lib/libopencv_objdetect.so.4.5.0
-../test/test: /usr/local/lib/libopencv_photo.so.4.5.0
-../test/test: /usr/local/lib/libopencv_stitching.so.4.5.0
-../test/test: /usr/local/lib/libopencv_video.so.4.5.0
-../test/test: /usr/local/lib/libopencv_calib3d.so.4.5.0
-../test/test: /usr/local/lib/libopencv_features2d.so.4.5.0
-../test/test: /usr/local/lib/libopencv_flann.so.4.5.0
-../test/test: /usr/local/lib/libopencv_videoio.so.4.5.0
-../test/test: /usr/local/lib/libopencv_imgcodecs.so.4.5.0
-../test/test: /usr/local/lib/libopencv_imgproc.so.4.5.0
-../test/test: /usr/local/lib/libopencv_core.so.4.5.0
-../test/test: /usr/local/lib/libpangolin.so
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_stitching.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_aruco.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_bgsegm.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_bioinspired.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_ccalib.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_dnn_objdetect.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_dnn_superres.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_dpm.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_face.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_freetype.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_fuzzy.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_hdf.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_hfs.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_img_hash.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_line_descriptor.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_quality.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_reg.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_rgbd.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_saliency.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_shape.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_stereo.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_structured_light.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_phase_unwrapping.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_superres.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_optflow.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_surface_matching.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_tracking.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_datasets.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_plot.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_text.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_dnn.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_ml.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_videostab.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_videoio.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_viz.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_ximgproc.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_video.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_xobjdetect.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_objdetect.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_calib3d.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_features2d.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_flann.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_xphoto.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_photo.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2.0
+../test/test: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0
+../test/test: /usr/local/lib/libpango_glgeometry.so
+../test/test: /usr/local/lib/libpango_geometry.so
+../test/test: /usr/local/lib/libpango_plot.so
+../test/test: /usr/local/lib/libpango_python.so
+../test/test: /usr/local/lib/libpango_scene.so
+../test/test: /usr/local/lib/libpango_tools.so
+../test/test: /usr/local/lib/libpango_display.so
+../test/test: /usr/local/lib/libpango_vars.so
+../test/test: /usr/local/lib/libpango_video.so
+../test/test: /usr/local/lib/libpango_packetstream.so
+../test/test: /usr/local/lib/libpango_windowing.so
+../test/test: /usr/local/lib/libpango_opengl.so
+../test/test: /usr/local/lib/libpango_image.so
+../test/test: /usr/local/lib/libpango_core.so
+../test/test: /usr/lib/x86_64-linux-gnu/libGLEW.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libOpenGL.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libGLX.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libGLU.so
-../test/test: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../test/test: /usr/lib/x86_64-linux-gnu/libEGL.so
-../test/test: /usr/lib/x86_64-linux-gnu/libSM.so
-../test/test: /usr/lib/x86_64-linux-gnu/libICE.so
-../test/test: /usr/lib/x86_64-linux-gnu/libX11.so
-../test/test: /usr/lib/x86_64-linux-gnu/libXext.so
-../test/test: /usr/lib/x86_64-linux-gnu/libOpenGL.so
-../test/test: /usr/lib/x86_64-linux-gnu/libGLX.so
-../test/test: /usr/lib/x86_64-linux-gnu/libGLU.so
-../test/test: /usr/lib/x86_64-linux-gnu/libGLEW.so
-../test/test: /usr/lib/x86_64-linux-gnu/libEGL.so
-../test/test: /usr/lib/x86_64-linux-gnu/libSM.so
-../test/test: /usr/lib/x86_64-linux-gnu/libICE.so
-../test/test: /usr/lib/x86_64-linux-gnu/libX11.so
-../test/test: /usr/lib/x86_64-linux-gnu/libXext.so
-../test/test: /usr/lib/x86_64-linux-gnu/libdc1394.so
-../test/test: /usr/lib/x86_64-linux-gnu/libavcodec.so
-../test/test: /usr/lib/x86_64-linux-gnu/libavformat.so
-../test/test: /usr/lib/x86_64-linux-gnu/libavutil.so
-../test/test: /usr/lib/x86_64-linux-gnu/libswscale.so
-../test/test: /usr/lib/x86_64-linux-gnu/libavdevice.so
-../test/test: /usr/lib/libOpenNI.so
-../test/test: /usr/lib/libOpenNI2.so
-../test/test: /usr/lib/x86_64-linux-gnu/libpng.so
-../test/test: /usr/lib/x86_64-linux-gnu/libz.so
-../test/test: /usr/lib/x86_64-linux-gnu/libjpeg.so
-../test/test: /usr/lib/x86_64-linux-gnu/libtiff.so
-../test/test: /usr/lib/x86_64-linux-gnu/libIlmImf.so
-../test/test: /usr/lib/x86_64-linux-gnu/libzstd.so
-../test/test: /usr/lib/x86_64-linux-gnu/liblz4.so
+../test/test: /usr/local/lib/libtinyobj.so
 ../test/test: /usr/local/lib/libceres.a
 ../test/test: /usr/lib/x86_64-linux-gnu/libglog.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libgflags.so.2.2.2
 ../test/test: /usr/lib/x86_64-linux-gnu/libspqr.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libtbb.so
-../test/test: /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libcholmod.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libccolamd.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libcamd.so
@@ -144,20 +162,17 @@ test_EXTERNAL_OBJECTS =
 ../test/test: /usr/lib/x86_64-linux-gnu/libatlas.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
 ../test/test: /usr/lib/x86_64-linux-gnu/librt.so
-../test/test: /usr/local/lib/libmetis.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libcxsparse.so
 ../test/test: /usr/lib/x86_64-linux-gnu/liblapack.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libf77blas.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libatlas.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
 ../test/test: /usr/lib/x86_64-linux-gnu/librt.so
-../test/test: /usr/local/lib/libmetis.so
 ../test/test: /usr/lib/x86_64-linux-gnu/libcxsparse.so
-../test/test: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.6.2
-../test/test: /usr/local/lib/libgtest.a
-../test/test: /usr/local/lib/libgtest_main.a
+../test/test: /usr/lib/x86_64-linux-gnu/libgtest.a
+../test/test: /usr/lib/x86_64-linux-gnu/libgtest_main.a
 ../test/test: CMakeFiles/test.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/fernando/SonarSLAM/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../test/test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/fernando/Code/CS_SLAM/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../test/test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -170,6 +185,6 @@ CMakeFiles/test.dir/clean:
 .PHONY : CMakeFiles/test.dir/clean
 
 CMakeFiles/test.dir/depend:
-	cd /home/fernando/SonarSLAM/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/fernando/SonarSLAM /home/fernando/SonarSLAM /home/fernando/SonarSLAM/build /home/fernando/SonarSLAM/build /home/fernando/SonarSLAM/build/CMakeFiles/test.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/fernando/Code/CS_SLAM/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/fernando/Code/CS_SLAM /home/fernando/Code/CS_SLAM /home/fernando/Code/CS_SLAM/build /home/fernando/Code/CS_SLAM/build /home/fernando/Code/CS_SLAM/build/CMakeFiles/test.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/test.dir/depend
 

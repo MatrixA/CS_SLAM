@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_FLAGS =  -std=c++11  -Wall   -O3  
 
-CXX_DEFINES = -DCOMPILEDWITHC11 -DGFLAGS_IS_A_DLL=0
+CXX_DEFINES = -DCERES_EXPORT_INTERNAL_SYMBOLS -DCOMPILEDWITHC11 -DGFLAGS_IS_A_DLL=0 -DHAVE_EIGEN -DHAVE_GLEW -DPANGO_DEFAULT_WIN_URI=\"wayland\" -D_LINUX_
 
-CXX_INCLUDES = -I/home/fernando/SonarSLAM -I/home/fernando/SonarSLAM/include -isystem /usr/local/include/eigen3 -isystem /usr/local/include/opencv4 
+CXX_INCLUDES = -I/home/fernando/Code/CS_SLAM -I/home/fernando/Code/CS_SLAM/include -isystem /usr/include/eigen3 -isystem /usr/include/opencv4 
 
