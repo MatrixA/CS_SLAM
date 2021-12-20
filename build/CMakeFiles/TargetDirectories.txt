@@ -1,5 +1,0 @@
-/home/fernando/Code/CS_SLAM/build/CMakeFiles/edit_cache.dir
-/home/fernando/Code/CS_SLAM/build/CMakeFiles/test.dir
-/home/fernando/Code/CS_SLAM/build/CMakeFiles/cave.dir
-/home/fernando/Code/CS_SLAM/build/CMakeFiles/rebuild_cache.dir
-/home/fernando/Code/CS_SLAM/build/CMakeFiles/CS_SLAM.dir
