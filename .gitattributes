@@ -1,0 +1,2 @@
+my-large-file.gz filter=lfs diff=lfs merge=lfs -text
+slambook2.zip filter=lfs diff=lfs merge=lfs -text
