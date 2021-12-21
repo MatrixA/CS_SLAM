@@ -4,6 +4,7 @@
 #include <vector>
 #include "MapPoint.h"
 #include "KeyFrame.h"
+#include "ScanFormer.h"
 
 namespace CS_SLAM
 {
@@ -16,8 +17,8 @@ public:
     ~Map();
     void AddMapPoint(MapPoint* pMP);
     void AddKeyFrame(KeyFrame* pKF);
-    std::vector<KeyFrame *> Map::GetKeyFrames();
-    std::vector<MapPoint *> Map::GetMapPoints();
+    // std::vector<KeyFrame *> Map::GetKeyFrames();
+    // std::vector<MapPoint *> Map::GetMapPoints();
 
 private:
     std::vector<MapPoint *>mapPoints;

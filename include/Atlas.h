@@ -4,24 +4,29 @@
 #include <vector>
 #include "MapPoint.h"
 #include "KeyFrame.h"
+#include "ScanFormer.h"
 
 namespace CS_SLAM
 {
 class MapPoint;
 class KeyFrame;
 
+class Atlas{
+
 public:
     Atlas();
     ~Atlas();
     void AddMapPoint(MapPoint* pMP);
     void AddKeyFrame(KeyFrame* pKF);
-    std::vector<KeyFrame *> Atlas::GetKeyFrames();
-    std::vector<MapPoint *> Atlas::GetMapPoints();
+    // std::vector<KeyFrame *> Atlas::GetKeyFrames();
+    // std::vector<MapPoint *> Atlas::GetMapPoints();
 
 private:
     std::vector<MapPoint *>mapPoints;
     std::vector<KeyFrame *>keyFrames;
     ScanFormer* mpScanFormer;
+
+};
 
 }
 

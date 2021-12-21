@@ -3,18 +3,17 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <yaml-cpp/yaml.h>
 
 #include "System.h"
 #include "MeasurementPackage.h"
 
 
-using namespace std;
+void LoadImages(const std::string &strSequence, std::vector<std::string> &vstrImageFilenames,
+                std::vector<double> &vTimestamps);
 
-void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
-                vector<double> &vTimestamps);
-
-void Import(std::string filename, std::vector<CS_SLAM::MeasurementPackage> &data, std::vector<int> &data_ind, enum CS_SLAM::MeasurementPackage::SensorType sensor, bool tags){
+void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage> &data, std::vector<int> &data_ind, enum CS_SLAM::MeasurementPackage::SensorType sensor, bool tags){
     std::ifstream infile;
     infile.open(filename, std::ios::in);
     std::cout<<"Reading"<<std::endl;
@@ -55,14 +54,14 @@ void Import(std::string filename, std::vector<CS_SLAM::MeasurementPackage> &data
     return ;
 }
 
-void ConfigSensor(const std::string DB_CONF, Eigen::VectorXd sonarParam){
-    std::cout<<DB_CONF<<std::endl;
-    YAML::Node conf = YAML::LoadFile(DB_CONF);
-    sonarParam.resize(3);
-    sonarParam(0)=conf["Sonar"]["angle_step"].as<double>();
-    std::cout<<sonarParam(0)<<std::endl;
-    return ;
-}
+// YAML::Node ConfigSensor(const std::string DB_CONF){
+//     std::cout<<DB_CONF<<std::endl;
+//     YAML::Node conf = YAML::LoadFile(DB_CONF);
+//     // sonarParam.resize(3);
+//     // sonarParam(0)=conf["Sonar"]["angle_step"].as<double>();
+//     // std::cout<<sonarParam(0)<<std::endl;
+//     return conf;
+// }
 
 int main(int argc, char **argv){
 //     if(argc != 4){
@@ -79,25 +78,28 @@ int main(int argc, char **argv){
 //     long long last_timestamp_ = 0;
     std::ifstream infile;
     //数据读入模块
-    string datafile_DVL = string(argv[1]) + "dvl_linkquest.txt";
-    vector<int> datacols_DVL = {2,23,24,25};
-    string datafile_AHRS = string(argv[1]) + "imu_adis.txt";
-    vector<int> datacols_AHRS = {2,5};
-    string datafile_Sonar = string(argv[1]) + "sonar_micron.txt";
-    vector<int> datacols_Sonar(398);
+    std::string datafile_DVL = std::string(argv[1]) + "dvl_linkquest.txt";
+    std::vector<int> datacols_DVL = {2,23,24,25};
+    std::string datafile_AHRS = std::string(argv[1]) + "imu_adis.txt";
+    std::vector<int> datacols_AHRS = {2,5};
+    std::string datafile_Sonar = std::string(argv[1]) + "sonar_micron.txt";
+    std::vector<int> datacols_Sonar(398);
     datacols_Sonar[0]=2;
     int itmp=7;
     std::generate(datacols_Sonar.begin()+1,datacols_Sonar.end(),[&itmp](){return itmp++;});
-    string datafile_DS = string(argv[1]) + "depth_sensor.txt";
-    vector<int> datacols_DS = {2,3};
+    std::string datafile_DS = std::string(argv[1]) + "depth_sensor.txt";
+    std::vector<int> datacols_DS = {2,3};
 
     // for(int i=0;i<datacols_Sonar.size();i++)std::cout<<datacols_Sonar[i]<<":";
-    vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS, data;
+    std::vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS, data;
     
     
     Eigen::VectorXd sonarParam, DVLParam, AHRSParam, DSParam;
-    ConfigSensor(string(argv[1]) + "SensorsConfiguration.yaml",sonarParam);
-
+    // ConfigSensor(string(argv[1]) + "SensorsConfiguration.yaml",sonarParam);
+    //Sensor configuration
+    const std::string DB_CONF=std::string(argv[2]);
+    YAML::Node conf = YAML::LoadFile(DB_CONF);
+    
     Import(datafile_Sonar,data_Sonar,datacols_Sonar,CS_SLAM::MeasurementPackage::SONAR,true);
     Import(datafile_DVL,data_DVL,datacols_DVL,CS_SLAM::MeasurementPackage::DVL,true);
     Import(datafile_AHRS,data_AHRS,datacols_AHRS,CS_SLAM::MeasurementPackage::AHRS,true);
@@ -107,73 +109,77 @@ int main(int argc, char **argv){
     data.insert(data.end(),data_AHRS.begin(),data_AHRS.end());
     data.insert(data.end(),data_Sonar.begin(),data_Sonar.end());
     data.insert(data.end(),data_DS.begin(),data_DS.end());
-    sort(data.begin(),data.end());
+    std::sort(data.begin(),data.end());
 
-    CS_SLAM::System SLAM;
-    for(int i=0;i<10;i++)std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
-
+    // CS_SLAM::System SLAM;
+    for(int i=0;i<3;i++){
+        std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
+        //std::cout<<data[i].raw_measurements_<<std::endl;
+    }
     int scnt=0;//统计声纳帧以形成fullscan触发不同的滤波器
 //     scanFormer.reset();
 //     ASEKF.reset();
 
-    for(int i=0;i< data.size();i++){
-        //DVL或AHRS来了，就更新状态。Sonar来了，就用预测来估计状态。
-        switch(data[i].sensor_type_){
-            case CS_SLAM::MeasurementPackage::SONAR:
-                std::cout<<"Sonar Start"<<std::endl;
-                SLAM.TrackSonar(data[i],sonarParam);
-                std::cout<<"Sonar End"<<std::endl;
-                break;
-            case CS_SLAM::MeasurementPackage::DVL:
-                std::cout<<"DVL Start"<<std::endl;
-                SLAM.TrackDVL(data[i],DVLParam);
-                std::cout<<"DVL End"<<std::endl;
-                break;
-            case CS_SLAM::MeasurementPackage::AHRS:
-                std::cout<<"AHRS Start"<<std::endl;
-                SLAM.TrackAHRS(data[i],AHRSParam);
-                std::cout<<"AHRS End"<<std::endl;
-                break;
-            case CS_SLAM::MeasurementPackage::DS:
-                std::cout<<"DS Start"<<std::endl;
-                SLAM.TrackDS(data[i],DSParam);
-                std::cout<<"DS End"<<std::endl;
-                break;
-        }
-        // if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::SONAR){
-        //     std::cout<<"Sonar Start"<<std::endl;
-        //     SLAM.TrackSonar(data[i],sonarParam);
-        //     std::cout<<"Sonar End"<<std::endl;
-        // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::DVL){
-        //     std::cout<<"DVL Start"<<std::endl;
-        //     SLAM.TrackDVL(data[i],DVLParam);
-        //     std::cout<<"DVL End"<<std::endl;
-        // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::AHRS){
-        //     std::cout<<"AHRS Start"<<std::endl;
-        //     SLAM.TrackAHRS(data[i],AHRSParam);
-        //     std::cout<<"AHRS End"<<std::endl;
-        // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::DS){
-        //     std::cout<<"DS Start"<<std::endl;
-        //     SLAM.TrackDS(data[i],DSParam);
-        //     std::cout<<"DS End"<<std::endl;
-        // }
-        SLAM.PlotTrajectory();
-    }
+//     for(int i=0;i< data.size();i++){
+//         //DVL或AHRS来了，就更新状态。Sonara来了，就用预测来估计状态。
+//         switch(data[i].sensor_type_){
+//             case CS_SLAM::MeasurementPackage::SONAR:
+//                 std::cout<<"Sonar Start"<<std::endl;
+//                 SLAM.TrackSonar(data[i],sonarParam);
+//                 std::cout<<"Sonar End"<<std::endl;
+//                 break;
+//             case CS_SLAM::MeasurementPackage::DVL:
+//                 std::cout<<"DVL Start"<<std::endl;
+//                 SLAM.TrackDVL(data[i],DVLParam);
+//                 std::cout<<"DVL End"<<std::endl;
+//                 break;
+//             case CS_SLAM::MeasurementPackage::AHRS:
+//                 std::cout<<"AHRS Start"<<std::endl;
+//                 SLAM.TrackAHRS(data[i],AHRSParam);
+//                 std::cout<<"AHRS End"<<std::endl;
+//                 break;
+//             case CS_SLAM::MeasurementPackage::DS:
+//                 std::cout<<"DS Start"<<std::endl;
+//                 SLAM.TrackDS(data[i],DSParam);
+//                 std::cout<<"DS End"<<std::endl;
+//                 break;
+//         }
+//         // if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::SONAR){
+//         //     std::cout<<"Sonar Start"<<std::endl;
+//         //     SLAM.TrackSonar(data[i],sonarParam);
+//         //     std::cout<<"Sonar End"<<std::endl;
+//         // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::DVL){
+//         //     std::cout<<"DVL Start"<<std::endl;
+//         //     SLAM.TrackDVL(data[i],DVLParam);
+//         //     std::cout<<"DVL End"<<std::endl;
+//         // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::AHRS){
+//         //     std::cout<<"AHRS Start"<<std::endl;
+//         //     SLAM.TrackAHRS(data[i],AHRSParam);
+//         //     std::cout<<"AHRS End"<<std::endl;
+//         // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::DS){
+//         //     std::cout<<"DS Start"<<std::endl;
+//         //     SLAM.TrackDS(data[i],DSParam);
+//         //     std::cout<<"DS End"<<std::endl;
+//         // }
+//         SLAM.PlotTrajectory();
+//     }
+    std::cout<<"nothing wrong"<<std::endl;
+    return 0;
 }
 
 
-void LoadImages(const string &strPathToSequence, vector<string> &vstrImageFilenames, vector<double> &vTimestamps)
+void LoadImages(const std::string &strPathToSequence, std::vector<std::string> &vstrImageFilenames, std::vector<double> &vTimestamps)
 {
-    ifstream fTimes;
-    string strPathTimeFile = strPathToSequence + "/times.txt";
+    std::ifstream fTimes;
+    std::string strPathTimeFile = strPathToSequence + "/times.txt";
     fTimes.open(strPathTimeFile.c_str());
     while(!fTimes.eof())
     {
-        string s;
+        std::string s;
         getline(fTimes,s);
         if(!s.empty())
         {
-            stringstream ss;
+            std::stringstream ss;
             ss << s;
             double t;
             ss >> t;
@@ -181,15 +187,15 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageFilena
         }
     }
 
-    string strPrefixLeft = strPathToSequence + "/image_0/";
+    std::string strPrefixLeft = strPathToSequence + "/image_0/";
 
     const int nTimes = vTimestamps.size();
     vstrImageFilenames.resize(nTimes);
 
     for(int i=0; i<nTimes; i++)
     {
-        stringstream ss;
-        ss << setfill('0') << setw(6) << i;
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(6) << i;
         vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
     }
 }

@@ -6,9 +6,9 @@ namespace CS_SLAM
 System::System(){
     //viewer_thread_ = std::thread(std::bind(&Viewer:))
     //viewer_thread_ = std::thread(std::bind(&System::Plot, this));
-    mpAtlas = new Atlas();
-    mpViewer = new Viewer(mpAtlas);
-    mptViwer = new std::thread(&Viewer::ThreadLoop,mpViewer);
+    // mpAtlas = new Atlas();
+    // mpViewer = new Viewer(mpAtlas);
+    // mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
 }
 
 System::~System(){
@@ -77,10 +77,10 @@ void System::TrackSonar(MeasurementPackage meas,Eigen::VectorXd paramSonar){
     std::cout<<"--Over scanFormer.UseSonar"<<std::endl;
     scnt++;
     if(scanFormer.IsFull()){
-        if(!asekf.IsInitialized()){
-            asekf.Initialize(scanFormer.GetPose());
+        if(!asekf->IsInitialized()){
+            asekf->Initialize(scanFormer.GetPose());
         }else{
-            asekf.AddPose(scanFormer.GetPose());
+            asekf->AddPose(scanFormer.GetPose());
         }
         // asekf.Update(scanFormer.GetPose());
     }

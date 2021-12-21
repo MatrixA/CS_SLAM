@@ -24,18 +24,18 @@ public:
     Eigen::VectorXd GetX();
     Eigen::MatrixXd GetP();
 
-    void initialize(Eigen::VectorXd x_in);
+    void initialize(const Eigen::VectorXd x_in);
     bool isInitialized();
     void reset();
     void ResetDeadReckoningXYZ();
 
-    void setP(Eigen::MatrixXd P_in);
-    void setQ(Eigen::MatrixXd Q_in);
-    void setH(Eigen::MatrixXd H_in);
-    void setR(Eigen::MatrixXd R_in);
+    void setP(const Eigen::MatrixXd P_in);
+    void setQ(const Eigen::MatrixXd Q_in);
+    void setH(const Eigen::MatrixXd H_in);
+    void setR(const Eigen::MatrixXd R_in);
 
-    pose prediction(double dt);
-    void update(Eigen::VectorXd z, double dt);
+    pose prediction(const double dt);
+    void update(const Eigen::VectorXd z, const double dt);
 private:
     bool is_initialized_;
     Eigen::VectorXd x_;

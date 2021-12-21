@@ -9,11 +9,11 @@ EKF::EKF(){
     F_=Eigen::MatrixXd::Zero(8,8);
     P_=Eigen::MatrixXd::Zero(8,8);
 }
-EKF::EKF(Eigen::VectorXd x):x_(x){
+EKF::EKF(const Eigen::VectorXd x):x_(x){
     is_initialized_ = false;
 }
 EKF::~EKF(){}
-void EKF::initialize(Eigen::VectorXd x_in){
+void EKF::initialize(const Eigen::VectorXd x_in){
     //只有\psi为读数，其他设为0，因为是要计算相对位移
     x_ = x_in;
 }
@@ -35,19 +35,19 @@ void EKF::ResetDeadReckoningXYZ(){
     x_(1)=0;
     x_(2)=0;
 }
-void EKF::setP(Eigen::MatrixXd P_in){
+void EKF::setP(const Eigen::MatrixXd P_in){
     P_ = P_in;
 }
-void EKF::setQ(Eigen::MatrixXd Q_in){
+void EKF::setQ(const Eigen::MatrixXd Q_in){
     Q_ = Q_in;
 }
-void EKF::setH(Eigen::MatrixXd H_in){
+void EKF::setH(const Eigen::MatrixXd H_in){
     H_ = H_in;
 }
-void EKF::setR(Eigen::MatrixXd R_in){
+void EKF::setR(const Eigen::MatrixXd R_in){
     R_ = R_in;
 }
-pose EKF::prediction(double dt){
+pose EKF::prediction(const double dt){
 /*
 输入：时间差dt
 输出：预测的dt后的位姿
@@ -121,7 +121,7 @@ pose EKF::prediction(double dt){
 //     return x_knext;
 // }
 
-void EKF::update(Eigen::VectorXd z, double dt){
+void EKF::update(const Eigen::VectorXd z, const double dt){
     prediction(dt);
     // std::cout<<"------start EKF update"<<std::endl;
     // std::cout<<"------cal y,z: "<<z<<"\n  H_:"<<H_<<"\n  x_:"<<x_<<std::endl;

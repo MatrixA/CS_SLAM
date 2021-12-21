@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(CS_SLAM)
 
+
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)
 ENDIF()
@@ -26,6 +27,8 @@ else()
    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+set(CMAKE_CXX_STANDARD 11)
+
 
 find_package(Ceres REQUIRED)
 include_directories( ${CERES_INCLUDE_DIRS})
@@ -42,6 +45,9 @@ endif()
 MESSAGE("OPENCV VERSION:")
 MESSAGE(${OpenCV_VERSION})
 
+find_package(PkgConfig)
+pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
+
 find_package(Boost COMPONENTS)
 
 if(NOT Boost_FOUND)
@@ -51,15 +57,17 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
-find_package(yaml-cpp)
+
 find_package(GTest REQUIRED)
+
+
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
-${YAML_CPP_INCLUDE_DIRS}
+${YAMLCPP_INCLUDE_DIRS}
 ${GTEST_INCLUDE_DIRS}
 )
 
@@ -97,7 +105,7 @@ ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${Boost_LIBRARIES}
 ${CERES_LIBRARIES}
-${YAML_CPP_LIBRARIES}
+${YAMLCPP_LIBRARIES}
 ${GTEST_BOTH_LIBRARIES}
 pthread
 )

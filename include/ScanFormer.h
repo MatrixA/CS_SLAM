@@ -44,7 +44,7 @@ public:
     void SetEKF(EKF* ekf);
     //获得EKF的当前位姿(一般只在扫描一轮结束后调用)
     KeyFrame GetPose();
-    void ScanFormer::DrawFullScan();
+    // void ScanFormer::DrawFullScan();
 
 private:
     int sonarCnt=0;

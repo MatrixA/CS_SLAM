@@ -2,6 +2,8 @@
 #define MEASUREMENT_PACKAGE_H
 
 #include "Eigen/Dense"
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <fstream>
 #include <iostream>
 #include <vector>

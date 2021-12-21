@@ -97,10 +97,10 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt,Eigen::VectorXd para
             0,0,0,0,0,1,0,0,
             0,0,0,0,0,0,1,0;
             // 0,0,1,0,0,0,0,0;
-    scanEKF.setH(H_DVL);
-    scanEKF.setR(0.01*Eigen::MatrixXd::Identity(3,3));
+    mpEKF->setH(H_DVL);
+    mpEKF->setR(0.01*Eigen::MatrixXd::Identity(3,3));
     // std::cout<<"----start DVL update"<<std::endl;
-    scanEKF.update(data_dvl, dt);
+    mpEKF->update(data_dvl, dt);
     // std::cout<<"----end DVL update"<<std::endl;
 
 }
@@ -108,10 +108,10 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt,Eigen::VectorXd para
 void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt,Eigen::VectorXd paramAHRS){
     Eigen::MatrixXd H_AHRS(1,8);
     H_AHRS << 0,0,0,1,0,0,0,0;
-    scanEKF.setH(H_AHRS);
-    scanEKF.setR(0.001*Eigen::MatrixXd::Identity(1,1));
+    mpEKF->setH(H_AHRS);
+    mpEKF->setR(0.001*Eigen::MatrixXd::Identity(1,1));
     // std::cout<<"----start AHRS update"<<std::endl;
-    scanEKF.update(data_ahrs, dt);
+    mpEKF->update(data_ahrs, dt);
     // std::cout<<"----end AHRS update"<<std::endl;
 }
 
@@ -127,15 +127,15 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt,Eigen::VectorXd 
 
     //std::cout<<"integrating"<<std::endl;
     if(sonarCnt == 1){
-        scanEKF.ResetDeadReckoningXYZ();
+        mpEKF->ResetDeadReckoningXYZ();
     }
     
-    scanEKF.prediction(dt);
+    mpEKF->prediction(dt);
     std::cout<<"----sonar_data "<< sonarCnt << " integrated into scan"<<std::endl;
 
-    // std::cout<<"push x:\n"<<scanEKF.GetX()<<" P:"<<scanEKF.GetP()<<std::endl;
-    Eigen::VectorXd x_stmp = scanEKF.GetX();
-    Eigen::MatrixXd x_sptmp = scanEKF.GetP();
+    // std::cout<<"push x:\n"<<mpEKF->.GetX()<<" P:"<<mpEKF->.GetP()<<std::endl;
+    Eigen::VectorXd x_stmp = mpEKF->GetX();
+    Eigen::MatrixXd x_sptmp = mpEKF->GetP();
     Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
     Eigen::Matrix3d x_sp;
     x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
@@ -159,10 +159,10 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt,Eigen::VectorXd 
 void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt,Eigen::VectorXd paramDS){
     Eigen::MatrixXd H_DS(1,8);
     H_DS << 0,0,1,0,0,0,0,0;
-    scanEKF.setH(H_DS);
-    scanEKF.setR(0.01*Eigen::MatrixXd::Identity(1,1));
+    mpEKF->setH(H_DS);
+    mpEKF->setR(0.01*Eigen::MatrixXd::Identity(1,1));
     // std::cout<<"----start DS update"<<std::endl;
-    scanEKF.update(data_ds, dt);
+    mpEKF->update(data_ds, dt);
     // std::cout<<"----end DS update"<<std::endl;
 
 }
@@ -172,24 +172,24 @@ KeyFrame ScanFormer::GetPose(){
 }
 
 void ScanFormer::Reset(){
-    scanEKF.reset();
+    mpEKF->reset();
     // scan.setZero();
     //x_s.resize(0);
     sonarCnt = 0;
 }
 
-void ScanFormer::DrawFullScan(){
-    glBegin(GL_POINTS);
-    for (int i=0;i<scan.size();i++){
-        for(int j=0;j<scan[i].rows();j++){
-            glColor3f(0, 0, 0);
-            double theta=0.0503*i;
-            double r=0.2*j;
-            glVertex3d(r*cos(theta), r*sin(theta), scan[i](j));
-        }
-    }
-    glEnd();
-}
+// void ScanFormer::DrawFullScan(){
+//     glBegin(GL_POINTS);
+//     for (int i=0;i<scan.size();i++){
+//         for(int j=0;j<scan[i].rows();j++){
+//             glColor3f(0, 0, 0);
+//             double theta=0.0503*i;
+//             double r=0.2*j;
+//             glVertex3d(r*cos(theta), r*sin(theta), scan[i](j));
+//         }
+//     }
+//     glEnd();
+// }
 
 
 

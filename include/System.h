@@ -6,6 +6,8 @@
 #include <thread>
 
 #include "ASEKF.h"
+#include "Atlas.h"
+#include "Viewer.h"
 #include "ScanFormer.h"
 #include "MeasurementPackage.h"
 #include "RandomVector.h"
@@ -31,7 +33,7 @@ public:
     //void Plot();
     void PlotTrajectory();
     void Reset();
-    void SaveTrajectory(const string &filename);
+    void SaveTrajectory(const std::string &filename);
     int GetTrackingState();
     bool isLost();
     bool isFinished();
@@ -46,6 +48,9 @@ private:
     int mTrackingState;
     std::vector<MapPoint*> mTrackedMapPoints;
     LocalMapping* mpLocalMapper;
+    Viewer* mpViewer;
+    Atlas* mpAtlas;
+
     
     //std::thread viewer_thread_;
 };

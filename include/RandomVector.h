@@ -7,7 +7,6 @@
 #include <Eigen/Core>
 #include <boost/math/distributions.hpp>
 #include <utility>
-#include <ceres/ceres.h>
 
 
 namespace CS_SLAM{
