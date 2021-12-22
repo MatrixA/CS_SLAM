@@ -18,7 +18,7 @@ namespace CS_SLAM
     }
 
     std::vector<MapPoint *> Atlas::GetMapPoints(){
-        return MapPoints;
+        return mapPoints;
     }
 
 } // namespace CS_SLAM

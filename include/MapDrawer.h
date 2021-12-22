@@ -1,13 +1,14 @@
 #ifndef MAPDRAWER_H
 #define MAPDRAWER_H
 
+#include "Map.h"
 
 namespace CS_SLAM
 {
 
 class MapDrawer{
 public:
-    MapDrawer(Map* pMap, const string &strSettingPath);
+    MapDrawer(Map* pMap, const std::string &strSettingPath);
     void DrawMapPoints();
 private:
     float mKeyFrameSize;

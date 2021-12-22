@@ -18,8 +18,8 @@ public:
     ~Atlas();
     void AddMapPoint(MapPoint* pMP);
     void AddKeyFrame(KeyFrame* pKF);
-    // std::vector<KeyFrame *> Atlas::GetKeyFrames();
-    // std::vector<MapPoint *> Atlas::GetMapPoints();
+    std::vector<KeyFrame *> GetKeyFrames();
+    std::vector<MapPoint *> GetMapPoints();
 
 private:
     std::vector<MapPoint *>mapPoints;

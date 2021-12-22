@@ -16,63 +16,63 @@ Drawer::Drawer(Atlas* pAtlas, const string &strSettingPath):mpAtlas(pAtlas){
     }
 }
 
-bool Drawer::ParseViewerParamFile(cv::FileStorage &fSettings){
-    bool b_miss_params = false;
-    cv::FileNode node = fSettings["Viewer.KeyFrameSize"];
-    if(!node.empty()){
-        mKeyFrameSize = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.KeyFrameSize parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
+// bool Drawer::ParseViewerParamFile(cv::FileStorage &fSettings){
+//     bool b_miss_params = false;
+//     cv::FileNode node = fSettings["Viewer.KeyFrameSize"];
+//     if(!node.empty()){
+//         mKeyFrameSize = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.KeyFrameSize parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
 
-    node = fSettings["Viewer.KeyFrameLineWidth"];
-    if(!node.empty()){
-        mKeyFrameLineWidth = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.KeyFrameLineWidth parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
+//     node = fSettings["Viewer.KeyFrameLineWidth"];
+//     if(!node.empty()){
+//         mKeyFrameLineWidth = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.KeyFrameLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
 
-    node = fSettings["Viewer.GraphLineWidth"];
-    if(!node.empty()){
-        mGraphLineWidth = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.GraphLineWidth parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
+//     node = fSettings["Viewer.GraphLineWidth"];
+//     if(!node.empty()){
+//         mGraphLineWidth = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.GraphLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
 
-    node = fSettings["Viewer.PointSize"];
-    if(!node.empty()){
-        mPointSize = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.PointSize parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
+//     node = fSettings["Viewer.PointSize"];
+//     if(!node.empty()){
+//         mPointSize = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.PointSize parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
 
-    node = fSettings["Viewer.CameraSize"];
-    if(!node.empty()){
-        mCameraSize = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.CameraSize parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
+//     node = fSettings["Viewer.CameraSize"];
+//     if(!node.empty()){
+//         mCameraSize = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.CameraSize parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
 
-    node = fSettings["Viewer.CameraLineWidth"];
-    if(!node.empty()){
-        mCameraLineWidth = node.real();
-    }
-    else{
-        std::cerr << "*Viewer.CameraLineWidth parameter doesn't exist or is not a real number*" << std::endl;
-        b_miss_params = true;
-    }
-    return !b_miss_params;
-}
+//     node = fSettings["Viewer.CameraLineWidth"];
+//     if(!node.empty()){
+//         mCameraLineWidth = node.real();
+//     }
+//     else{
+//         std::cerr << "*Viewer.CameraLineWidth parameter doesn't exist or is not a real number*" << std::endl;
+//         b_miss_params = true;
+//     }
+//     return !b_miss_params;
+// }
 
 void Drawer::DrawMapPoints(){
     const vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
@@ -370,49 +370,50 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
     }
 }
 
-void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc){
-    const float &w = mCameraSize;
-    const float h = w*0.75;
-    const float z = w*0.6;
+// void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc){
+//     const float &w = mCameraSize;
+//     const float h = w*0.75;
+//     const float z = w*0.6;
 
-    glPushMatrix();
+//     glPushMatrix();
 
-#ifdef HAVE_GLES
-        glMultMatrixf(Twc.m);
-#else
-        glMultMatrixd(Twc.m);
-#endif
+// #ifdef HAVE_GLES
+//         glMultMatrixf(Twc.m);
+// #else
+//         glMultMatrixd(Twc.m);
+// #endif
 
-    glLineWidth(mCameraLineWidth);
-    glColor3f(0.0f,1.0f,0.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0,0,0);
-    glVertex3f(w,h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(w,-h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(-w,-h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(-w,h,z);
+//     glLineWidth(mCameraLineWidth);
+//     glColor3f(0.0f,1.0f,0.0f);
+//     glBegin(GL_LINES);
+//     glVertex3f(0,0,0);
+//     glVertex3f(w,h,z);
+//     glVertex3f(0,0,0);
+//     glVertex3f(w,-h,z);
+//     glVertex3f(0,0,0);
+//     glVertex3f(-w,-h,z);
+//     glVertex3f(0,0,0);
+//     glVertex3f(-w,h,z);
 
-    glVertex3f(w,h,z);
-    glVertex3f(w,-h,z);
+//     glVertex3f(w,h,z);
+//     glVertex3f(w,-h,z);
 
-    glVertex3f(-w,h,z);
-    glVertex3f(-w,-h,z);
+//     glVertex3f(-w,h,z);
+//     glVertex3f(-w,-h,z);
 
-    glVertex3f(-w,h,z);
-    glVertex3f(w,h,z);
+//     glVertex3f(-w,h,z);
+//     glVertex3f(w,h,z);
 
-    glVertex3f(-w,-h,z);
-    glVertex3f(w,-h,z);
-    glEnd();
+//     glVertex3f(-w,-h,z);
+//     glVertex3f(w,-h,z);
+//     glEnd();
 
-    glPopMatrix();
-}
+//     glPopMatrix();
+// }
 
 void Drawer::DrawSonar(){
-    mpAtlas->
+    
+    return ;
 }
 
 }

@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "ASEKF.h"
+#include "Map.h"
 #include "Atlas.h"
 #include "Viewer.h"
 #include "ScanFormer.h"
@@ -50,7 +51,7 @@ private:
     LocalMapping* mpLocalMapper;
     Viewer* mpViewer;
     Atlas* mpAtlas;
-
+    Map* mpMap;
     
     //std::thread viewer_thread_;
 };

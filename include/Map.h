@@ -17,8 +17,8 @@ public:
     ~Map();
     void AddMapPoint(MapPoint* pMP);
     void AddKeyFrame(KeyFrame* pKF);
-    // std::vector<KeyFrame *> Map::GetKeyFrames();
-    // std::vector<MapPoint *> Map::GetMapPoints();
+    std::vector<KeyFrame *> GetKeyFrames();
+    std::vector<MapPoint *> GetMapPoints();
 
 private:
     std::vector<MapPoint *>mapPoints;

@@ -63,19 +63,7 @@ void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage
 //     return conf;
 // }
 
-int main(int argc, char **argv){
-//     if(argc != 4){
-//         cerr<<endl<<"Usage: path_to_settings path_to_sequence" << endl;
-//         return 1;
-//     }
-
-//     vector<string> vstrImageFilenames;
-//     vector<double> vTimestamps;
-//     LoadImages(string(argv[3]), vstrImageFilenames, vTimestamps);
-//     int nImages = vstrImageFilenames.size();
-
-//     unsigned int pd=0, pa=0, ps=0, scnt=0;
-//     long long last_timestamp_ = 0;
+void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data){
     std::ifstream infile;
     //数据读入模块
     std::string datafile_DVL = std::string(argv[1]) + "dvl_linkquest.txt";
@@ -91,9 +79,8 @@ int main(int argc, char **argv){
     std::vector<int> datacols_DS = {2,3};
 
     // for(int i=0;i<datacols_Sonar.size();i++)std::cout<<datacols_Sonar[i]<<":";
-    std::vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS, data;
-    
-    
+    std::vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS;
+
     Eigen::VectorXd sonarParam, DVLParam, AHRSParam, DSParam;
     // ConfigSensor(string(argv[1]) + "SensorsConfiguration.yaml",sonarParam);
     //Sensor configuration
@@ -110,12 +97,27 @@ int main(int argc, char **argv){
     data.insert(data.end(),data_Sonar.begin(),data_Sonar.end());
     data.insert(data.end(),data_DS.begin(),data_DS.end());
     std::sort(data.begin(),data.end());
+}
 
-    // CS_SLAM::System SLAM;
-    for(int i=0;i<3;i++){
-        std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
-        //std::cout<<data[i].raw_measurements_<<std::endl;
+int main(int argc, char **argv){
+    if(argc != 3){
+        std::cerr<<std::endl<<"Usage: path_to_settings path_to_sequence" << std::endl;
+        return 1;
     }
+//     vector<string> vstrImageFilenames;
+//     vector<double> vTimestamps;
+//     LoadImages(string(argv[3]), vstrImageFilenames, vTimestamps);
+//     int nImages = vstrImageFilenames.size();
+
+//     unsigned int pd=0, pa=0, ps=0, scnt=0;
+//     long long last_timestamp_ = 0;a
+    std::vector<CS_SLAM::MeasurementPackage> dataSequence;
+    InputDataset(argv, dataSequence);
+    CS_SLAM::System SLAM;
+    // for(int i=0;i<3;i++){
+    //     std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
+    //     //std::cout<<data[i].raw_measurements_<<std::endl;
+    // }
     int scnt=0;//统计声纳帧以形成fullscan触发不同的滤波器
 //     scanFormer.reset();
 //     ASEKF.reset();

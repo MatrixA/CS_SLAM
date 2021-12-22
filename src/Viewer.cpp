@@ -7,25 +7,25 @@ Viewer::Viewer(Map* pMap):mpMap(pMap){
 }
 
 void Viewer::Close(){
-    viewer_running_ = false;
+    mbViewerRunning = false;
     viewer_thread_.join();
 }
 
-void Viewer::AddCurrentFrame(){
+void Viewer::AddCurrentFrame(KeyFrame* current_frame){
     std::unique_lock<std::mutex> lck(viewer_data_mutex_);
     current_frame_ = current_frame;
 }
 
 void Viewer::UpdateMap(){
     std::unique_lock<std::mutex> lck(viewer_data_mutex_);
-    assert(map_ != nullptr);
-    active_keyframes_ = map_->GetActiveKeyFrames();
-    active_landmarks_ = map_->GetActiveMapPoints();
-    map_updated_ = true;
+    assert(mpMap != nullptr);
+    // active_keyframes_ = map_->GetActiveKeyFrames();
+    // active_landmarks_ = map_->GetActiveMapPoints();
+    mbMapUpdated = true;
 }
 
 void Viewer::ThreadLoop(){
-    pangolin::CreateWindowAndBins("MySLAM", 1024, 768);
+    pangolin::CreateWindowAndBind("MySLAM", 1024, 768);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -44,7 +44,7 @@ void Viewer::ThreadLoop(){
 //ModelViewLookAt(观测点位置，观测目标位置，观测的方位向量)
     pangolin::OpenGlRenderState vis_camera(
         pangolin::ProjectionMatrix(1024,768,400,400,512,384,0.1,1000),
-        pangolin::ModelViewLookAt(mViewPointX,mViewPointY,mViewPointZ,0,0,0,0.0,-1.0,0.0));
+        pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ,0,0,0,0.0,-1.0,0.0));
 
 //定义显示面板大小
     pangolin::View& vis_display = 
@@ -55,14 +55,15 @@ void Viewer::ThreadLoop(){
     const float blue[3] = {0, 0, 1};
     const float green[3] = {0, 1, 0};
 
-    while(!pangolin::ShouldQuit() && viewer_running_){
+    while(!pangolin::ShouldQuit() && mbViewerRunning){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         vis_display.Activate(vis_camera);
 
         std::unique_lock<std::mutex> lock(viewer_data_mutex_);
         if(current_frame_){
-            DrawFrame(current_frame_, green);
+            // mpFrameDrawer->DrawFrame(current_frame_, green);
+            mpDrawer->DrawKeyFrames(true,false,false);
             FollowCurrentFrame(vis_camera);
 
             cv::Mat img = PlotFrameImage();
@@ -70,15 +71,15 @@ void Viewer::ThreadLoop(){
             cv::waitKey(1);
         }
 
-        if(map_){
-            DrawMapPoints();
+        if(mpMap){
+            mpDrawer->DrawMapPoints();
         }
 
         pangolin::FinishFrame();
         usleep(5000);
     }
-
-    LOG(INFO) << "Stop Viewer";
+    std::cout<<"Stop Viewer"<<std::endl;
+    // LOG(INFO) << "Stop Viewer";
 }
 
 

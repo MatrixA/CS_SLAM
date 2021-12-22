@@ -7,7 +7,8 @@ System::System(){
     //viewer_thread_ = std::thread(std::bind(&Viewer:))
     //viewer_thread_ = std::thread(std::bind(&System::Plot, this));
     // mpAtlas = new Atlas();
-    // mpViewer = new Viewer(mpAtlas);
+    mpMap = new Map();
+    mpViewer = new Viewer(mpMap);
     // mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
 }
 

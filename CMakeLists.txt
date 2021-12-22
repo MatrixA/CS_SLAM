@@ -75,26 +75,37 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 add_library(${PROJECT_NAME} SHARED
 src/EKF.cpp
+src/Atlas.cpp
+src/Map.cpp
 src/ASEKF.cpp
 src/RandomVector.cpp
 src/MapPoint.cpp
 src/KeyFrame.cpp
 src/ScanFormer.cpp
+# src/MapDrawer.cpp
 src/MeasurementPackage.cpp
 src/System.cpp
 src/Utils.cpp
+src/Viewer.cpp
+src/Drawer.cpp
+# src/FrameDrawer.cpp
 include/ASEKF.h
 # include/Map.h
 include/EKF.h
 include/RandomVector.h
 include/KeyFrame.h
+include/Map.h
+include/Drawer.h
 # include/MapDrawer.h
 # include/MapPoint.h
 include/MeasurementPackage.h
 include/ScanFormer.h
+include/FrameDrawer.h
 # include/PoseGraph.h
 include/System.h
 include/Utils.h
+include/Atlas.h
+include/Viewer.h
 # include/SetParameters.h
 )
 
