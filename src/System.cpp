@@ -3,91 +3,128 @@
 namespace CS_SLAM
 {
 
-System::System(){
+System::System(YAML::Node SensorConfig){
     //viewer_thread_ = std::thread(std::bind(&Viewer:))
     //viewer_thread_ = std::thread(std::bind(&System::Plot, this));
     // mpAtlas = new Atlas();
+    mSensorConfig = SensorConfig;
     mpMap = new Map();
     mpViewer = new Viewer(mpMap);
-    // mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
+    mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
+    mpASEKF = new ASEKF();
+    mpScanFormer = new ScanFormer();
 }
 
 System::~System(){
     
 }
 
-void System::TrackAHRS(MeasurementPackage meas,Eigen::VectorXd paramAHRS){
-    if(timestamp_now == 0)timestamp_now = meas.timestamp_;
-    double dt = (meas.timestamp_ - timestamp_now)/1e9;
-    std::cout<<"dt:"<<dt<<std::endl;
-    if(dt < 0){
-        std::cerr << "ERROR: datas not sequential." << std::endl;
-        exit(-1);
+void System::TrackAHRS(MeasurementPackage meas){
+    if(timestamp_now == 0){
+        timestamp_now = meas.timestamp_;
+        return ;
     }
-
-    std::cout<<"--Start scanFormer.UseAHRS"<<std::endl;
-    scanFormer.UseAHRS(meas.raw_measurements_,dt,paramAHRS);
-    std::cout<<"--Start scanFormer.UseAHRS"<<std::endl;
-    timestamp_now = meas.timestamp_;
-    return ;
-}
-
-
-void System::TrackDVL(MeasurementPackage meas,Eigen::VectorXd paramDVL){
-    if(timestamp_now == 0)timestamp_now = meas.timestamp_;
     double dt = (meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
         exit(-1);
     }
-    // std::cout<<"--Start scanFormer.UseDVL"<<std::endl;
-    scanFormer.UseDVL(meas.raw_measurements_,dt,paramDVL);
-    // std::cout<<"--End scanFormer.UseDVL"<<std::endl;
+
+    // std::cout<<"--Start mpScanFormer->UseAHRS"<<std::endl;
+    mpScanFormer->UseAHRS(meas.raw_measurements_,dt);
+    // std::cout<<"--Start mpScanFormer->UseAHRS"<<std::endl;
     timestamp_now = meas.timestamp_;
     return ;
 }
 
-void System::TrackDS(MeasurementPackage meas,Eigen::VectorXd paramDS){
-    if(timestamp_now == 0)timestamp_now = meas.timestamp_;
+void System::SaveTrajectory(const std::string &filename){
+    std::ofstream outfile;
+    outfile.open(filename);
+    if(!outfile.is_open()){
+        std::cout<<"open file fail"<<std::endl;
+        return;
+    }
+
+    Eigen::VectorXd poses = mpASEKF->GetX();
+    int tot = poses.size()/3;
+    std::cout<<"total "<<tot<<" poses. "<<std::endl;
+
+    for(int i = 0; i<poses.size()/3;i++){
+        outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
+    }
+    outfile.close();
+}
+
+void System::TrackDVL(MeasurementPackage meas){
+    if(timestamp_now == 0){
+        timestamp_now = meas.timestamp_;
+        return ;
+    }
     double dt = (meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
         exit(-1);
     }
-    // std::cout<<"--Start scanFormer.UseDS"<<std::endl;
-    scanFormer.UseDS(meas.raw_measurements_,dt,paramDS);
-    // std::cout<<"--Over scanFormer.UseDS"<<std::endl;
+    // std::cout<<"--Start mpScanFormer->UseDVL"<<std::endl;
+    mpScanFormer->UseDVL(meas.raw_measurements_,dt);
+    // std::cout<<"--End mpScanFormer->UseDVL"<<std::endl;
+    timestamp_now = meas.timestamp_;
+    return ;
+}
+
+void System::TrackDS(MeasurementPackage meas){
+    if(timestamp_now == 0){
+        timestamp_now = meas.timestamp_;
+        return ;
+    }    
+    double dt = (meas.timestamp_ - timestamp_now)/1e9;
+    // std::cout<<"dt:"<<dt<<std::endl;
+    if(dt < 0){
+        std::cerr << "ERROR: datas not sequential." << std::endl;
+        exit(-1);
+    }
+    // std::cout<<"--Start mpScanFormer->UseDS"<<std::endl;
+    mpScanFormer->UseDS(meas.raw_measurements_,dt);
+    // std::cout<<"--Over mpScanFormer->UseDS"<<std::endl;
     timestamp_now = meas.timestamp_;
     return ;
 }
 
 
-void System::TrackSonar(MeasurementPackage meas,Eigen::VectorXd paramSonar){
-    if(timestamp_now == 0)timestamp_now = meas.timestamp_;
-    std::cout<<"dt:";
+void System::TrackSonar(MeasurementPackage meas){
+    if(timestamp_now == 0){
+        timestamp_now = meas.timestamp_;
+        return ;
+    }
+    // std::cout<<"dt:";
     double dt = (meas.timestamp_ - timestamp_now)/1e9;
-    std::cout<<dt<<std::endl;
+    // std::cout<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
         exit(-1);
     }
-    std::cout<<"--Start scanFormer.UseSonar"<<std::endl;
-    scanFormer.UseSonar(meas.raw_measurements_,dt,paramSonar);
-    std::cout<<"--Over scanFormer.UseSonar"<<std::endl;
+    
+    // std::cout<<"--Start mpScanFormer->UseSonar"<<std::endl;
+    // std::cout<<"In TrackSonar raw:"<<meas.raw_measurements_.size()<<std::endl;
+    mpScanFormer->UseSonar(meas.raw_measurements_,dt);
+    // std::cout<<"--Over mpScanFormer->UseSonar"<<std::endl;
     scnt++;
-    if(scanFormer.IsFull()){
-        if(!asekf->IsInitialized()){
-            asekf->Initialize(scanFormer.GetPose());
+    if(mpScanFormer->IsFull()){
+        if(!mpASEKF->IsInitialized()){
+            std::cout<<"Initialize ASEKF"<<(mpScanFormer->GetPose().GetPos())<<std::endl;
+            mpASEKF->Initialize(mpScanFormer->GetPose());
         }else{
-            asekf->AddPose(scanFormer.GetPose());
+            // std::cout<<"AddPose"<< mpScanFormer->GetPose().GetPos()<< std::endl;
+            mpASEKF->AddPose(mpScanFormer->GetPose());
         }
-        // asekf.Update(scanFormer.GetPose());
+        // mpASEKF.Update(mpScanFormer->GetPose());
+        mpScanFormer->Reset();
     }
 //         if(scnt == FSCAN_SIZE){
-//             full_scan_list.push_back(scanFormer.undistort());
-//             scanFormer.reset();
+//             full_scan_list.push_back(mpScanFormer->undistort());
+//             mpScanFormer->reset();
 //             motion = modpIC(full_scan);
 //             ASEKF.update(motion);
 //             scnt = 0;
@@ -100,7 +137,7 @@ void System::SetUp(){
     pangolin::CreateWindowAndBind(window_name, 640,480);
     glEnable(GL_DEPTH_TEST);
     pangolin::GetBoundWindow()->RemoveCurrent();
-    isSetUp = true;
+    mbSetUp = true;
     return ;
 }
 
@@ -108,7 +145,7 @@ void System::SetUp(){
 //     pangolin::BindToContext(window_name);
 //     glEnable(GL_DEPTH_TEST);
 //     while( !pangolin::ShouldQuit() ){
-//         Eigen::VectorXd all_pose=asekf.GetX();
+//         Eigen::VectorXd all_pose=mpASEKF.GetX();
 //         int pointNums =  all_pose.size()/3;
 //         glPointSize(20.0);
 //         glBegin(GL_POINTS);
@@ -126,11 +163,11 @@ void System::SetUp(){
 
 //绘制轨迹
 void System::PlotTrajectory(){
-    if(!scanFormer.IsFull()){
-        // std::cout<<"not Full no Plot"<<std::endl;
+    if(!mpScanFormer->IsFull()){
+        std::cout<<"not Full no Plot"<<std::endl;
         return ;
     }
-    if(!isSetUp){
+    if(!mbSetUp){
         SetUp();
     }else{
         std::cout<<"Full Start Plot"<<std::endl;
@@ -141,7 +178,7 @@ void System::PlotTrajectory(){
         //std::thread(std::bind(&Viewer::ThreadLoop, this)
         //render_loop.join();
         std::cout<<"Full End Plot"<<std::endl; 
-        scanFormer.Reset();
+        mpScanFormer->Reset();
     }
     return ;//
 }

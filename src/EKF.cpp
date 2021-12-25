@@ -16,6 +16,7 @@ EKF::~EKF(){}
 void EKF::initialize(const Eigen::VectorXd x_in){
     //只有\psi为读数，其他设为0，因为是要计算相对位移
     x_ = x_in;
+    is_initialized_ = true;
 }
 bool EKF::isInitialized(){
     return is_initialized_;
@@ -27,7 +28,7 @@ void EKF::reset(){
     R_.setZero();
     F_.setZero();
     x_.setZero();
-        return ;
+    return ;
 }
 void EKF::ResetDeadReckoningXYZ(){
     //在新一轮扫描开始的时候，将EKF中的坐标重置为0

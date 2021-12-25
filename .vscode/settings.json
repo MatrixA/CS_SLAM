@@ -100,7 +100,8 @@
         "source_location": "cpp",
         "__availability": "cpp",
         "*.ipp": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "*.txx": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "python.autoComplete.extraPaths": [

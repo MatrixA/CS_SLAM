@@ -1,19 +1,20 @@
-#include "MapDrawer.h"
+#include "Drawer.h"
 
 namespace CS_SLAM{
-Drawer::Drawer(Atlas* pAtlas, const string &strSettingPath):mpAtlas(pAtlas){
-    cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+    
+Drawer::Drawer(Map* pMap):mpMap(pMap){
+    // cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
-    bool is_correct = ParseViewerParamFile(fSettings);
+    // bool is_correct = ParseViewerParamFile(fSettings);
 
-    if(!is_correct){
-        std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
-        try{
-            throw -1;
-        }
-        catch(exception &e){
-        }
-    }
+    // if(!is_correct){
+    //     std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
+    //     try{
+    //         throw -1;
+    //     }
+    //     catch(exception &e){
+    //     }
+    // }
 }
 
 // bool Drawer::ParseViewerParamFile(cv::FileStorage &fSettings){
@@ -75,20 +76,20 @@ Drawer::Drawer(Atlas* pAtlas, const string &strSettingPath):mpAtlas(pAtlas){
 // }
 
 void Drawer::DrawMapPoints(){
-    const vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
-    const vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
+    // const std::vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
+    // const std::vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
 
-    if(vpMPs.empty())
-        return;
+    // if(vpMPs.empty())
+    //     return;
 
-    pangolin::CreateWindowAndBind("Point Cloud Viewer", 1024, 768);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // pangolin::CreateWindowAndBind("Point Cloud Viewer", 1024, 768);
+    // glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glPointSize(mPointSize);
+    // glPointSize(mPointSize);
 
-    DrawPointCloud(const std::vector<RandomVector> &rvs);
+    // DrawPointCloud(const std::vector<RandomVector> &rvs);
     // glBegin(GL_POINTS);
     // glColor3f(0.0,0.0,0.0);
 
@@ -115,9 +116,9 @@ void Drawer::DrawMapPoints(){
     // glEnd();
 }
 
-void DrawPointCloud(const vector<RandomVector> &rvs) {
+void DrawPointCloud(const std::vector<RandomVector> &rvs) {
     if (rvs.empty()) {
-        cerr << "Point cloud is empty!" << endl;
+        std::cerr << "Point cloud is empty!" << std::endl;
         return;
     }
 
@@ -155,219 +156,219 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
     const float h = w*0.75;
     const float z = w*0.6;
 
-    const vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
+    // const std::vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
 
-    if(bDrawKF){
-        for(size_t i=0; i<vpKFs.size(); i++)
-        {
-            KeyFrame* pKF = vpKFs[i];
-            cv::Mat Twc = pKF->GetPoseInverse().t();
-            unsigned int index_color = pKF->mnOriginMapId;
+    // if(bDrawKF){
+    //     for(size_t i=0; i<vpKFs.size(); i++)
+    //     {
+    //         KeyFrame* pKF = vpKFs[i];
+    //         cv::Mat Twc = pKF->GetPoseInverse().t();
+    //         unsigned int index_color = pKF->mnOriginMapId;
 
-            glPushMatrix();
+    //         glPushMatrix();
 
-            glMultMatrixf(Twc.ptr<GLfloat>(0));
+    //         glMultMatrixf(Twc.ptr<GLfloat>(0));
 
-            if(!pKF->GetParent()) // It is the first KF in the map
-            {
-                glLineWidth(mKeyFrameLineWidth*5);
-                glColor3f(1.0f,0.0f,0.0f);
-                glBegin(GL_LINES);
+    //         if(!pKF->GetParent()) // It is the first KF in the map
+    //         {
+    //             glLineWidth(mKeyFrameLineWidth*5);
+    //             glColor3f(1.0f,0.0f,0.0f);
+    //             glBegin(GL_LINES);
 
-                //cout << "Initial KF: " << mpAtlas->GetCurrentMap()->GetOriginKF()->mnId << endl;
-                //cout << "Parent KF: " << vpKFs[i]->mnId << endl;
-            }
-            else
-            {
-                glLineWidth(mKeyFrameLineWidth);
-                //glColor3f(0.0f,0.0f,1.0f);
-                glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
-                glBegin(GL_LINES);
-            }
+    //             //cout << "Initial KF: " << mpAtlas->GetCurrentMap()->GetOriginKF()->mnId << endl;
+    //             //cout << "Parent KF: " << vpKFs[i]->mnId << endl;
+    //         }
+    //         else
+    //         {
+    //             glLineWidth(mKeyFrameLineWidth);
+    //             //glColor3f(0.0f,0.0f,1.0f);
+    //             glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
+    //             glBegin(GL_LINES);
+    //         }
 
-            glVertex3f(0,0,0);
-            glVertex3f(w,h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(w,-h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(-w,-h,z);
-            glVertex3f(0,0,0);
-            glVertex3f(-w,h,z);
+    //         glVertex3f(0,0,0);
+    //         glVertex3f(w,h,z);
+    //         glVertex3f(0,0,0);
+    //         glVertex3f(w,-h,z);
+    //         glVertex3f(0,0,0);
+    //         glVertex3f(-w,-h,z);
+    //         glVertex3f(0,0,0);
+    //         glVertex3f(-w,h,z);
 
-            glVertex3f(w,h,z);
-            glVertex3f(w,-h,z);
+    //         glVertex3f(w,h,z);
+    //         glVertex3f(w,-h,z);
 
-            glVertex3f(-w,h,z);
-            glVertex3f(-w,-h,z);
+    //         glVertex3f(-w,h,z);
+    //         glVertex3f(-w,-h,z);
 
-            glVertex3f(-w,h,z);
-            glVertex3f(w,h,z);
+    //         glVertex3f(-w,h,z);
+    //         glVertex3f(w,h,z);
 
-            glVertex3f(-w,-h,z);
-            glVertex3f(w,-h,z);
-            glEnd();
+    //         glVertex3f(-w,-h,z);
+    //         glVertex3f(w,-h,z);
+    //         glEnd();
 
-            glPopMatrix();
+    //         glPopMatrix();
 
-            //Draw lines with Loop and Merge candidates
-            /*glLineWidth(mGraphLineWidth);
-            glColor4f(1.0f,0.6f,0.0f,1.0f);
-            glBegin(GL_LINES);
-            cv::Mat Ow = pKF->GetCameraCenter();
-            const vector<KeyFrame*> vpLoopCandKFs = pKF->mvpLoopCandKFs;
-            if(!vpLoopCandKFs.empty())
-            {
-                for(vector<KeyFrame*>::const_iterator vit=vpLoopCandKFs.begin(), vend=vpLoopCandKFs.end(); vit!=vend; vit++)
-                {
-                    cv::Mat Ow2 = (*vit)->GetCameraCenter();
-                    glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                    glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
-                }
-            }
-            const vector<KeyFrame*> vpMergeCandKFs = pKF->mvpMergeCandKFs;
-            if(!vpMergeCandKFs.empty())
-            {
-                for(vector<KeyFrame*>::const_iterator vit=vpMergeCandKFs.begin(), vend=vpMergeCandKFs.end(); vit!=vend; vit++)
-                {
-                    cv::Mat Ow2 = (*vit)->GetCameraCenter();
-                    glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                    glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
-                }
-            }*/
+    //         //Draw lines with Loop and Merge candidates
+    //         /*glLineWidth(mGraphLineWidth);
+    //         glColor4f(1.0f,0.6f,0.0f,1.0f);
+    //         glBegin(GL_LINES);
+    //         cv::Mat Ow = pKF->GetCameraCenter();
+    //         const vector<KeyFrame*> vpLoopCandKFs = pKF->mvpLoopCandKFs;
+    //         if(!vpLoopCandKFs.empty())
+    //         {
+    //             for(vector<KeyFrame*>::const_iterator vit=vpLoopCandKFs.begin(), vend=vpLoopCandKFs.end(); vit!=vend; vit++)
+    //             {
+    //                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
+    //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                 glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
+    //             }
+    //         }
+    //         const vector<KeyFrame*> vpMergeCandKFs = pKF->mvpMergeCandKFs;
+    //         if(!vpMergeCandKFs.empty())
+    //         {
+    //             for(vector<KeyFrame*>::const_iterator vit=vpMergeCandKFs.begin(), vend=vpMergeCandKFs.end(); vit!=vend; vit++)
+    //             {
+    //                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
+    //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                 glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
+    //             }
+    //         }*/
 
-            glEnd();
-        }
-    }
+    //         glEnd();
+    //     }
+    // }
 
-    if(bDrawGraph){
-        glLineWidth(mGraphLineWidth);
-        glColor4f(0.0f,1.0f,0.0f,0.6f);
-        glBegin(GL_LINES);
+    // if(bDrawGraph){
+    //     glLineWidth(mGraphLineWidth);
+    //     glColor4f(0.0f,1.0f,0.0f,0.6f);
+    //     glBegin(GL_LINES);
 
-        // cout << "-----------------Draw graph-----------------" << endl;
-        for(size_t i=0; i<vpKFs.size(); i++)
-        {
-            // Covisibility Graph
-            const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
-            cv::Mat Ow = vpKFs[i]->GetCameraCenter();
-            if(!vCovKFs.empty())
-            {
-                for(vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
-                {
-                    if((*vit)->mnId<vpKFs[i]->mnId)
-                        continue;
-                    cv::Mat Ow2 = (*vit)->GetCameraCenter();
-                    glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                    glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
-                }
-            }
+    //     // cout << "-----------------Draw graph-----------------" << endl;
+    //     for(size_t i=0; i<vpKFs.size(); i++)
+    //     {
+    //         // Covisibility Graph
+    //         const vector<KeyFrame*> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
+    //         cv::Mat Ow = vpKFs[i]->GetCameraCenter();
+    //         if(!vCovKFs.empty())
+    //         {
+    //             for(vector<KeyFrame*>::const_iterator vit=vCovKFs.begin(), vend=vCovKFs.end(); vit!=vend; vit++)
+    //             {
+    //                 if((*vit)->mnId<vpKFs[i]->mnId)
+    //                     continue;
+    //                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
+    //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //                 glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
+    //             }
+    //         }
 
-            // Spanning tree
-            KeyFrame* pParent = vpKFs[i]->GetParent();
-            if(pParent)
-            {
-                cv::Mat Owp = pParent->GetCameraCenter();
-                glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
-            }
+    //         // Spanning tree
+    //         KeyFrame* pParent = vpKFs[i]->GetParent();
+    //         if(pParent)
+    //         {
+    //             cv::Mat Owp = pParent->GetCameraCenter();
+    //             glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //             glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
+    //         }
 
-            // Loops
-            set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
-            for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
-            {
-                if((*sit)->mnId<vpKFs[i]->mnId)
-                    continue;
-                cv::Mat Owl = (*sit)->GetCameraCenter();
-                glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
-            }
-        }
+    //         // Loops
+    //         set<KeyFrame*> sLoopKFs = vpKFs[i]->GetLoopEdges();
+    //         for(set<KeyFrame*>::iterator sit=sLoopKFs.begin(), send=sLoopKFs.end(); sit!=send; sit++)
+    //         {
+    //             if((*sit)->mnId<vpKFs[i]->mnId)
+    //                 continue;
+    //             cv::Mat Owl = (*sit)->GetCameraCenter();
+    //             glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //             glVertex3f(Owl.at<float>(0),Owl.at<float>(1),Owl.at<float>(2));
+    //         }
+    //     }
 
-        glEnd();
-    }
+    //     glEnd();
+    // }
 
-    if(bDrawInertialGraph && mpAtlas->isImuInitialized()){
-        glLineWidth(mGraphLineWidth);
-        glColor4f(1.0f,0.0f,0.0f,0.6f);
-        glBegin(GL_LINES);
+    // if(bDrawInertialGraph && mpAtlas->isImuInitialized()){
+    //     glLineWidth(mGraphLineWidth);
+    //     glColor4f(1.0f,0.0f,0.0f,0.6f);
+    //     glBegin(GL_LINES);
 
-        //Draw inertial links
-        for(size_t i=0; i<vpKFs.size(); i++)
-        {
-            KeyFrame* pKFi = vpKFs[i];
-            cv::Mat Ow = pKFi->GetCameraCenter();
-            KeyFrame* pNext = pKFi->mNextKF;
-            if(pNext)
-            {
-                cv::Mat Owp = pNext->GetCameraCenter();
-                glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
-                glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
-            }
-        }
+    //     //Draw inertial links
+    //     for(size_t i=0; i<vpKFs.size(); i++)
+    //     {
+    //         KeyFrame* pKFi = vpKFs[i];
+    //         cv::Mat Ow = pKFi->GetCameraCenter();
+    //         KeyFrame* pNext = pKFi->mNextKF;
+    //         if(pNext)
+    //         {
+    //             cv::Mat Owp = pNext->GetCameraCenter();
+    //             glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+    //             glVertex3f(Owp.at<float>(0),Owp.at<float>(1),Owp.at<float>(2));
+    //         }
+    //     }
 
-        glEnd();
-    }
+    //     glEnd();
+    // }
 
-    vector<Map*> vpMaps = mpAtlas->GetAllMaps();
+    // std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
 
-    if(bDrawKF){
-        for(Map* pMap : vpMaps)
-        {
-            if(pMap == mpAtlas->GetCurrentMap())
-                continue;
+    // if(bDrawKF){
+    //     for(Map* pMap : vpMaps)
+    //     {
+    //         if(pMap == mpAtlas->GetCurrentMap())
+    //             continue;
 
-            vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
+    //         vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
 
-            for(size_t i=0; i<vpKFs.size(); i++)
-            {
-                KeyFrame* pKF = vpKFs[i];
-                cv::Mat Twc = pKF->GetPoseInverse().t();
-                unsigned int index_color = pKF->mnOriginMapId;
+    //         for(size_t i=0; i<vpKFs.size(); i++)
+    //         {
+    //             KeyFrame* pKF = vpKFs[i];
+    //             cv::Mat Twc = pKF->GetPoseInverse().t();
+    //             unsigned int index_color = pKF->mnOriginMapId;
 
-                glPushMatrix();
+    //             glPushMatrix();
 
-                glMultMatrixf(Twc.ptr<GLfloat>(0));
+    //             glMultMatrixf(Twc.ptr<GLfloat>(0));
 
-                if(!vpKFs[i]->GetParent()) // It is the first KF in the map
-                {
-                    glLineWidth(mKeyFrameLineWidth*5);
-                    glColor3f(1.0f,0.0f,0.0f);
-                    glBegin(GL_LINES);
-                }
-                else
-                {
-                    glLineWidth(mKeyFrameLineWidth);
-                    //glColor3f(0.0f,0.0f,1.0f);
-                    glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
-                    glBegin(GL_LINES);
-                }
+    //             if(!vpKFs[i]->GetParent()) // It is the first KF in the map
+    //             {
+    //                 glLineWidth(mKeyFrameLineWidth*5);
+    //                 glColor3f(1.0f,0.0f,0.0f);
+    //                 glBegin(GL_LINES);
+    //             }
+    //             else
+    //             {
+    //                 glLineWidth(mKeyFrameLineWidth);
+    //                 //glColor3f(0.0f,0.0f,1.0f);
+    //                 glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
+    //                 glBegin(GL_LINES);
+    //             }
 
-                glVertex3f(0,0,0);
-                glVertex3f(w,h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(w,-h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(-w,-h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(-w,h,z);
+    //             glVertex3f(0,0,0);
+    //             glVertex3f(w,h,z);
+    //             glVertex3f(0,0,0);
+    //             glVertex3f(w,-h,z);
+    //             glVertex3f(0,0,0);
+    //             glVertex3f(-w,-h,z);
+    //             glVertex3f(0,0,0);
+    //             glVertex3f(-w,h,z);
 
-                glVertex3f(w,h,z);
-                glVertex3f(w,-h,z);
+    //             glVertex3f(w,h,z);
+    //             glVertex3f(w,-h,z);
 
-                glVertex3f(-w,h,z);
-                glVertex3f(-w,-h,z);
+    //             glVertex3f(-w,h,z);
+    //             glVertex3f(-w,-h,z);
 
-                glVertex3f(-w,h,z);
-                glVertex3f(w,h,z);
+    //             glVertex3f(-w,h,z);
+    //             glVertex3f(w,h,z);
 
-                glVertex3f(-w,-h,z);
-                glVertex3f(w,-h,z);
-                glEnd();
+    //             glVertex3f(-w,-h,z);
+    //             glVertex3f(w,-h,z);
+    //             glEnd();
 
-                glPopMatrix();
-            }
-        }
-    }
+    //             glPopMatrix();
+    //         }
+    //     }
+    // }
 }
 
 // void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc){

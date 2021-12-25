@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <yaml-cpp/yaml.h>
 
 #include "System.h"
 #include "MeasurementPackage.h"
@@ -63,7 +62,7 @@ void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage
 //     return conf;
 // }
 
-void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data){
+void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YAML::Node conf){
     std::ifstream infile;
     //数据读入模块
     std::string datafile_DVL = std::string(argv[1]) + "dvl_linkquest.txt";
@@ -85,7 +84,7 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data){
     // ConfigSensor(string(argv[1]) + "SensorsConfiguration.yaml",sonarParam);
     //Sensor configuration
     const std::string DB_CONF=std::string(argv[2]);
-    YAML::Node conf = YAML::LoadFile(DB_CONF);
+    // conf = YAML::LoadFile(DB_CONF);
     
     Import(datafile_Sonar,data_Sonar,datacols_Sonar,CS_SLAM::MeasurementPackage::SONAR,true);
     Import(datafile_DVL,data_DVL,datacols_DVL,CS_SLAM::MeasurementPackage::DVL,true);
@@ -112,40 +111,43 @@ int main(int argc, char **argv){
 //     unsigned int pd=0, pa=0, ps=0, scnt=0;
 //     long long last_timestamp_ = 0;a
     std::vector<CS_SLAM::MeasurementPackage> dataSequence;
-    InputDataset(argv, dataSequence);
-    CS_SLAM::System SLAM;
+    YAML::Node sensorConfig;
+    InputDataset(argv, dataSequence, sensorConfig);
+    
+    CS_SLAM::System SLAM(sensorConfig);
     // for(int i=0;i<3;i++){
     //     std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
     //     //std::cout<<data[i].raw_measurements_<<std::endl;
     // }
     int scnt=0;//统计声纳帧以形成fullscan触发不同的滤波器
+
 //     scanFormer.reset();
 //     ASEKF.reset();
-
-//     for(int i=0;i< data.size();i++){
+    // std::cout<<dataSequence[1].sensor_type_<<std::endl;
+    for(int i=0;i< dataSequence.size();i++){
 //         //DVL或AHRS来了，就更新状态。Sonara来了，就用预测来估计状态。
-//         switch(data[i].sensor_type_){
-//             case CS_SLAM::MeasurementPackage::SONAR:
-//                 std::cout<<"Sonar Start"<<std::endl;
-//                 SLAM.TrackSonar(data[i],sonarParam);
-//                 std::cout<<"Sonar End"<<std::endl;
-//                 break;
-//             case CS_SLAM::MeasurementPackage::DVL:
-//                 std::cout<<"DVL Start"<<std::endl;
-//                 SLAM.TrackDVL(data[i],DVLParam);
-//                 std::cout<<"DVL End"<<std::endl;
-//                 break;
-//             case CS_SLAM::MeasurementPackage::AHRS:
-//                 std::cout<<"AHRS Start"<<std::endl;
-//                 SLAM.TrackAHRS(data[i],AHRSParam);
-//                 std::cout<<"AHRS End"<<std::endl;
-//                 break;
-//             case CS_SLAM::MeasurementPackage::DS:
-//                 std::cout<<"DS Start"<<std::endl;
-//                 SLAM.TrackDS(data[i],DSParam);
-//                 std::cout<<"DS End"<<std::endl;
-//                 break;
-//         }
+        switch(dataSequence[i].sensor_type_){
+            case CS_SLAM::MeasurementPackage::SONAR:
+                // std::cout<<"Sonar Start"<<std::endl;
+                SLAM.TrackSonar(dataSequence[i]);
+                // std::cout<<"Sonar End"<<std::endl;
+                break;
+            case CS_SLAM::MeasurementPackage::DVL:
+                // std::cout<<"DVL Start"<<std::endl;
+                SLAM.TrackDVL(dataSequence[i]);
+                // std::cout<<"DVL End"<<std::endl;
+                break;
+            case CS_SLAM::MeasurementPackage::AHRS:
+                // std::cout<<"AHRS Start"<<std::endl;
+                SLAM.TrackAHRS(dataSequence[i]);
+                // std::cout<<"AHRS End"<<std::endl;
+                break;
+            case CS_SLAM::MeasurementPackage::DS:
+                // std::cout<<"DS Start"<<std::endl;
+                SLAM.TrackDS(dataSequence[i]);
+                // std::cout<<"DS End"<<std::endl;
+                break;
+        }
 //         // if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::SONAR){
 //         //     std::cout<<"Sonar Start"<<std::endl;
 //         //     SLAM.TrackSonar(data[i],sonarParam);
@@ -164,7 +166,8 @@ int main(int argc, char **argv){
 //         //     std::cout<<"DS End"<<std::endl;
 //         // }
 //         SLAM.PlotTrajectory();
-//     }
+    }
+    SLAM.SaveTrajectory("../poses.txt");
     std::cout<<"nothing wrong"<<std::endl;
     return 0;
 }

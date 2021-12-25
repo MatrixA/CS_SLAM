@@ -2,6 +2,7 @@
 #define MAPDRAWER_H
 
 #include "Map.h"
+#include "KeyFrame.h"
 
 namespace CS_SLAM
 {

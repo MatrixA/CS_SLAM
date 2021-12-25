@@ -3,8 +3,10 @@
 
 #include <pangolin/pangolin.h>
 #include <string>
+#include <fstream>
 #include <thread>
 
+#include "yaml-cpp/yaml.h"
 #include "ASEKF.h"
 #include "Map.h"
 #include "Atlas.h"
@@ -24,12 +26,13 @@ class System
 {
 public:
     System();
+    System(YAML::Node sensorConfig);
     ~System();
-    void TrackAHRS(MeasurementPackage meas,Eigen::VectorXd paramAHRS);
-    void TrackDVL(MeasurementPackage meas,Eigen::VectorXd paramDVL);
-    void TrackSonar(MeasurementPackage meas,Eigen::VectorXd paramSonar);
-    void TrackDS(MeasurementPackage meas,Eigen::VectorXd paramDS);
-    void TrackMono(MeasurementPackage meas,Eigen::VectorXd paramMono);
+    void TrackAHRS(MeasurementPackage meas);
+    void TrackDVL(MeasurementPackage meas);
+    void TrackSonar(MeasurementPackage meas);
+    void TrackDS(MeasurementPackage meas);
+    void TrackMono(MeasurementPackage meas);
     void SetUp();
     //void Plot();
     void PlotTrajectory();
@@ -40,11 +43,14 @@ public:
     bool isFinished();
 private:
     unsigned long long timestamp_now;
-    ASEKF* asekf; //ASEKF里保存了所有KeyFrames的坐标及其方差
-    ScanFormer scanFormer;
+    ASEKF* mpASEKF; //ASEKF里保存了所有KeyFrames的坐标及其方差
+    ScanFormer* mpScanFormer;
     int scnt=0;
-    bool isSetUp = false;
+    bool mbSetUp = false;
     bool mbReset = false;
+
+    YAML::Node mSensorConfig;
+
     std::thread* mptViewer;
     int mTrackingState;
     std::vector<MapPoint*> mTrackedMapPoints;
@@ -59,4 +65,4 @@ private:
 
 }
 
-#endif
+#endif //SYSTEM_H

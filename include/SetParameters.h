@@ -11,8 +11,7 @@
 
 
 namespace CS_SLAM{
-    const int NUM_BEAMS = 200;
-    const int NUM_BINS 500;
+
 }
 
 #endif

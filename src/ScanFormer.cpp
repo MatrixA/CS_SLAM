@@ -9,7 +9,10 @@ class KeyFrame;
 
 ScanFormer::ScanFormer(){
     scan.resize(0);
+    x_s.resize(0);
+    mpEKF = new EKF();
 }
+
 ScanFormer::~ScanFormer(){}
 
 void ScanFormer::BeamSegment(int thresh = 80){
@@ -35,7 +38,7 @@ void ScanFormer::BeamSegment(int thresh = 80){
             Eigen::Vector2d z_hat(0.1*localMaxID*cos(365/200*i),0.1*localMaxID*sin(365/200*i));
             Eigen::Matrix2d z_P = Eigen::Matrix2d::Zero(2,2);
             z.push_back(point(z_hat,z_P));
-            std::cout<<z_hat<<std::endl;
+            // std::cout<<z_hat<<std::endl;
         }else{
             std::cout<<"row: "<<i<<" no useful information"<<std::endl;
         //     z.push_back(KeyFrame(Eigen::VectroXd(0,0,0),
@@ -66,7 +69,10 @@ motion ScanFormer::D(int i){
 }
 
 bool ScanFormer::IsFull(){
-    return sonarCnt == NUM_BEAMS;
+    if(sonarCnt == NUM_BEAMS){
+        sonarCnt = 0;
+        return true;
+    }else return false;
 }
 
 
@@ -75,10 +81,10 @@ void ScanFormer::Undistort(int thresh=80){
     //输入(内隐)：scan
     //输出(内隐)：修正好的scan
     //先阈值化
-    std::cout<<"--Start Undistort"<<std::endl;
-    std::cout<<"----Start BeamSegment"<<std::endl;
+    // std::cout<<"--Start Undistort"<<std::endl;
+    // std::cout<<"----Start BeamSegment"<<std::endl;
     BeamSegment(thresh);//对该轮声纳Segment之后得到点云
-    std::cout<<"----End BeamSegment"<<std::endl;
+    // std::cout<<"----End BeamSegment"<<std::endl;
     for(int i = 0;i < z.size(); i++){
         if(i == C)continue;
         motion r_(Eigen::Vector3d(0,0,x_s[i].GetPos()(2)), Eigen::Matrix3d::Zero(3,3));
@@ -87,11 +93,14 @@ void ScanFormer::Undistort(int thresh=80){
         //std::cout<<"------undistorting beam "<<i<<std::endl;
         z[i] = (r_c.tail2tail(D(i))).compoundP(r_.compoundP(z[i]));
     }
-    std::cout<<"--End Undistort"<<std::endl;
+    // std::cout<<"--End Undistort"<<std::endl;
     return ;
 }
 
-void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt,Eigen::VectorXd paramDVL){
+void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt){
+    if(!mpEKF->isInitialized()){
+        return ;
+    }
     Eigen::MatrixXd H_DVL(3,8);
     H_DVL << 0,0,0,0,1,0,0,0,
             0,0,0,0,0,1,0,0,
@@ -102,10 +111,14 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt,Eigen::VectorXd para
     // std::cout<<"----start DVL update"<<std::endl;
     mpEKF->update(data_dvl, dt);
     // std::cout<<"----end DVL update"<<std::endl;
-
 }
 
-void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt,Eigen::VectorXd paramAHRS){
+void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt){
+    if(!mpEKF->isInitialized()){
+        Eigen::VectorXd tmp=Eigen::VectorXd::Zero(8);
+        tmp(2) = data_ahrs(0);
+        mpEKF->initialize(tmp);
+    }
     Eigen::MatrixXd H_AHRS(1,8);
     H_AHRS << 0,0,0,1,0,0,0,0;
     mpEKF->setH(H_AHRS);
@@ -115,48 +128,52 @@ void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt,Eigen::VectorXd pa
     // std::cout<<"----end AHRS update"<<std::endl;
 }
 
-void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt,Eigen::VectorXd paramSonar){
+void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
     /*
     目的：叠加声纳beam，并用其进行EKF的位姿估计。
     */
     //data_sonar.resize(0);
-    //std::cout<<"resizing"<<std::endl;
+    // std::cout<<scan.size()<<std::endl;
+
+    // std::cout<<data_sonar.size()<<std::endl;
+
     //scan[sonarCnt++] = data_sonar;
+    if(!mpEKF->isInitialized()){
+        return ;
+    }
     scan.push_back(data_sonar);
     sonarCnt++;
-
-    //std::cout<<"integrating"<<std::endl;
+    // std::cout<<"integrating"<<std::endl;
     if(sonarCnt == 1){
         mpEKF->ResetDeadReckoningXYZ();
+        // std::cout<<"reseted"<<std::endl;
     }
     
     mpEKF->prediction(dt);
-    std::cout<<"----sonar_data "<< sonarCnt << " integrated into scan"<<std::endl;
-
-    // std::cout<<"push x:\n"<<mpEKF->.GetX()<<" P:"<<mpEKF->.GetP()<<std::endl;
+    // std::cout<<"----sonar_data "<< sonarCnt << " integrated into scan"<<std::endl;
+    // std::cout<<"push x:\n"<<mpEKF->GetX()<<" P:"<<mpEKF->GetP()<<std::endl;
     Eigen::VectorXd x_stmp = mpEKF->GetX();
     Eigen::MatrixXd x_sptmp = mpEKF->GetP();
     Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
     Eigen::Matrix3d x_sp;
     x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
     x_sp.block(2,0,1,2)=x_sptmp.block(3,0,1,2);x_sp(2,2)=x_sptmp(3,3);
-    //std::cout<<"pushing"<<std::endl;
+    // std::cout<<"pushing "<<x_shat<<std::endl;
     x_s.push_back(KeyFrame(x_shat,x_sp));
-    //std::cout<<"pushed"<<std::endl;
+    // std::cout<<"pushed"<<std::endl;
     if(sonarCnt == NUM_BEAMS){
         //扫完一轮就要矫正然后得到该轮图像以及轮内运动
         Undistort();
-        sonarCnt = 0;
         // std::cout<<"scan是"<<scan.size()<<std::endl;
-        scan.resize(0);
         // std::cout<<"z是"<<z.size()<<std::endl;
-        z.resize(0);
         // std::cout<<"x_s是"<<x_s.size()<<std::endl;
-        x_s.resize(0);
     }
 }
 
-void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt,Eigen::VectorXd paramDS){
+void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt){
+    if(!mpEKF->isInitialized()){
+        return ;
+    }
     Eigen::MatrixXd H_DS(1,8);
     H_DS << 0,0,1,0,0,0,0,0;
     mpEKF->setH(H_DS);
@@ -173,13 +190,17 @@ KeyFrame ScanFormer::GetPose(){
 
 void ScanFormer::Reset(){
     mpEKF->reset();
-    // scan.setZero();
-    //x_s.resize(0);
+    x_s.resize(0);
     sonarCnt = 0;
+    // std::cout<<"scan是"<<scan.size()<<std::endl;
+    scan.resize(0);
+    // std::cout<<"z是"<<z.size()<<std::endl;
+    z.resize(0);
+    // std::cout<<"x_s是"<<x_s.size()<<std::endl;
 }
 
 // void ScanFormer::DrawFullScan(){
-//     glBegin(GL_POINTS);
+//     glBegin(L_POINTS);
 //     for (int i=0;i<scan.size();i++){
 //         for(int j=0;j<scan[i].rows();j++){
 //             glColor3f(0, 0, 0);

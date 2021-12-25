@@ -17,19 +17,22 @@ public:
     void Close();
     void UpdateMap();
     void AddCurrentFrame(KeyFrame* current_frame);
-    
-private:
     void ThreadLoop();
+    // void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
+    // cv::Mat PlotFrameImage();
+
+
+private:
+    
     // void DrawFrame();
     // void DrawMapPoints();
-    void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
-    cv::Mat PlotFrameImage();
-    std::thread viewer_thread_;
+
 
     Drawer* mpDrawer = nullptr;
+    Map* mpMap = nullptr;
 
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
-    Map* mpMap = nullptr;
+    
     std::mutex viewer_data_mutex_;
 
     KeyFrame* current_frame_ = nullptr;

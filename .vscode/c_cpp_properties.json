@@ -11,21 +11,6 @@
             "cppStandard": "gnu++17"
         },
         {
-            "name": "Win64",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
-            "compilerPath": "C:\\MingW\\bin\\gcc.exe",
-            "cStandard": "c11",
-            "cppStandard": "c++11",
-            "intelliSenseMode": "windows-gcc-x86"
-        },
-        {
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
@@ -35,6 +20,22 @@
             "cStandard": "gnu17",
             "cppStandard": "gnu++17"
         },
+        {
+            "name": "Win64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/MingW/bin/gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "windows-gcc-x86"
+        }
+
     ],
     "version": 4
 }

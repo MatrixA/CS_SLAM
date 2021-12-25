@@ -5,8 +5,9 @@ namespace CS_SLAM{
 
 
 ASEKF::ASEKF(){
-    
     is_initialized_ = false;
+    X_ = Eigen::Vector3d(0,0,0);
+    // std::cout<<"init OK"<<std::endl;
     //初始化在整个实验的起点，x,y,phi
 }
 ASEKF::~ASEKF(){}
@@ -52,17 +53,20 @@ void ASEKF::Prediction(motion q_n){
     */
     /*均值*/
     int N = X_.rows();
-    // Eigen::MatrixXd tmp_mu(N+3, 1);
-    // tmp_mu.block(0,0,3,1) = odot(X_.block(0,0,3,1), q_n.hat_q);
-    // tmp_mu.block(3,0,N,1) = X_;
-    // X_.resize(N+3, 1);
-    // X_ = tmp_mu;
+    Eigen::MatrixXd tmp_mu(N+3, 1);
+    Eigen::Vector3d a=X_.block(0,0,3,1);
+    Eigen::Vector3d b=q_n.hat;
+
+    tmp_mu.block(0,0,3,1) = Eigen::Vector3d(a(0)+b(0),a(1)+b(1),b(2));
+    tmp_mu.block(3,0,N,1) = X_;
+    X_.resize(N+3, 1);
+    X_ = tmp_mu;
     //X_.topRows(3)=Utils::Odot(X_.block(0,0,3,1), q_n.hat);
 
     /*方差*/
-    Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
-    Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
-    P_ = F*P_*F.transpose() + G * q_n.P * G.transpose();
+    // Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
+    // Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
+    // P_ = F*P_*F.transpose() + G * q_n.P * G.transpose();
 
 // void Prediction(pose x_k, motion q_n){
 //位姿图的更新
@@ -99,21 +103,35 @@ void ASEKF::AddPose(KeyFrame xn){
     // Eigen::VectorXd X_new(X_.rows()+(xn.GetPos()).rows());
     // X_new.middleRows(0,3) = xn.GetPos();
     // X_new.middleRows(3,X_new.size()-3) = X_;
-    X_.resize(X_.rows()+xn.GetPos().size());
-    X_.tail(X_.rows()-xn.GetPos().size()) = X_.head(X_.rows()-xn.GetPos().size());
-    std::cout<<"------Start Add a Pose"<<std::endl;
-    std::cout<<"------Adding a Pose:\n"<<X_<<"\n xn:\n"<<xn.GetPos()<<std::endl;
-    X_.head(3) = xn.GetPos();
+    // X_.resize(X_.rows()+xn.GetPos().size());
+    int N = X_.rows();
+    Eigen::MatrixXd tmp_mu(N+3, 1);
+    Eigen::Vector3d a=X_.block(0,0,3,1);
+    Eigen::Vector3d b=xn.GetPos();
+
+    tmp_mu.block(0,0,3,1) = Eigen::Vector3d(a(0)+b(0),a(1)+b(1),b(2));
+    tmp_mu.block(3,0,N,1) = X_;
+    X_.resize(N+3, 1);
+    X_ = tmp_mu;
+    // X_.tail(X_.rows()-xn.GetPos().size()) = X_.head(X_.rows()-xn.GetPos().size());
+    // std::cout<<"------Start Add a Pose"<<std::endl;
+    // std::cout<<"------Adding a Pose then:\n"<<X_<<"\n xn:\n"<<xn.GetPos()<<std::endl;
+    // X_.head(3) = xn.GetPos();
     // X_new << xn.GetPos(),X_;
     // X_ = X_new;
-    const int N = X_.rows();
-    Eigen::MatrixXd P_new = Eigen::MatrixXd::Zero(N,N);
-    P_new.block(0,0,3,3) = xn.GetPosP();
-    P_new.block(3,3,N-3,N-3) = P_;
-    P_ = P_new;
-    F_ = Eigen::MatrixXd::Identity(N, N);
-    F_(2,2)=0;
-    std::cout<<"------End Add a Pose"<<std::endl;
+    // const int N = X_.rows();
+    // Eigen::MatrixXd P_new = Eigen::MatrixXd::Zero(N,N);
+    // P_new.block(0,0,3,3) = xn.GetPosP();
+    // P_new.block(3,3,N-3,N-3) = P_;
+    // P_ = P_new;
+    // F_ = Eigen::MatrixXd::Identity(N, N);
+    // F_(2,2)=0;
+    // Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
+    // Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
+    // Eigen::MatrixXd tmp = F*P_*F.transpose() + G * xn.GetPosP() * G.transpose();
+    // P_.resize(N+3,N+3);
+    // P_ = tmp;
+    // std::cout<<"------End Add a Pose"<<std::endl;
     return ;
 }
 
