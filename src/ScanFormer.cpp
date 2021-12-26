@@ -65,14 +65,12 @@ motion ScanFormer::D(int i){
             res.hat = res.hat - d_;
         }
     }
+    
     return res;
 }
 
 bool ScanFormer::IsFull(){
-    if(sonarCnt == NUM_BEAMS){
-        sonarCnt = 0;
-        return true;
-    }else return false;
+    return sonarCnt == NUM_BEAMS;
 }
 
 
@@ -111,6 +109,15 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt){
     // std::cout<<"----start DVL update"<<std::endl;
     mpEKF->update(data_dvl, dt);
     // std::cout<<"----end DVL update"<<std::endl;
+//DR
+    Eigen::VectorXd x_stmp = mpEKF->GetX();
+    Eigen::MatrixXd x_sptmp = mpEKF->GetP();
+    Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
+    Eigen::Matrix3d x_sp;
+    x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
+    x_sp.block(2,0,1,2)=x_sptmp.block(3,0,1,2);x_sp(2,2)=x_sptmp(3,3);
+    // std::cout<<"pushing "<<x_shat<<std::endl;
+    x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
 void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt){
@@ -126,6 +133,15 @@ void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt){
     // std::cout<<"----start AHRS update"<<std::endl;
     mpEKF->update(data_ahrs, dt);
     // std::cout<<"----end AHRS update"<<std::endl;
+//DR
+    Eigen::VectorXd x_stmp = mpEKF->GetX();
+    Eigen::MatrixXd x_sptmp = mpEKF->GetP();
+    Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
+    Eigen::Matrix3d x_sp;
+    x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
+    x_sp.block(2,0,1,2)=x_sptmp.block(3,0,1,2);x_sp(2,2)=x_sptmp(3,3);
+    // std::cout<<"pushing "<<x_shat<<std::endl;
+    // x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
 void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
@@ -142,16 +158,17 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
         return ;
     }
     scan.push_back(data_sonar);
-    sonarCnt++;
+    // sonarCnt++;
     // std::cout<<"integrating"<<std::endl;
-    if(sonarCnt == 1){
-        mpEKF->ResetDeadReckoningXYZ();
-        // std::cout<<"reseted"<<std::endl;
-    }
+    // if(sonarCnt == 1){
+    //     mpEKF->ResetDeadReckoningXYZ();
+    //     // std::cout<<"reseted"<<std::endl;
+    // }
     
     mpEKF->prediction(dt);
     // std::cout<<"----sonar_data "<< sonarCnt << " integrated into scan"<<std::endl;
     // std::cout<<"push x:\n"<<mpEKF->GetX()<<" P:"<<mpEKF->GetP()<<std::endl;
+    //选取状态量中的x y psi作为x_s的元素
     Eigen::VectorXd x_stmp = mpEKF->GetX();
     Eigen::MatrixXd x_sptmp = mpEKF->GetP();
     Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
@@ -159,7 +176,7 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
     x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
     x_sp.block(2,0,1,2)=x_sptmp.block(3,0,1,2);x_sp(2,2)=x_sptmp(3,3);
     // std::cout<<"pushing "<<x_shat<<std::endl;
-    x_s.push_back(KeyFrame(x_shat,x_sp));
+    // x_s.push_back(KeyFrame(x_shat,x_sp));
     // std::cout<<"pushed"<<std::endl;
     if(sonarCnt == NUM_BEAMS){
         //扫完一轮就要矫正然后得到该轮图像以及轮内运动
@@ -181,11 +198,21 @@ void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt){
     // std::cout<<"----start DS update"<<std::endl;
     mpEKF->update(data_ds, dt);
     // std::cout<<"----end DS update"<<std::endl;
-
+//DR
+    Eigen::VectorXd x_stmp = mpEKF->GetX();
+    Eigen::MatrixXd x_sptmp = mpEKF->GetP();
+    Eigen::VectorXd x_shat = Eigen::Vector3d(x_stmp(0),x_stmp(1),x_stmp(3));
+    Eigen::Matrix3d x_sp;
+    x_sp.block(0,0,2,2)=x_sptmp.block(0,0,2,2);x_sp.block(0,2,2,1)=x_sptmp.block(0,3,2,1);
+    x_sp.block(2,0,1,2)=x_sptmp.block(3,0,1,2);x_sp(2,2)=x_sptmp(3,3);
+    // std::cout<<"pushing "<<x_shat<<std::endl;
+    // x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
-KeyFrame ScanFormer::GetPose(){
-    return x_s.back();
+motion ScanFormer::GetFullMotion(){
+    motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
+    std::cout<<ans.hat<<std::endl;
+    return ans;
 }
 
 void ScanFormer::Reset(){
@@ -211,7 +238,15 @@ void ScanFormer::Reset(){
 //     }
 //     glEnd();
 // }
-
+Eigen::VectorXd ScanFormer::getx_ss(){
+    Eigen::VectorXd ans;
+    ans.resize(x_s.size()*3);
+    std::cout<<"tot x_s.size"<<x_s.size()<<std::endl;
+    for(int i = 0; i< x_s.size();i++){
+        ans.block(3*i,0,3,1) = x_s[i].GetPos();
+    }
+    return ans;
+}
 
 
 }
@@ -240,3 +275,4 @@ void ScanFormer::Reset(){
     //     }
     //     return ;
     // }
+

@@ -12,11 +12,11 @@ ASEKF::ASEKF(){
 }
 ASEKF::~ASEKF(){}
 
-void ASEKF::Initialize(KeyFrame kf_init){
+void ASEKF::Initialize(motion kf_init){
     //只有\psi为读数，其他设为0，因为是要计算相对位移
     std::cout<<"---Start Initialize ASEKF"<<std::endl;
-    X_ = kf_init.GetPos();
-    P_ = kf_init.GetPosP();
+    X_ = kf_init.hat;
+    P_ = kf_init.P;
     is_initialized_ = true;
     std::cout<<"---End Initialize ASEKF"<<std::endl;
 }

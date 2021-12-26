@@ -26,7 +26,7 @@ public:
     ASEKF();
     ~ASEKF();
 
-    void Initialize(KeyFrame kf_init);
+    void Initialize(motion kf_init);
     bool IsInitialized();
     void reset();
 

@@ -85,6 +85,7 @@ src/RandomVector.cpp
 src/MapPoint.cpp
 src/KeyFrame.cpp
 src/ScanFormer.cpp
+src/Converter.cpp
 # src/MapDrawer.cpp
 src/MeasurementPackage.cpp
 src/System.cpp
@@ -110,6 +111,7 @@ include/Utils.h
 # include/Atlas.h
 include/Viewer.h
 # include/SetParameters.h
+include/Converter.h
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/examples)

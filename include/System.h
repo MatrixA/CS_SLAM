@@ -15,6 +15,7 @@
 #include "MeasurementPackage.h"
 #include "RandomVector.h"
 #include "LocalMapping.h"
+#include "KeyFrame.h"
 
 namespace CS_SLAM
 {
@@ -42,7 +43,7 @@ public:
     bool isLost();
     bool isFinished();
 private:
-    unsigned long long timestamp_now;
+    unsigned long long timestamp_now=0;
     ASEKF* mpASEKF; //ASEKF里保存了所有KeyFrames的坐标及其方差
     ScanFormer* mpScanFormer;
     int scnt=0;

@@ -277,6 +277,19 @@
                 "cmake" // 在task `cmake` 后执行该task
             ]
         },
+        {
+            "label": "pythonplot",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "plot.py",
+                "--optimized_poses",
+                "poses.txt",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+            }
+        }
 
     ],
     "inputs": [

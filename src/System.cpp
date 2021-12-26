@@ -45,14 +45,17 @@ void System::SaveTrajectory(const std::string &filename){
         std::cout<<"open file fail"<<std::endl;
         return;
     }
-
-    Eigen::VectorXd poses = mpASEKF->GetX();
+//ASEKF
+    // Eigen::VectorXd poses = mpASEKF->GetX();
+//DR
+    Eigen::VectorXd poses = mpScanFormer->getx_ss();
     int tot = poses.size()/3;
     std::cout<<"total "<<tot<<" poses. "<<std::endl;
 
     for(int i = 0; i<poses.size()/3;i++){
         outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
     }
+    std::cout<<"write OK"<<std::endl;
     outfile.close();
 }
 
@@ -99,7 +102,7 @@ void System::TrackSonar(MeasurementPackage meas){
         return ;
     }
     // std::cout<<"dt:";
-    double dt = (meas.timestamp_ - timestamp_now)/1e9;
+    double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
@@ -113,13 +116,13 @@ void System::TrackSonar(MeasurementPackage meas){
     scnt++;
     if(mpScanFormer->IsFull()){
         if(!mpASEKF->IsInitialized()){
-            std::cout<<"Initialize ASEKF"<<(mpScanFormer->GetPose().GetPos())<<std::endl;
-            mpASEKF->Initialize(mpScanFormer->GetPose());
+            std::cout<<"Initialize ASEKF:"<<(mpScanFormer->GetFullMotion().hat)<<std::endl;
+            mpASEKF->Initialize(mpScanFormer->GetFullMotion());
         }else{
-            // std::cout<<"AddPose"<< mpScanFormer->GetPose().GetPos()<< std::endl;
-            mpASEKF->AddPose(mpScanFormer->GetPose());
+            // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPos()<< std::endl;
+            mpASEKF->Prediction(mpScanFormer->GetFullMotion());
         }
-        // mpASEKF.Update(mpScanFormer->GetPose());
+        // mpASEKF.Update(mpScanFormer->GetFullMotion());
         mpScanFormer->Reset();
     }
 //         if(scnt == FSCAN_SIZE){
