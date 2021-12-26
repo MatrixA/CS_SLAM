@@ -19,12 +19,33 @@ System::~System(){
     
 }
 
+void System::SaveTrajectory(const std::string &filename){
+    std::ofstream outfile;
+    outfile.open(filename);
+    if(!outfile.is_open()){
+        std::cout<<"open file fail"<<std::endl;
+        return;
+    }
+//ASEKF
+    Eigen::VectorXd poses = mpASEKF->GetX();
+//DR
+    // Eigen::VectorXd poses = mpScanFormer->getx_ss();
+    int tot = poses.size()/3;
+    std::cout<<"total "<<tot<<" poses. "<<std::endl;
+
+    for(int i = 0; i<poses.size()/3;i++){
+        outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
+    }
+    std::cout<<"write OK"<<std::endl;
+    outfile.close();
+}
+
 void System::TrackAHRS(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
         return ;
     }
-    double dt = (meas.timestamp_ - timestamp_now)/1e9;
+    double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
@@ -38,33 +59,12 @@ void System::TrackAHRS(MeasurementPackage meas){
     return ;
 }
 
-void System::SaveTrajectory(const std::string &filename){
-    std::ofstream outfile;
-    outfile.open(filename);
-    if(!outfile.is_open()){
-        std::cout<<"open file fail"<<std::endl;
-        return;
-    }
-//ASEKF
-    // Eigen::VectorXd poses = mpASEKF->GetX();
-//DR
-    Eigen::VectorXd poses = mpScanFormer->getx_ss();
-    int tot = poses.size()/3;
-    std::cout<<"total "<<tot<<" poses. "<<std::endl;
-
-    for(int i = 0; i<poses.size()/3;i++){
-        outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
-    }
-    std::cout<<"write OK"<<std::endl;
-    outfile.close();
-}
-
 void System::TrackDVL(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
         return ;
     }
-    double dt = (meas.timestamp_ - timestamp_now)/1e9;
+    double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
@@ -82,7 +82,7 @@ void System::TrackDS(MeasurementPackage meas){
         timestamp_now = meas.timestamp_;
         return ;
     }    
-    double dt = (meas.timestamp_ - timestamp_now)/1e9;
+    double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
@@ -99,7 +99,6 @@ void System::TrackDS(MeasurementPackage meas){
 void System::TrackSonar(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
-        return ;
     }
     // std::cout<<"dt:";
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -120,6 +119,7 @@ void System::TrackSonar(MeasurementPackage meas){
             mpASEKF->Initialize(mpScanFormer->GetFullMotion());
         }else{
             // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPos()<< std::endl;
+            // std::cout<<"predict "<<std::endl;
             mpASEKF->Prediction(mpScanFormer->GetFullMotion());
         }
         // mpASEKF.Update(mpScanFormer->GetFullMotion());

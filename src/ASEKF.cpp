@@ -88,6 +88,11 @@ void ASEKF::Prediction(motion q_n){
 // P_knext = F_k * P_k * F_k.transpose() + G_k * q_n.P * G_k.transpose();
 }
 
+void ASEKF::print(){
+    std::cout<<"X_:"<<X_<<std::endl;
+    std::cout<<"P:"<<P_<<std::endl;
+}
+
 void ASEKF::Update(Eigen::VectorXd z){
     //scan matching结果作为实际观测进行更新
     Eigen::VectorXd y = z - H_ * X_;

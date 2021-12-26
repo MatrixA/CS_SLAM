@@ -139,9 +139,10 @@ examples/cave.cpp)
 target_link_libraries(cave ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
-add_executable(test
-test/test_what.cpp)
-target_link_libraries(test ${PROJECT_NAME})
+add_executable(TEST_ASEKF
+test/TEST_ASEKF.cpp)
+target_link_libraries(TEST_ASEKF ${PROJECT_NAME})
+# asekf_no_problem
 
 
 

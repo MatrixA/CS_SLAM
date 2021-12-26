@@ -6,11 +6,12 @@
 namespace CS_SLAM{
 EKF::EKF(){
     x_=Eigen::VectorXd::Zero(8);
-    F_=Eigen::MatrixXd::Zero(8,8);
-    P_=Eigen::MatrixXd::Zero(8,8);
+    F_=Eigen::MatrixXd::Identity(8,8);
+    P_=Eigen::MatrixXd::Identity(8,8);
 }
 EKF::EKF(const Eigen::VectorXd x):x_(x){
     is_initialized_ = false;
+    P_=0.01*Eigen::MatrixXd::Identity(8,8);
 }
 EKF::~EKF(){}
 void EKF::initialize(const Eigen::VectorXd x_in){
@@ -22,10 +23,10 @@ bool EKF::isInitialized(){
     return is_initialized_;
 }
 void EKF::reset(){
-    P_.setZero();
-    Q_.setZero();
+    P_ = Eigen::MatrixXd::Identity(8,8);
+    Q_ = 0.01*Eigen::MatrixXd::Identity(8,8);
     H_.setZero();
-    R_.setZero();
+    R_ = 0.01*Eigen::MatrixXd::Identity(8,8);
     F_.setZero();
     x_.setZero();
     return ;

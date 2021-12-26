@@ -2,12 +2,21 @@
 #include <iostream>
 // #include <opencv2/core/core.hpp>
 #include <Eigen/Core>
+#include <Eigen/Dense>
 // #include <ceres/ceres.h>
 #include <chrono>
 
+#include "ASEKF.h"
+#include "RandomVector.h"
+#include "KeyFrame.h"
+
 using namespace std;
 
-
+int main(){
+    ASEKF asekf(motion(Eigen::Vector3d(1,1,2),Eigen::Matrix3d:Zero(3)));
+    
+    
+}
 
 // int main(){
 
