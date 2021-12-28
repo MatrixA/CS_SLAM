@@ -278,8 +278,22 @@
             ]
         },
         {
+            "label": "run",
+            "type": "shell",
+            "group":"build",
+            "command": "./examples/cave/cave",
+            "args": ["./data/","./data/SensorsConfiguration.yaml"],
+            "options": {
+                "cwd": "${workspaceFolder}",
+            },
+            "dependsOn": [
+                "build" 
+            ]
+        },
+        {
             "label": "pythonplot",
             "type": "shell",
+            "group":"build",
             "command": "python",
             "args": [
                 "plot.py",
@@ -288,9 +302,11 @@
             ],
             "options": {
                 "cwd": "${workspaceFolder}",
-            }
-        }
-
+            },
+            "dependsOn": [
+                "run" 
+            ]
+        },
     ],
     "inputs": [
         {

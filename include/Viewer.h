@@ -4,7 +4,7 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include "KeyFrame.h"
-#include "Map.h"
+#include "LocalMap.h"
 #include "Drawer.h"
 
 namespace CS_SLAM{
@@ -13,7 +13,7 @@ class Viewer{
 
 public:
     Viewer();
-    Viewer(Map* pMap);
+    Viewer(LocalMap* pMap);
     void Close();
     void UpdateMap();
     void AddCurrentFrame(KeyFrame* current_frame);
@@ -29,7 +29,7 @@ private:
 
 
     Drawer* mpDrawer = nullptr;
-    Map* mpMap = nullptr;
+    LocalMap* mpMap = nullptr;
 
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
     

@@ -10,6 +10,7 @@ KeyFrame类
 
 #include "Eigen/Core"
 #include "RandomVector.h"
+#include "MapPoint.h"
 
 namespace CS_SLAM{
     
@@ -21,12 +22,16 @@ public:
 
     Eigen::VectorXd GetPos();
     Eigen::MatrixXd GetPosP();
-    void setPos(Eigen::VectorXd);
-    void setPosP(Eigen::MatrixXd);
+    void SetPos(Eigen::VectorXd);
+    void SetPosP(Eigen::MatrixXd);
+    void SetSonarFullScan(std::vector<point> fs);
+    std::vector<point> GetSonarFullScan();
     void Transform(motion transform);
+    void Print();
 
 private:
-    RandomVector mKfPose;
+    pose mKfPose;
+    std::vector<point> mvSonarFullScan;
     // Eigen::MatrixXd* Simg;
     // cv::mat* Cimg;
 };

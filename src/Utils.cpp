@@ -3,14 +3,13 @@
 namespace CS_SLAM
 {
 
-double Utils::MahDistance(const Eigen::Vector3d &ri, const Eigen::Matrix3d &Sigma, const Eigen::Vector3d &ni){
+double Utils::MahDistance(const Eigen::VectorXd &ri, const Eigen::MatrixXd &Sigma, const Eigen::VectorXd &ni){
 /*
 输入：向量ri,协方差矩阵，向量ni
 输出：ri和ni的马氏距离
 */
     return sqrt((ri - ni).transpose() * Sigma.inverse() * (ri - ni));
 }
-
 
 Eigen::Vector2d Utils::Oplus(const Eigen::Vector3d &q,const Eigen::Vector2d &n){
     /*
@@ -24,6 +23,8 @@ Eigen::Vector2d Utils::Oplus(const Eigen::Vector3d &q,const Eigen::Vector2d &n){
 Eigen::Vector3d Odot(const Eigen::Vector3d &a, const Eigen::Vector3d &b){
     return Eigen::Vector3d(a(0)+b(0),a(1)+b(1),b(2));
 }
+
+
 
 
 }

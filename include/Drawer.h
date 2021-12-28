@@ -1,7 +1,7 @@
 #ifndef MAPDRAWER_H
 #define MAPDRAWER_H
 
-#include "Map.h"
+#include "LocalMap.h"
 #include <pangolin/pangolin.h>
 
 namespace CS_SLAM
@@ -9,10 +9,10 @@ namespace CS_SLAM
 
 class Drawer{
 public:
-    // Drawer(Map* pMap, const std::string &strSettingPath);
-    Drawer(Map* pMap);
+    // Drawer(LocalMap* pMap, const std::string &strSettingPath);
+    Drawer(LocalMap* pMap);
 
-    Map* mpMap;
+    LocalMap* mpMap;
 
     void DrawMapPoints();
     void DrawSonar();

@@ -5,6 +5,35 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch TEST Debug", //名称
+            "type": "cppdbg", //调试类型，除使用msvc进行调试外，均为该类型
+            "request": "launch",
+            "program": "${workspaceFolder}/test/TEST_SCANMATCHING", //指定C/C++程序位置
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}", //指定工作目录
+            "preLaunchTask": "build", //在调试前会先调用build_debug这个task编译构建程序
+            "environment": [],
+            "externalConsole": false,
+            "osx": { //macOS的特定配置
+                // "miDebuggerPath": "/Applications/Xcode.app/Contents/ Developer/usr/bin/lldb-mi", //修改使用的lldb-mi，一般不需要修改
+                "MIMode": "lldb" //指定使用lldb进行调试
+            },
+            "linux": { //linux的特定配置
+                "MIMode": "gdb", //指定使用gdb调试
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            },
+            "windows": { //windows的特定配置
+                "type": "cppvsdbg", //指定使用msvc进行调试
+                "program": "${workspaceFolder}/build/${workspaceFolderBasename}.exe", //指定C/C++程序位置
+            }
+        },
+        {
             "name": "lldb",
             "type": "cppdbg",
             "request": "launch",

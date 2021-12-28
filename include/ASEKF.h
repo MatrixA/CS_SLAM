@@ -37,7 +37,7 @@ public:
     void SetQ(Eigen::MatrixXd Q_in);
     void SetH(Eigen::MatrixXd H_in);
     void SetR(Eigen::MatrixXd R_in);
-    void print();
+    void Print();
 
     void Prediction(motion q_n);
     void Update(Eigen::VectorXd z);

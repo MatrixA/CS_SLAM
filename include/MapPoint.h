@@ -16,7 +16,7 @@ public:
 private:
     Eigen::Vector2d worldPose;
     Eigen::Matrix2d worldPoseP;
-    KeyFrame * kfRef;
+    // KeyFrame * kfRef;
 };
 
 

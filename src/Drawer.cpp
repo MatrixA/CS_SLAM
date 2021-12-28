@@ -2,7 +2,7 @@
 
 namespace CS_SLAM{
     
-Drawer::Drawer(Map* pMap):mpMap(pMap){
+Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
     // cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
     // bool is_correct = ParseViewerParamFile(fSettings);
@@ -309,10 +309,10 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
     //     glEnd();
     // }
 
-    // std::vector<Map*> vpMaps = mpAtlas->GetAllMaps();
+    // std::vector<LocalMap*> vpMaps = mpAtlas->GetAllMaps();
 
     // if(bDrawKF){
-    //     for(Map* pMap : vpMaps)
+    //     for(LocalMap* pMap : vpMaps)
     //     {
     //         if(pMap == mpAtlas->GetCurrentMap())
     //             continue;

@@ -2,7 +2,7 @@
 
 namespace CS_SLAM{
 
-Viewer::Viewer(Map* pMap):mpMap(pMap){
+Viewer::Viewer(LocalMap* pMap):mpMap(pMap){
     //viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
     mpDrawer = new Drawer(pMap);
 }

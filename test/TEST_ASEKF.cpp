@@ -15,13 +15,13 @@ using namespace std;
 int main(){
     CS_SLAM::ASEKF asekf;
     asekf.Initialize(CS_SLAM::motion(Eigen::Vector3d(1,1,2),Eigen::MatrixXd::Zero(3,3)));
-    asekf.print();
+    asekf.Print();
 
     asekf.Prediction(CS_SLAM::motion(Eigen::Vector3d(0.1,0.2,1),Eigen::MatrixXd::Zero(3,3)));
-    asekf.print();
+    asekf.Print();
 
     asekf.Prediction(CS_SLAM::motion(Eigen::Vector3d(-0.1,-0.2,1),Eigen::MatrixXd::Zero(3,3)));
-    asekf.print();
+    asekf.Print();
     
     return 0;
 }

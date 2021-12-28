@@ -51,21 +51,21 @@ void ScanFormer::BeamSegment(int thresh = 80){
 //把Ii平移到Ic
 motion ScanFormer::D(int i){
     motion res;
-    if(i >= C){
-        for(int j = C; j <= i; j++){
+    if(i == C) return res;
+    else if(i > C){
+        for(int j = C+1; j <= i; j++){
             Eigen::VectorXd x_ = x_s[j].GetPos();
             Eigen::Vector3d d_(x_(0), x_(1), 0);
             res.hat = res.hat + d_;
         }
     }else{
-        for(int j = i; j <= C; j++){
+        for(int j = i; j < C; j++){
             Eigen::VectorXd x_ = x_s[j].GetPos();
             // std::cout<<"here2:"<<x_s[j].GetPos()<<std::endl;
             Eigen::Vector3d d_(x_(0), x_(1), 0);
             res.hat = res.hat - d_;
         }
     }
-    
     return res;
 }
 
@@ -189,10 +189,14 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
     scan.push_back(data_sonar);
     sonarCnt++;
     // std::cout<<"integrating"<<std::endl;
+    //只在每轮reset一次
     if(sonarCnt == 1){
         mpEKF->ResetDeadReckoningXYZ();
         // std::cout<<"reseted"<<std::endl;
     }
+    /*\每个beam都reset
+    mpEKF->ResetDeadReckoningXYZ();
+    */
     // std::cout<<"from x:\n"<<mpEKF->GetX()<<std::endl;
     mpEKF->prediction(dt);
     // std::cout<<"to x:\n"<<mpEKF->GetX()<<std::endl;
@@ -221,9 +225,9 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
 
 
 motion ScanFormer::GetFullMotion(){
-    // motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
+    motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
     // motion ans = motion(x_s[0].GetPos(),x_s[0].GetPosP()).tail2tail(motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP()));
-    motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
+    // motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
     // for(int i=0;i<x_s.size();i++){
     //     std::cout<<"x_s "<<i<<":"<<x_s[i].GetPos()<<std::endl;
     // }

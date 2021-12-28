@@ -79,7 +79,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 add_library(${PROJECT_NAME} SHARED
 src/EKF.cpp
 # src/Atlas.cpp
-src/Map.cpp
+src/LocalMap.cpp
 src/ASEKF.cpp
 src/RandomVector.cpp
 src/MapPoint.cpp
@@ -87,18 +87,20 @@ src/KeyFrame.cpp
 src/ScanFormer.cpp
 src/Converter.cpp
 # src/MapDrawer.cpp
+src/LoopClosing.cpp
 src/MeasurementPackage.cpp
 src/System.cpp
 src/Utils.cpp
 src/Viewer.cpp
 src/Drawer.cpp
+src/Frames.cpp
 # src/FrameDrawer.cpp
 include/ASEKF.h
-include/Map.h
+include/LocalMap.h
 include/EKF.h
 include/RandomVector.h
 include/KeyFrame.h
-include/Map.h
+include/LocalMap.h
 include/Drawer.h
 # include/MapDrawer.ha
 # include/MapPoint.h
@@ -108,8 +110,10 @@ include/FrameDrawer.h
 # include/PoseGraph.h
 include/System.h
 include/Utils.h
+include/Frames.h
 # include/Atlas.h
 include/Viewer.h
+include/LoopClosing.h
 # include/SetParameters.h
 include/Converter.h
 )
@@ -144,6 +148,10 @@ test/TEST_ASEKF.cpp)
 target_link_libraries(TEST_ASEKF ${PROJECT_NAME})
 # asekf_no_problem
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+add_executable(TEST_SCANMATCHING
+test/TEST_SCANMATCHING.cpp)
+target_link_libraries(TEST_SCANMATCHING ${PROJECT_NAME})
 
 
 

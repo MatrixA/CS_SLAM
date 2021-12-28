@@ -7,13 +7,13 @@ namespace CS_SLAM
 
 class SonarDrawer{
 public:
-    SonarDrawer(Map* pMap, const string &strSettingPath);
+    SonarDrawer(LocalMap* pMap, const string &strSettingPath);
     viod DrawSonar();
 private:
     float mKeyFrameSize;
     float mKeyFrameLineWidth;
     float mPointSize;
-    Map* mpMap;
+    LocalMap* mpMap;
 };
 
 }

@@ -8,7 +8,7 @@
 
 #include "yaml-cpp/yaml.h"
 #include "ASEKF.h"
-#include "Map.h"
+#include "LocalMap.h"
 #include "Atlas.h"
 #include "Viewer.h"
 #include "ScanFormer.h"
@@ -58,7 +58,7 @@ private:
     LocalMapping* mpLocalMapper;
     Viewer* mpViewer;
     Atlas* mpAtlas;
-    Map* mpMap;
+    LocalMap* mpMap;
     
     //std::thread viewer_thread_;
 };

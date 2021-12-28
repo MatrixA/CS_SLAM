@@ -11,7 +11,10 @@ RandomVector::RandomVector(){
 
 RandomVector::RandomVector(Eigen::VectorXd hat_, Eigen::MatrixXd P_):hat(hat_),P(P_){}
     
-
+void RandomVector::Print(){
+    std::cout<<"hat:"<<hat<<std::endl<<"P: "<<P<<std::endl;
+    return ;
+}
 
 /** 
  * @brief compound two random vectors that are head to tail.
@@ -57,6 +60,30 @@ RandomVector RandomVector::compoundP(RandomVector b){
     this->P = J1*this->P*J1.transpose()+J2*b.P*J2.transpose();
     return *this;
 }
+
+/**
+ * @brief compound 2D point random vector with this randomvector
+ * @param q - motion q
+ * @param b - 2D point to be compounded with
+ * @return compounded 2d RandomVector 
+ */
+RandomVector RandomVector::CompoundP(RandomVector q, RandomVector b){
+    Eigen::VectorXd oi = q.hat;
+    Eigen::VectorXd ip = b.hat;
+    Eigen::VectorXd hat = Eigen::Vector2d(oi(0)+ip(0)*cos(oi(2))-ip(1)*sin(oi(2)),
+                        oi(1)+ip(0)*sin(oi(2))+ip(1)*cos(oi(2)));
+    Eigen::MatrixXd J1(2,3),J2(2,2);
+    J1 << 1,0,-ip(1)*sin(oi(2))-ip(1)*cos(oi(2)),
+            0,1,ip(0)*cos(oi(2))-ip(1)*sin(oi(2));
+    J2 << cos(oi(2)), -sin(oi(2)),
+            sin(oi(2)), cos(oi(2));
+    // std::cout<<"compoundP \n"<<this->P;
+    Eigen::Matrix<double, 2, 2> P = J1*q.P*J1.transpose()+J2*b.P*J2.transpose();
+    std::cout<<"what's wrong"<<std::endl;
+    RandomVector ret(hat,P);
+    return ret;
+}
+
 
 /**
  * @brief compute inverse of the random vector transform

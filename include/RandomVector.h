@@ -16,12 +16,13 @@ class RandomVector{
 public:
     RandomVector();
     RandomVector(Eigen::VectorXd hat_, Eigen::MatrixXd P_);
+
+    void Print();
     
     RandomVector compound(RandomVector b);
 
     RandomVector compoundP(RandomVector b);
-
-
+    static RandomVector CompoundP(RandomVector q, RandomVector b);
     RandomVector rinverse();
 
     RandomVector tail2tail(RandomVector b);
