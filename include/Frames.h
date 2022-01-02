@@ -19,6 +19,7 @@ public:
     void clear();
     void clearMap(LocalMap* pMap);
 
+    int Size();
     KeyFrame GetCurrentKeyFrame();
     KeyFrame GetKeyFrameByID(int id);
 

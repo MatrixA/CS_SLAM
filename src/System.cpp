@@ -11,8 +11,10 @@ System::System(YAML::Node SensorConfig){
     mpMap = new LocalMap();
     mpViewer = new Viewer(mpMap);
     mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
-    mpASEKF = new ASEKF();
     mpScanFormer = new ScanFormer();
+    mpFramesDatabase = new Frames();
+    mpASEKF = new ASEKF(mpFramesDatabase);
+    mpLoopClosing = new LoopClosing(mpFramesDatabase);
 }
 
 System::~System(){
@@ -35,6 +37,21 @@ void System::SaveTrajectory(const std::string &filename){
 
     for(int i = 0; i<poses.size()/3;i++){
         outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
+    }
+    std::cout<<"write OK"<<std::endl;
+    outfile.close();
+}
+
+void System::SaveTrajectoryFromDatabase(const std::string &filename){
+    std::ofstream outfile;
+    outfile.open(filename);
+    if(!outfile.is_open()){
+        std::cout<<"open file fail"<<std::endl;
+        return;
+    }
+    for(int i=0;i < mpFramesDatabase->Size();i++){
+        Eigen::Vector3d tmp = (mpFramesDatabase->GetKeyFrameByID(i)).GetPos();
+        outfile<< i+1 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<std::endl;
     }
     std::cout<<"write OK"<<std::endl;
     outfile.close();
@@ -121,6 +138,13 @@ void System::TrackSonar(MeasurementPackage meas){
             // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPos()<< std::endl;
             // std::cout<<"predict "<<std::endl;
             mpASEKF->Prediction(mpScanFormer->GetFullMotion());
+            KeyFrame curP = mpFramesDatabase->GetCurrentKeyFrame();
+            std::vector<int>alternative = mpFramesDatabase->GetCurrentOverlaps(0.1);
+            for(int i=0; i<alternative.size(); i++){
+                KeyFrame agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
+                motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
+                mpASEKF->Update(alternative[i],1,estimate);
+            }
         }
         // mpASEKF.Update(mpScanFormer->GetFullMotion());
         mpScanFormer->Reset();
@@ -128,8 +152,7 @@ void System::TrackSonar(MeasurementPackage meas){
 //         if(scnt == FSCAN_SIZE){
 //             full_scan_list.push_back(mpScanFormer->undistort());
 //             mpScanFormer->reset();
-//             motion = modpIC(full_scan);
-//             ASEKF.update(motion);
+
 //             scnt = 0;
 //         }
     timestamp_now = meas.timestamp_;

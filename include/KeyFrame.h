@@ -18,6 +18,7 @@ class KeyFrame{
 public:
     KeyFrame();
     ~KeyFrame();
+    KeyFrame(pose kf);
     KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP);
 
     Eigen::VectorXd GetPos();

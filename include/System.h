@@ -16,6 +16,7 @@
 #include "RandomVector.h"
 #include "LocalMapping.h"
 #include "KeyFrame.h"
+#include "LoopClosing.h"
 
 namespace CS_SLAM
 {
@@ -39,6 +40,7 @@ public:
     void PlotTrajectory();
     void Reset();
     void SaveTrajectory(const std::string &filename);
+    void SaveTrajectoryFromDatabase(const std::string &filename);
     int GetTrackingState();
     bool isLost();
     bool isFinished();
@@ -59,6 +61,8 @@ private:
     Viewer* mpViewer;
     Atlas* mpAtlas;
     LocalMap* mpMap;
+    LoopClosing* mpLoopClosing;
+    Frames* mpFramesDatabase;
     
     //std::thread viewer_thread_;
 };

@@ -12,9 +12,9 @@
 #include <random>
 #include <ceres/ceres.h>
 
-
 #include "RandomVector.h"
 #include "KeyFrame.h"
+#include "Frames.h"
 #include "Utils.h"
 
 namespace CS_SLAM{
@@ -25,12 +25,14 @@ class ASEKF{
 public:
     ASEKF();
     ~ASEKF();
+    ASEKF(Frames *pFramesDatabase);
 
     void Initialize(motion kf_init);
     bool IsInitialized();
     void reset();
 
-    Eigen::MatrixXd GetX();
+    Eigen::VectorXd GetX();
+    pose GetCurrentPose();
     void AddPose(KeyFrame xn);
 
     void SetP(Eigen::MatrixXd P_in);
@@ -40,7 +42,9 @@ public:
     void Print();
 
     void Prediction(motion q_n);
-    void Update(Eigen::VectorXd z);
+    void AddToDatabase(pose q);
+    void Update(int xi, int xn, motion ob);
+    void UpdateDatabase();//TODO:
 
 private:
     bool is_initialized_;
@@ -50,6 +54,8 @@ private:
     Eigen::MatrixXd Q_;
     Eigen::MatrixXd H_;
     Eigen::MatrixXd R_;
+    Frames* mpFramesDatabase;
+
 };
 
 //得到一个scan_pose之后，该scan_pose和之前的scan_pose进行scanMatching，每次相邻结果都作为约束更新随机图。

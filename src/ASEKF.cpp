@@ -10,6 +10,9 @@ ASEKF::ASEKF(){
     // std::cout<<"init OK"<<std::endl;
     //初始化在整个实验的起点，x,y,phi
 }
+
+ASEKF::ASEKF(Frames *pFramesDatabase):mpFramesDatabase(pFramesDatabase){}
+
 ASEKF::~ASEKF(){}
 
 void ASEKF::Initialize(motion kf_init){
@@ -45,6 +48,10 @@ void ASEKF::SetR(Eigen::MatrixXd R_in){
     R_ = R_in;
 }
 
+pose ASEKF::GetCurrentPose(){
+    return pose(X_.head(3),P_.block(0,0,3,3));
+}
+
 void ASEKF::Prediction(motion q_n){
     /*
     位姿图更新。
@@ -61,13 +68,15 @@ void ASEKF::Prediction(motion q_n){
     tmp_mu.block(3,0,N,1) = X_;
     X_.resize(N+3, 1);
     X_ = tmp_mu;
+    //TO Modify P:
+    AddToDatabase(pose(tmp_mu.block(0,0,3,1),0.1*Eigen::MatrixXd::Identity(3,3)));
     //X_.topRows(3)=Utils::Odot(X_.block(0,0,3,1), q_n.hat);
 
     /*方差*/
     // Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
     // Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
     // P_ = F*P_*F.transpose() + G * q_n.P * G.transpose();
-
+    
 // void Prediction(pose x_k, motion q_n){
 //位姿图的更新
 //估计的时候，只是把最后一个位置叠加了航位推算，然后扩展了估计状态。
@@ -93,8 +102,9 @@ void ASEKF::Print(){
     std::cout<<"P:"<<P_<<std::endl;
 }
 
-void ASEKF::Update(Eigen::VectorXd z){
+void ASEKF::Update(int xi, int xn, motion ob){
     //scan matching结果作为实际观测进行更新
+    Eigen::VectorXd z = ob.hat;
     Eigen::VectorXd y = z - H_ * X_;
     Eigen::MatrixXd S = H_ * P_ * H_.transpose() + R_;
     Eigen::MatrixXd K = P_ * H_.transpose() * S.inverse();
@@ -140,7 +150,14 @@ void ASEKF::AddPose(KeyFrame xn){
     return ;
 }
 
-Eigen::MatrixXd ASEKF::GetX(){
+
+void ASEKF::AddToDatabase(motion q){
+    mpFramesDatabase->add(KeyFrame(q));
+    return ;
+}
+
+
+Eigen::VectorXd ASEKF::GetX(){
     return X_;
 }
 

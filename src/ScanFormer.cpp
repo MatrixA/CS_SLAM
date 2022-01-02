@@ -225,14 +225,20 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
 
 
 motion ScanFormer::GetFullMotion(){
-    motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
+    // motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
+    motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
     // motion ans = motion(x_s[0].GetPos(),x_s[0].GetPosP()).tail2tail(motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP()));
     // motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
     // for(int i=0;i<x_s.size();i++){
     //     std::cout<<"x_s "<<i<<":"<<x_s[i].GetPos()<<std::endl;
     // }
     
-    // std::cout<<x_s[100].GetPos()<<std::endl;
+    // for(int i = 0; i < 5;i++){
+    //     std::cout<<"see "<<i<<" "<<x_s[i].GetPos()<<std::endl;
+    // }
+    // <<D(0).hat<<" =? "<<x_s[0].GetPos()<<" vs "<<x_s[1].GetPos();
+    // std::cout<<"while "<<D(199).hat<<std::endl;
+
     // std::cout<<ans.hat<<std::endl;
     return ans;
 }
@@ -297,4 +303,3 @@ Eigen::VectorXd ScanFormer::getx_ss(){
     //     }
     //     return ;
     // }
-

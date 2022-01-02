@@ -31,6 +31,10 @@ void Frames::clearMap(LocalMap* pMap){
     return ;
 }
 
+int Frames::Size(){
+    return KeyFrameDatabase.size();
+}
+
 KeyFrame Frames::GetCurrentKeyFrame(){
     std::unique_lock<std::mutex> lock(mMutex);
     return KeyFrameDatabase.back();

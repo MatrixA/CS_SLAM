@@ -9,7 +9,12 @@ KeyFrame::KeyFrame(){
     mvSonarFullScan.resize(0);
     return ;
 }
+
 KeyFrame::~KeyFrame(){};
+KeyFrame::KeyFrame(pose kf){
+    mKfPose.hat = kf.hat;
+    mKfPose.P = kf.P;
+}
 
 KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,kfPosP){}
 

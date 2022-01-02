@@ -167,7 +167,8 @@ int main(int argc, char **argv){
 //         // }
 //         SLAM.PlotTrajectory();
     }
-    SLAM.SaveTrajectory("../poses.txt");
+    SLAM.SaveTrajectoryFromDatabase("../poses.txt");
+    // SLAM.SaveTrajectory("../poses.txt");
     std::cout<<"nothing wrong"<<std::endl;
     return 0;
 }

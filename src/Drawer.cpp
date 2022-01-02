@@ -413,8 +413,79 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
 // }
 
 void Drawer::DrawSonar(){
-    
-    return ;
+    // const std::vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
+    // const std::vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
+
+    // if(vpMPs.empty())
+    //     return;
+
+    // pangolin::CreateWindowAndBind("Point Cloud Viewer", 1024, 768);
+    // glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // glPointSize(mPointSize);
+
+    // DrawPointCloud(const std::vector<RandomVector> &rvs);
+    // glBegin(GL_POINTS);
+    // glColor3f(0.0,0.0,0.0);
+
+    // for(size_t i=0, iend=vpMPs.size(); i<iend;i++){
+    //     if(vpMPs[i]->isBad() || spRefMPs.count(vpMPs[i]))
+    //         continue;
+    //     cv::Mat pos = vpMPs[i]->GetWorldPos();
+    //     glVertex3f(pos.at<float>(0),pos.at<float>(1),pos.at<float>(2));
+    // }
+    // glEnd();
+
+    // glPointSize(mPointSize);
+    // glBegin(GL_POINTS);
+    // glColor3f(1.0,0.0,0.0);
+
+    // for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++){
+    //     if((*sit)->isBad())
+    //         continue;
+    //     cv::Mat pos = (*sit)->GetWorldPos();
+    //     glVertex3f(pos.at<float>(0),pos.at<float>(1),pos.at<float>(2));
+
+    // }
+
+    // glEnd();
 }
+
+// void DrawPointCloud(const std::vector<RandomVector> &rvs) {
+//     if (rvs.empty()) {
+//         std::cerr << "Point cloud is empty!" << std::endl;
+//         return;
+//     }
+
+//     pangolin::OpenGlRenderState s_cam(
+//             pangolin::ProjectionMatrix(1024, 768, 25, 25, 512, 389, 0.1, 1000),
+//             pangolin::ModelViewLookAt(0, 0, 5, 0, 0, 0, pangolin::AxisY)
+//     );
+
+
+//     pangolin::View &d_cam = pangolin::CreateDisplay()
+//         .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
+//         .SetHandler(new pangolin::Handler3D(s_cam));
+
+//     while (pangolin::ShouldQuit() == false) {
+//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//         d_cam.Activate(s_cam);
+//         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+//         glPointSize(2);
+//         glBegin(GL_POINTS);
+//         for (auto &p: rvs) {
+//             glColor3f(0, 0, 0);
+//             glVertex3d(p.hat[0], p.hat[1], 0);
+//         }
+//         glEnd();
+//         pangolin::FinishFrame();
+//         usleep(5000);   // sleep 5 ms
+//     }
+//     return ;
+// }
 
 }
