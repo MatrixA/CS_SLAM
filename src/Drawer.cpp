@@ -17,6 +17,7 @@ Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
     // }
 }
 
+
 // bool Drawer::ParseViewerParamFile(cv::FileStorage &fSettings){
 //     bool b_miss_params = false;
 //     cv::FileNode node = fSettings["Viewer.KeyFrameSize"];
@@ -75,6 +76,56 @@ Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
 //     return !b_miss_params;
 // }
 
+
+//Twc存储的是相机的旋转和平移矩阵
+void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
+{
+    const float &w = mCameraSize;
+    const float h = w*0.75;
+    const float z = w*0.6;
+    /**
+     * glPushMatrix、glPopMatrix实际上是做入栈和出栈的操作。因为旋转和平移都是在glPushMatrix、glPopMatrix之间进行的。
+     * 在绘制之前先把当前的位置保存下来，后边调用glPopMatrix可再次回到当前的位置。下次再绘制的时候就不会受当前的旋转或者平移的影响。
+     * glPushMatrix()和glPopMatrix()的配对使用能够消除上一次的变换对本次变换的影响。使本次变换是以世界坐标系的原点为參考点进行。
+     * */
+    glPushMatrix();
+
+#ifdef HAVE_GLES
+        glMultMatrixf(Twc.m);
+#else
+        glMultMatrixd(Twc.m);//把m指定的16个值作为一个矩阵，与当前矩阵相乘，并把结果存储在当前矩阵中
+#endif
+
+    glLineWidth(mCameraLineWidth);
+    //相机为绿色
+    glColor3f(0.0f,1.0f,0.0f);
+
+    glBegin(GL_LINES);
+    glVertex3f(0,0,0);
+    glVertex3f(w,h,z);
+    glVertex3f(0,0,0);
+    glVertex3f(w,-h,z);
+    glVertex3f(0,0,0);
+    glVertex3f(-w,-h,z);
+    glVertex3f(0,0,0);
+    glVertex3f(-w,h,z);
+
+    glVertex3f(w,h,z);
+    glVertex3f(w,-h,z);
+
+    glVertex3f(-w,h,z);
+    glVertex3f(-w,-h,z);
+
+    glVertex3f(-w,h,z);
+    glVertex3f(w,h,z);
+
+    glVertex3f(-w,-h,z);
+    glVertex3f(w,-h,z);
+    glEnd();
+
+    glPopMatrix();
+}
+
 void Drawer::DrawMapPoints(){
     // const std::vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
     // const std::vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
@@ -116,7 +167,13 @@ void Drawer::DrawMapPoints(){
     // glEnd();
 }
 
-void DrawPointCloud(const std::vector<RandomVector> &rvs) {
+/**
+ * @brief Draw RandomVector type points:(xs,ys,0)
+ * 
+ * @param rvs vectors of RandomVector rype points
+ */
+void Drawer::DrawSonar() {
+    std::vector<point> rvs = (mpFrames->GetCurrentKeyFrame()).GetSonarFullScan();
     if (rvs.empty()) {
         std::cerr << "Point cloud is empty!" << std::endl;
         return;
@@ -151,80 +208,99 @@ void DrawPointCloud(const std::vector<RandomVector> &rvs) {
     return;
 }
 
+/**
+ * @brief draw Keyframes and mappoints
+ * 
+ * @param bDrawKF whether draw Keyframes
+ * @param bDrawGraph whether draw mappoints
+ * @param bDrawInertialGraph whether draw inertial graph
+ */
 void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph){
-    const float &w = mKeyFrameSize;
-    const float h = w*0.75;
-    const float z = w*0.6;
+    // const float &w = mKeyFrameSize;
+    // const float h = w*0.75;
+    // const float z = w*0.6;
 
-    // const std::vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
+    // const std::vector<KeyFrame> vpKFs = mpFrames->GetAllKeyFrames();
+    // for(int i=0;i<mpFrames->Size();i++){
+    //     KeyFrame tmp = mpFrames->GetKeyFrameByID(i);
 
+    // }
     // if(bDrawKF){
-    //     for(size_t i=0; i<vpKFs.size(); i++)
+    //     for(int i=0; i<mpFrames->size(); i++)
     //     {
-    //         KeyFrame* pKF = vpKFs[i];
-    //         cv::Mat Twc = pKF->GetPoseInverse().t();
+    //         KeyFrame KF = mpFrames->GetKeyFrameByID(i);
+    //         Eigen::Vector3d kfPos = KF.GetPos();
+            // cv::Mat Twc = KF.GetPoseInverse().t();
     //         unsigned int index_color = pKF->mnOriginMapId;
 
-    //         glPushMatrix();
+            // glPushMatrix();
 
     //         glMultMatrixf(Twc.ptr<GLfloat>(0));
 
-    //         if(!pKF->GetParent()) // It is the first KF in the map
-    //         {
-    //             glLineWidth(mKeyFrameLineWidth*5);
-    //             glColor3f(1.0f,0.0f,0.0f);
-    //             glBegin(GL_LINES);
+            // if(i == 0) // It is the first KF in the map
+            // {
+            //     glLineWidth(mKeyFrameLineWidth*5);
+            //     glColor3f(1.0f,0.0f,0.0f);
+            //     glBegin(GL_LINES);
 
     //             //cout << "Initial KF: " << mpAtlas->GetCurrentMap()->GetOriginKF()->mnId << endl;
     //             //cout << "Parent KF: " << vpKFs[i]->mnId << endl;
-    //         }
-    //         else
-    //         {
-    //             glLineWidth(mKeyFrameLineWidth);
-    //             //glColor3f(0.0f,0.0f,1.0f);
+            // }
+            // else
+            // {
+            //     glLineWidth(mKeyFrameLineWidth);
+            //     glColor3f(0.0f,0.0f,1.0f);
     //             glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
-    //             glBegin(GL_LINES);
-    //         }
+            //     glBegin(GL_LINES);
+            // }
 
-    //         glVertex3f(0,0,0);
-    //         glVertex3f(w,h,z);
-    //         glVertex3f(0,0,0);
-    //         glVertex3f(w,-h,z);
-    //         glVertex3f(0,0,0);
-    //         glVertex3f(-w,-h,z);
-    //         glVertex3f(0,0,0);
-    //         glVertex3f(-w,h,z);
+            // glVertex3f(0,0,0);
+            // glVertex3f(w,h,z);
+            // glVertex3f(0,0,0);
+            // glVertex3f(w,-h,z);
+            // glVertex3f(0,0,0);
+            // glVertex3f(-w,-h,z);
+            // glVertex3f(0,0,0);
+            // glVertex3f(-w,h,z);
 
-    //         glVertex3f(w,h,z);
-    //         glVertex3f(w,-h,z);
+            // glVertex3f(w,h,z);
+            // glVertex3f(w,-h,z);
 
-    //         glVertex3f(-w,h,z);
-    //         glVertex3f(-w,-h,z);
+            // glVertex3f(-w,h,z);
+            // glVertex3f(-w,-h,z);
 
-    //         glVertex3f(-w,h,z);
-    //         glVertex3f(w,h,z);
+            // glVertex3f(-w,h,z);
+            // glVertex3f(w,h,z);
 
-    //         glVertex3f(-w,-h,z);
-    //         glVertex3f(w,-h,z);
-    //         glEnd();
+            // glVertex3f(-w,-h,z);
+            // glVertex3f(w,-h,z);
+            // glEnd();
 
-    //         glPopMatrix();
+            // glPopMatrix();
 
-    //         //Draw lines with Loop and Merge candidates
-    //         /*glLineWidth(mGraphLineWidth);
-    //         glColor4f(1.0f,0.6f,0.0f,1.0f);
-    //         glBegin(GL_LINES);
+            //Draw lines with Loop and Merge candidates
+            // glLineWidth(mGraphLineWidth);
+            // glColor4f(1.0f,0.6f,0.0f,1.0f);
+            // glBegin(GL_LINES);
     //         cv::Mat Ow = pKF->GetCameraCenter();
+            // std::vector<int>viLoopCandKFs->GetOverlaps(KF, 0.1);
     //         const vector<KeyFrame*> vpLoopCandKFs = pKF->mvpLoopCandKFs;
-    //         if(!vpLoopCandKFs.empty())
-    //         {
+            // if(!vpLoopCandKFs.empty())
+            // {
+                //连接相机和位姿
+                // for(auto & p:viLoopCandKFs){
+                //     KeyFrame kf = mpFrames->GetKeyFrameByID(p);
+                //     // glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
+                //     // glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
+                // }
+                //连接回环的关键帧
     //             for(vector<KeyFrame*>::const_iterator vit=vpLoopCandKFs.begin(), vend=vpLoopCandKFs.end(); vit!=vend; vit++)
     //             {
     //                 cv::Mat Ow2 = (*vit)->GetCameraCenter();
     //                 glVertex3f(Ow.at<float>(0),Ow.at<float>(1),Ow.at<float>(2));
     //                 glVertex3f(Ow2.at<float>(0),Ow2.at<float>(1),Ow2.at<float>(2));
     //             }
-    //         }
+            // }
     //         const vector<KeyFrame*> vpMergeCandKFs = pKF->mvpMergeCandKFs;
     //         if(!vpMergeCandKFs.empty())
     //         {
@@ -412,7 +488,7 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
 //     glPopMatrix();
 // }
 
-void Drawer::DrawSonar(){
+// void Drawer::DrawSonar(){
     // const std::vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
     // const std::vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
 
@@ -451,7 +527,7 @@ void Drawer::DrawSonar(){
     // }
 
     // glEnd();
-}
+// }
 
 // void DrawPointCloud(const std::vector<RandomVector> &rvs) {
 //     if (rvs.empty()) {

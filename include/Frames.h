@@ -2,8 +2,10 @@
 #define FRAMES_H
 #include "KeyFrame.h"
 #include "LocalMap.h"
+#include "RandomVector.h"
 #include <mutex>
 #include <vector>
+#include <fstream>
 
 namespace CS_SLAM
 {
@@ -26,7 +28,7 @@ public:
     std::vector<int> GetOverlaps(KeyFrame kf, int threshold /*=1*/);
     std::vector<int> GetCurrentOverlaps(int threshold /*=1*/);
     
-    
+    void Init2DFromFile(std::string filename, bool haveObs);
 
 private:
     std::mutex mMutex;

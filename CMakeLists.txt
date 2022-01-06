@@ -153,6 +153,9 @@ add_executable(TEST_SCANMATCHING
 test/TEST_SCANMATCHING.cpp)
 target_link_libraries(TEST_SCANMATCHING ${PROJECT_NAME})
 
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+add_executable(TEST_DRAWER
+test/TEST_DRAWER.cpp)
+target_link_libraries(TEST_DRAWER ${PROJECT_NAME})
 
 

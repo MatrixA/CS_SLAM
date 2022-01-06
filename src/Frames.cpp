@@ -73,5 +73,24 @@ std::vector<int> Frames::GetCurrentOverlaps(int threshold){
     return ans;
 }
 
+void Frames::Init2DFromFile(std::string filename, bool haveObs){
+    std::ifstream infile(filename);
+    if(!infile.is_open()){
+        std::cout<<"Init FrameDatabase From null file"<<std::endl;
+        return ;
+    }
+    std::cout<<"here"<<std::endl;
+    if(!haveObs){
+        int id;
+        double x_, y_, theta_;
+        std::string line;
+        while(infile>>id>>x_>>y_>>theta_){
+            add(KeyFrame(Eigen::Vector3d(x_, y_, theta_),Eigen::Matrix3d::Identity()));
+            std::cout<<"add a pose in init "<<id<<" : "<<GetCurrentKeyFrame().GetPos()<<std::endl;
+        }
+    }
+    return ;
+}
+
 
 }
