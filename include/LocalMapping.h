@@ -1,8 +1,9 @@
 #ifndef LOCALMAPPING_H
 #define LOCALMAPPING_H
 
-#include <opencv2/opencv.hpp>
+
 #include "ScanFormer.h"
+#include <opencv2/opencv.hpp>
 
 namespace CS_SLAM
 {

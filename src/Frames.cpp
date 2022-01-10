@@ -35,14 +35,14 @@ int Frames::Size(){
     return KeyFrameDatabase.size();
 }
 
-KeyFrame Frames::GetCurrentKeyFrame(){
+KeyFrame* Frames::GetCurrentKeyFrame(){
     std::unique_lock<std::mutex> lock(mMutex);
-    return KeyFrameDatabase.back();
+    return &(KeyFrameDatabase.back());
 }
 
-KeyFrame Frames::GetKeyFrameByID(int id){
+KeyFrame* Frames::GetKeyFrameByID(int id){
     std::unique_lock<std::mutex> lock(mMutex);
-    return KeyFrameDatabase[id];
+    return &KeyFrameDatabase[id];
 }
 
 std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
@@ -50,10 +50,10 @@ std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
 输入：当前扫描对应的位姿x_nk，距离阈值threshold
 输出：所有相邻扫描对应的位姿id数组
 */
-    Eigen::Vector3d x_nk = kf.GetPos();
+    Eigen::Vector3d x_nk = kf.GetPose().hat;
     std::vector<int> ans;
     for(int i = 0; i < KeyFrameDatabase.size(); i++){
-        double dis = (KeyFrameDatabase[i].GetPos() - x_nk).norm();
+        double dis = (KeyFrameDatabase[i].GetPose().hat - x_nk).norm();
         if(dis < threshold){
             ans.push_back(i);
         }
@@ -62,10 +62,10 @@ std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
 }
 
 std::vector<int> Frames::GetCurrentOverlaps(int threshold){
-    Eigen::Vector3d x_nk= GetCurrentKeyFrame().GetPos();
+    Eigen::Vector3d x_nk= GetCurrentKeyFrame()->GetPose().hat;
     std::vector<int> ans;
     for(int i = 0; i < KeyFrameDatabase.size(); i++){
-        double dis = (KeyFrameDatabase[i].GetPos() - x_nk).norm();
+        double dis = (KeyFrameDatabase[i].GetPose().hat - x_nk).norm();
         if(dis < threshold){
             ans.push_back(i);
         }
@@ -86,7 +86,7 @@ void Frames::Init2DFromFile(std::string filename, bool haveObs){
         std::string line;
         while(infile>>id>>x_>>y_>>theta_){
             add(KeyFrame(Eigen::Vector3d(x_, y_, theta_),Eigen::Matrix3d::Identity()));
-            std::cout<<"add a pose in init "<<id<<" : "<<GetCurrentKeyFrame().GetPos()<<std::endl;
+            std::cout<<"add a pose in init "<<id<<" : "<<GetCurrentKeyFrame()->GetPose().hat<<std::endl;
         }
     }
     return ;

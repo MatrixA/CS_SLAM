@@ -21,18 +21,20 @@ public:
     KeyFrame(pose kf);
     KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP);
 
-    Eigen::VectorXd GetPos();
-    Eigen::MatrixXd GetPosP();
-    void SetPos(Eigen::VectorXd);
-    void SetPosP(Eigen::MatrixXd);
+    pose GetPose();
+    void SetPose(pose kfPose);
+    const std::vector<point>& GetSonarFullScan();
     void SetSonarFullScan(std::vector<point> fs);
-    std::vector<point> GetSonarFullScan();
+    const std::vector<Eigen::VectorXd>& GetSonarMeasurements();
+    void SetSonarMeasurements(const std::vector<Eigen::VectorXd>& fsm);
+
     void Transform(motion transform);
     void Print();
 
 private:
     pose mKfPose;
     std::vector<point> mvSonarFullScan;
+    std::vector<Eigen::VectorXd> mvFsm;
     // Eigen::MatrixXd* Simg;
     // cv::mat* Cimg;
 };

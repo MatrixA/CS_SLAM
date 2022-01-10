@@ -22,8 +22,8 @@ public:
     void clearMap(LocalMap* pMap);
 
     int Size();
-    KeyFrame GetCurrentKeyFrame();
-    KeyFrame GetKeyFrameByID(int id);
+    KeyFrame* GetCurrentKeyFrame();
+    KeyFrame* GetKeyFrameByID(int id);
 
     std::vector<int> GetOverlaps(KeyFrame kf, int threshold /*=1*/);
     std::vector<int> GetCurrentOverlaps(int threshold /*=1*/);

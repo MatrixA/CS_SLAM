@@ -2,11 +2,15 @@
 
 namespace CS_SLAM{
     
-Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
+Drawer::Drawer(LocalMap* pMap, Frames* pFrames):mpMap(pMap),mpFrames(pFrames){
     // cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
     // bool is_correct = ParseViewerParamFile(fSettings);
-
+    mCameraSize = 1;
+    mCameraLineWidth = 1;
+    mKeyFrameSize = 2;
+    mKeyFrameLineWidth = 2;
+    mPointSize = 2;
     // if(!is_correct){
     //     std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
     //     try{
@@ -15,6 +19,58 @@ Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
     //     catch(exception &e){
     //     }
     // }
+}
+
+void Drawer::DrawFrame(KeyFrame *kf, const float* color){
+    const float sz = 1.0;
+    const int lineWidth = 2.0;
+    const float fx = 400;
+    const float fy = 400;
+    const float cx = 512;
+    const float cy = 384;
+    const float width = 1080;
+    const float height = 768;
+
+    glPushMatrix();
+    pangolin::OpenGlMatrix Twc((kf->GetPose()).toSE3().matrix());
+    glMultMatrixd(Twc.m);
+
+    glColor3f(color[0],color[1],color[2]);
+
+    glLineWidth(lineWidth);
+    glBegin(GL_LINES);
+    glVertex3f(0,0,0);
+    glVertex3f(sz * (0-cx)/fx, sz*(0-cy)/fy, sz);
+    glVertex3f(0,0,0);
+    glVertex3f(sz * (0-cx)/fx, sz*(height -1 - cy) /fy, sz);
+    glVertex3f(0,0,0);
+    glVertex3f(sz * (width - 1 -cx)/fx, sz*(height -1-cy)/fy, sz);
+    glVertex3f(0,0,0);
+    glVertex3f(sz * (width -1 -cx)/fx, sz* (0-cy)/fy, sz);
+
+    glVertex3f(sz * (width - 1 - cx)/ fx, sz*(0-cy)/fy, sz);
+    glVertex3f(sz*(width -1- cx)/fx, sz * (height -1 -cy)/fy, sz);
+
+    glVertex3f(sz*(width-1-cx)/fx, sz*(height -1 -cy)/fy, sz);
+    glVertex3f(sz*(0-cx)/fx, sz*(0-cy)/fy,sz);
+
+    glVertex3f(sz*(0-cx)/fx, sz*(0-cy)/fy,sz);
+    glVertex3f(sz*(width - 1 - cx)/fx, sz * (0- cy)/ fy, sz);
+
+    glEnd();
+
+    glBegin(GL_POINTS);
+    glColor3f(!color[0],!color[1],color[2]); //坐标与landmark为首二反色
+    glPointSize(mPointSize);
+    std::vector<point> landmarks = kf->GetSonarFullScan();
+    for(point &p:landmarks){
+        glVertex3d(p.hat[0],p.hat[1],0);
+    }
+    glEnd();
+    
+    glPopMatrix();
+
+    return ;
 }
 
 
@@ -77,59 +133,19 @@ Drawer::Drawer(LocalMap* pMap):mpMap(pMap){
 // }
 
 
-//Twc存储的是相机的旋转和平移矩阵
-void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
-{
-    const float &w = mCameraSize;
-    const float h = w*0.75;
-    const float z = w*0.6;
-    /**
-     * glPushMatrix、glPopMatrix实际上是做入栈和出栈的操作。因为旋转和平移都是在glPushMatrix、glPopMatrix之间进行的。
-     * 在绘制之前先把当前的位置保存下来，后边调用glPopMatrix可再次回到当前的位置。下次再绘制的时候就不会受当前的旋转或者平移的影响。
-     * glPushMatrix()和glPopMatrix()的配对使用能够消除上一次的变换对本次变换的影响。使本次变换是以世界坐标系的原点为參考点进行。
-     * */
-    glPushMatrix();
 
-#ifdef HAVE_GLES
-        glMultMatrixf(Twc.m);
-#else
-        glMultMatrixd(Twc.m);//把m指定的16个值作为一个矩阵，与当前矩阵相乘，并把结果存储在当前矩阵中
-#endif
-
-    glLineWidth(mCameraLineWidth);
-    //相机为绿色
-    glColor3f(0.0f,1.0f,0.0f);
-
-    glBegin(GL_LINES);
-    glVertex3f(0,0,0);
-    glVertex3f(w,h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(w,-h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(-w,-h,z);
-    glVertex3f(0,0,0);
-    glVertex3f(-w,h,z);
-
-    glVertex3f(w,h,z);
-    glVertex3f(w,-h,z);
-
-    glVertex3f(-w,h,z);
-    glVertex3f(-w,-h,z);
-
-    glVertex3f(-w,h,z);
-    glVertex3f(w,h,z);
-
-    glVertex3f(-w,-h,z);
-    glVertex3f(w,-h,z);
-    glEnd();
-
-    glPopMatrix();
-}
-
-void Drawer::DrawMapPoints(){
+void Drawer::DrawMapPoints(KeyFrame* kf, const float * color){
+    // const std::vector<MapPoint*>& vpMPs = mpMap->GetMapPoints();
     // const std::vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
     // const std::vector<MapPoint*> &vpRefMPs = mpAtlas->GetReferenceMapPoints();
-
+    // glBegin(GL_POINT);
+    // glColor3f(color[0], color[1], color[2]);
+    // for(point &p:kf->GetFullScan()){
+    //     pose nw = (kf->GetPose()).Compound(point(Eigen::Vector3d(p.hat(0),p.hat(1),0),
+    //                                             0.01*Eigen::Matrix3d::Identity()));
+    //     glVertex3d(nw.hat(0),nw.hat(1),nw.hat(2));
+    // }
+    // glEnd();
     // if(vpMPs.empty())
     //     return;
 
@@ -173,38 +189,42 @@ void Drawer::DrawMapPoints(){
  * @param rvs vectors of RandomVector rype points
  */
 void Drawer::DrawSonar() {
-    std::vector<point> rvs = (mpFrames->GetCurrentKeyFrame()).GetSonarFullScan();
+    std::vector<point> rvs = mpFrames->GetCurrentKeyFrame()->GetSonarFullScan();
     if (rvs.empty()) {
         std::cerr << "Point cloud is empty!" << std::endl;
         return;
     }
 
-    pangolin::OpenGlRenderState s_cam(
-            pangolin::ProjectionMatrix(1024, 768, 25, 25, 512, 389, 0.1, 1000),
-            pangolin::ModelViewLookAt(0, 0, 5, 0, 0, 0, pangolin::AxisY)
-    );
+    // pangolin::OpenGlRenderState s_cam(
+    //         pangolin::ProjectionMatrix(1024, 768, 25, 25, 512, 389, 0.1, 1000),
+    //         pangolin::ModelViewLookAt(0, 0, 5, 0, 0, 0, pangolin::AxisY)
+    // );
 
 
-    pangolin::View &d_cam = pangolin::CreateDisplay()
-        .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
-        .SetHandler(new pangolin::Handler3D(s_cam));
+    // pangolin::View &d_cam = pangolin::CreateDisplay()
+    //     .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
+    //     .SetHandler(new pangolin::Handler3D(s_cam));
 
-    while (pangolin::ShouldQuit() == false) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // while (pangolin::ShouldQuit() == false) {
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        d_cam.Activate(s_cam);
+        // d_cam.Activate(s_cam);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         glPointSize(2);
-        glBegin(GL_POINTS);
+        glBegin(GL_LINE_STRIP);
         for (auto &p: rvs) {
+            // std::cout<<"("<<p.hat[0]<<","<<p.hat[1]<<")"<<std::endl;
+            // std::cout<<"("<<r<<","<<theta<<")"<<std::endl;
             glColor3f(0, 0, 0);
-            glVertex3d(p.hat[0], p.hat[1], 0);
+            // glVertex2d(p.hat[0], p.hat[1]);
+            glVertex2d(p.hat[0], p.hat[1]);
+
         }
         glEnd();
-        pangolin::FinishFrame();
+        // pangolin::FinishFrame();
         usleep(5000);   // sleep 5 ms
-    }
+    // }
     return;
 }
 
@@ -216,20 +236,24 @@ void Drawer::DrawSonar() {
  * @param bDrawInertialGraph whether draw inertial graph
  */
 void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph){
-    // const float &w = mKeyFrameSize;
-    // const float h = w*0.75;
-    // const float z = w*0.6;
+    const float &w = mKeyFrameSize;
+    const float h = w*0.75;
+    const float z = w*0.6;
+    const float red[] = {1.0,0.0,0.0};
 
     // const std::vector<KeyFrame> vpKFs = mpFrames->GetAllKeyFrames();
-    // for(int i=0;i<mpFrames->Size();i++){
-    //     KeyFrame tmp = mpFrames->GetKeyFrameByID(i);
-
-    // }
+    if(bDrawKF){
+        for(int i=0;i<mpFrames->Size();i++){
+            KeyFrame* cur = mpFrames->GetKeyFrameByID(i);
+            DrawFrame(cur, red);
+            // DrawMapPoints(cur, red);
+        }
+    }
     // if(bDrawKF){
     //     for(int i=0; i<mpFrames->size(); i++)
     //     {
     //         KeyFrame KF = mpFrames->GetKeyFrameByID(i);
-    //         Eigen::Vector3d kfPos = KF.GetPos();
+    //         Eigen::Vector3d kfPos = KF.GetPose().hat;
             // cv::Mat Twc = KF.GetPoseInverse().t();
     //         unsigned int index_color = pKF->mnOriginMapId;
 

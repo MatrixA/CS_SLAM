@@ -2,83 +2,122 @@
 
 namespace CS_SLAM{
 
-Viewer::Viewer(LocalMap* pMap):mpMap(pMap){
+Viewer::Viewer(LocalMap* pMap, Frames* pFrames):mpMap(pMap){
     //viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
-    mpDrawer = new Drawer(pMap);
+    mpDrawer = new Drawer(pMap, pFrames);
+    mViewpointX = 0; mViewpointY = 0; mViewpointZ = 100;
+    mViewpointF = 10;
 }
 
 void Viewer::Close(){
     mbViewerRunning = false;
 }
 
-void Viewer::AddCurrentFrame(KeyFrame* current_frame){
-    std::unique_lock<std::mutex> lck(viewer_data_mutex_);
-    current_frame_ = current_frame;
+void Viewer::AddCurrentFrame(KeyFrame* KfCurrent, unsigned long long timestamp_){
+    std::unique_lock<std::mutex> lock(mMutexViwerData);
+    mKfCurrent = KfCurrent;
+    mlTimestamp = timestamp_;
 }
 
 void Viewer::UpdateMap(){
-    std::unique_lock<std::mutex> lck(viewer_data_mutex_);
+    std::unique_lock<std::mutex> lock(mMutexViwerData);
     assert(mpMap != nullptr);
     // active_keyframes_ = map_->GetActiveKeyFrames();
     // active_landmarks_ = map_->GetActiveMapPoints();
     mbMapUpdated = true;
 }
 
+void Viewer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera){
+    Eigen::Matrix4d dos = (mKfCurrent->GetPose()).toSE3().matrix();
+    pangolin::OpenGlMatrix m(dos);
+    vis_camera.Follow(m, true);
+}
+
 void Viewer::ThreadLoop(){
-//     pangolin::CreateWindowAndBind("MySLAM", 1024, 768);
-//     glEnable(GL_DEPTH_TEST);
-//     glEnable(GL_BLEND);
-//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-// //创建按钮和选择框
-//     pangolin::CreatePanel("menu").SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(175));
-//     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera", true, true);
-//     pangolin::Var<bool> menuShowPoints("menu.Show Points", true, true);
-//     pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames", true, true);
-//     pangolin::Var<bool> mennuShowGraph("menu.Show Graph", true, true);
-//     pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false, true);
-//     pangolin::Var<bool> menuReset("menu.Reset", false, false);
+    pangolin::CreateWindowAndBind("MySLAM", 1024, 768);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//创建按钮和选择框
+    pangolin::CreatePanel("menu").SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(200));
+
+    pangolin::Var<bool> menuFollowCamera("menu.Follow Camera", true, true);
+    pangolin::Var<bool> menuShowPoints("menu.Show Points", true, true);
+    pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames", true, true);
+    pangolin::Var<bool> mennuShowGraph("menu.Show Graph", true, true);
+    pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode", false, true);
+    pangolin::Var<bool> menuReset("menu.Reset", false, false);
+    pangolin::Var<std::string> menuTimeStamp("menu.timestamp", std::to_string(mlTimestamp));
+//设置pangolin相机的投影模型和观测方向
+//ProjectionMatrix(w,h,fu,fv,u0,v0,zNear,zFar)
+//ModelViewLookAt(观测点位置，观测目标位置，观测的方位向量)
+    pangolin::OpenGlRenderState vis_pose(
+        pangolin::ProjectionMatrix(1024,768,400,400,512,384,0.1,1000),
+        pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ,0,0,0,pangolin::AxisY));
+
+    pangolin::View& d_display = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, pangolin::Attach::Pix(200), 0.7, -1024.0f / 768.0f)
+            .SetHandler(new pangolin::Handler3D(vis_pose));
+
+    pangolin::OpenGlRenderState vis_sonar(
+            pangolin::ProjectionMatrix(640,480,420,420,320,240,0.2,1000),
+            pangolin::ModelViewLookAt(0, 0, 20, 0, 0, 0, pangolin::AxisY)
+    );
+
+    pangolin::View& d_sonar = pangolin::CreateDisplay()
+        .SetBounds(0.5, 1.0, 0.0, 1.0)
+        .SetAspect(1024.0f/768.0f)
+        .SetHandler(new pangolin::Handler3D(vis_sonar));
 
 
-// //设置pangolin相机的投影模型和观测方向
-// //ProjectionMatrix(w,h,fu,fv,u0,v0,zNear,zFar)
-// //ModelViewLookAt(观测点位置，观测目标位置，观测的方位向量)
-//     pangolin::OpenGlRenderState vis_camera(
-//         pangolin::ProjectionMatrix(1024,768,400,400,512,384,0.1,1000),
-//         pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ,0,0,0,0.0,-1.0,0.0));
+    pangolin::View& d_camera = pangolin::CreateDisplay()
+        .SetBounds(0, 0.5, 0.0, 1.0)
+        .SetAspect(1024.0f/768.0f);
 
-// //定义显示面板大小
-//     pangolin::View& vis_display = 
-//         pangolin::CreateDisplay()
-//             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f / 768.0f)
-//             .SetHandler(new pangolin::Handler3D(vis_camera));
+    pangolin::Display("Camera_Sonar")
+        .SetBounds(0,1,0.7,1)
+        .AddDisplay(d_sonar)
+        .AddDisplay(d_camera);
+        // .AddDisplay(d_cam);
 
-//     const float blue[3] = {0, 0, 1};
-//     const float green[3] = {0, 1, 0};
+    const float blue[3] = {0, 0, 1};
+    const float green[3] = {0, 1, 0};
+    const float red[3] = {1, 0, 0};
 
-//     while(!pangolin::ShouldQuit() && mbViewerRunning){
-//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-//         vis_display.Activate(vis_camera);
-
-//         std::unique_lock<std::mutex> lock(viewer_data_mutex_);
-//         if(current_frame_){
-//             // mpFrameDrawer->DrawFrame(current_frame_, green);
-//             mpDrawer->DrawKeyFrames(true,false,false);
-//             FollowCurrentFrame(vis_camera);
-
+    while(!pangolin::ShouldQuit() && mbViewerRunning){
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        menuTimeStamp=Utils::TimeStamp2TimeString(mlTimestamp);
+        d_display.Activate(vis_pose);
+        std::unique_lock<std::mutex> lock(mMutexViwerData);
+        
+        if(mKfCurrent){
+            mpDrawer->DrawFrame(mKfCurrent, blue);//画关键帧以及观测点
+            FollowCurrentFrame(vis_pose);//视角移动
+            // mpDrawer->DrawKeyFrames(true,false,false);
+            // if()
+            d_sonar.Activate(vis_sonar);
+            mpDrawer->DrawSonar();//画声纳图像
+            // vis_cam.Activate();
+            // mpDrawer->PlotImage();//画相机
+            
+            // std::cout<<"ok?"<<std::endl;
 //             cv::Mat img = PlotFrameImage();
 //             cv::imshow("image", img);
 //             cv::waitKey(1);
-//         }
+        }
 
-//         if(mpMap){
-//             mpDrawer->DrawMapPoints();
-//         }
+        if(mpMap){
+            d_display.Activate(vis_pose);
+            mpDrawer->DrawKeyFrames(true,false,false);
+            // mpDrawer->DrawFrame();
+            // mpDrawer->DrawMapPoints();
+        }
 
-//         pangolin::FinishFrame();
-//         usleep(5000);
-//     }
-//     std::cout<<"Stop Viewer"<<std::endl;
+        pangolin::FinishFrame();
+        usleep(5000);
+    }
+    std::cout<<"Stop Viewer"<<std::endl;
     // LOG(INFO) << "Stop Viewer";
 }
 

@@ -172,23 +172,23 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
  * @param kfi : KeyFrame before now
  * @return motion 
  */
-motion LoopClosing::ScanMatching(KeyFrame kfn, KeyFrame kfi){
+motion LoopClosing::ScanMatching(KeyFrame* kfn, KeyFrame* kfi){
 //对两full scan做扫描匹配得到相对运动及其不确定性估计
     motion d;
     std::cout<<"start scan matching, new kf is:"<<std::endl;
-    kfn.Print();
+    kfn->Print();
     std::cout<<"old kfi is:"<<std::endl;
-    kfi.Print();
+    kfi->Print();
     //获得初始位移估计hat_q
-    motion q = pose(kfi.GetPos(),kfi.GetPosP()).tail2tail(pose(kfn.GetPos(),kfn
-    .GetPosP()));
+    motion q = pose(kfi->GetPose().hat,kfi->GetPose().P).tail2tail(pose(kfn->GetPose().hat,kfn
+    ->GetPose().P));
     //获得初始位移估计不确定性P_q
     // Eigen::Matrix<double, 3, 3> P_q;
     // Eigen::Matrix<double, 3, 3> H_k;
     // Eigen::Matrix<double, 3, 3> P_k;
     // P_q = H_k * P_k * H_k.transpose();
     std::cout<<"start modpIC with init_q "<<q.hat<<std::endl;
-    d.hat = modpIC(kfn.GetSonarFullScan(),kfi.GetSonarFullScan(),q);
+    d.hat = modpIC(kfn->GetSonarFullScan(),kfi->GetSonarFullScan(),q);
     d.P = 0.1*Eigen::Matrix3d::Identity(3,3);//TODO;
     return d;
 }

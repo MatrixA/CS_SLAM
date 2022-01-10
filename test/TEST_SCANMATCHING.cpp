@@ -3,6 +3,7 @@
 // #include <opencv2/core/core.hpp>
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 // #include <ceres/ceres.h>
 #include <chrono>
 
@@ -46,9 +47,9 @@ int main(){
     
     CS_SLAM::LoopClosing loopClosing(fdbs);
     std::cout<<"full scan ok"<<std::endl;
-    CS_SLAM::KeyFrame x = fdbs->GetKeyFrameByID(0);
-    CS_SLAM::KeyFrame y = fdbs->GetKeyFrameByID(1);
-    std::cout<<x.GetPos()<<"----"<<y.GetPos()<<std::endl;
+    CS_SLAM::KeyFrame* x = fdbs->GetKeyFrameByID(0);
+    CS_SLAM::KeyFrame* y = fdbs->GetKeyFrameByID(1);
+    std::cout<<x->GetPose().hat<<"----"<<y->GetPose().hat<<std::endl;
     CS_SLAM::motion estimate = loopClosing.ScanMatching(y,x);
     estimate.Print();
     return 0;

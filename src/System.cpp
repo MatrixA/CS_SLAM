@@ -9,10 +9,11 @@ System::System(YAML::Node SensorConfig){
     // mpAtlas = new Atlas();
     mSensorConfig = SensorConfig;
     mpMap = new LocalMap();
-    mpViewer = new Viewer(mpMap);
+    mpFramesDatabase = new Frames();
+    mpViewer = new Viewer(mpMap, mpFramesDatabase);
     mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
     mpScanFormer = new ScanFormer();
-    mpFramesDatabase = new Frames();
+    
     mpASEKF = new ASEKF(mpFramesDatabase);
     mpLoopClosing = new LoopClosing(mpFramesDatabase);
 }
@@ -50,7 +51,7 @@ void System::SaveTrajectoryFromDatabase(const std::string &filename){
         return;
     }
     for(int i=0;i < mpFramesDatabase->Size();i++){
-        Eigen::Vector3d tmp = (mpFramesDatabase->GetKeyFrameByID(i)).GetPos();
+        Eigen::Vector3d tmp = (mpFramesDatabase->GetKeyFrameByID(i)->GetPose()).hat;
         outfile<< i+1 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<std::endl;
     }
     std::cout<<"write OK"<<std::endl;
@@ -135,13 +136,19 @@ void System::TrackSonar(MeasurementPackage meas){
             std::cout<<"Initialize ASEKF:"<<(mpScanFormer->GetFullMotion().hat)<<std::endl;
             mpASEKF->Initialize(mpScanFormer->GetFullMotion());
         }else{
-            // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPos()<< std::endl;
+            // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPose().hat<< std::endl;
             // std::cout<<"predict "<<std::endl;
             mpASEKF->Prediction(mpScanFormer->GetFullMotion());
-            KeyFrame curP = mpFramesDatabase->GetCurrentKeyFrame();
-            std::vector<int>alternative = mpFramesDatabase->GetCurrentOverlaps(0.1);
+            KeyFrame* curP=new KeyFrame();
+            curP->SetPose(mpASEKF->GetCurrentPose());
+            curP->SetSonarFullScan(mpScanFormer->GetFullScan());
+            curP->SetSonarMeasurements(mpScanFormer->GetScan());
+            mpFramesDatabase->add(*curP);
+            // KeyFrame* curP = mpFramesDatabase->GetCurrentKeyFrame();
+            mpViewer->AddCurrentFrame(curP, timestamp_now);
+            const std::vector<int>& alternative = mpFramesDatabase->GetCurrentOverlaps(0.1);
             for(int i=0; i<alternative.size(); i++){
-                KeyFrame agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
+                KeyFrame* agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
                 motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
                 mpASEKF->Update(alternative[i],1,estimate);
             }
@@ -152,7 +159,6 @@ void System::TrackSonar(MeasurementPackage meas){
 //         if(scnt == FSCAN_SIZE){
 //             full_scan_list.push_back(mpScanFormer->undistort());
 //             mpScanFormer->reset();
-
 //             scnt = 0;
 //         }
     timestamp_now = meas.timestamp_;
@@ -160,9 +166,9 @@ void System::TrackSonar(MeasurementPackage meas){
 }
 
 void System::SetUp(){
-    pangolin::CreateWindowAndBind(window_name, 640,480);
-    glEnable(GL_DEPTH_TEST);
-    pangolin::GetBoundWindow()->RemoveCurrent();
+    // pangolin::CreateWindowAndBind(window_name, 640,480);
+    // glEnable(GL_DEPTH_TEST);
+    // pangolin::GetBoundWindow()->RemoveCurrent();
     mbSetUp = true;
     return ;
 }
@@ -183,7 +189,7 @@ void System::SetUp(){
 //         }
 //         glEnd();
 //         pangolin::FinishFrame();
-//     }z
+//     }
 //     pangolin::GetBoundWindow()->RemoveCurrent();
 // }
 

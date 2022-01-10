@@ -15,18 +15,26 @@ ScanFormer::ScanFormer(){
 
 ScanFormer::~ScanFormer(){}
 
-void ScanFormer::BeamSegment(int thresh = 80){
+const std::vector<point>& ScanFormer::GetFullScan(){
+    return z;
+}
+
+const std::vector<Eigen::VectorXd>& ScanFormer::GetScan(){
+    return scan;
+}
+
+void ScanFormer::BeamSegment(int thresh = 10){
     /*
     输入：beam的一轮完整scan, 强度阈值thresh
     输出(内隐)：阈值化并局部最大化后的scan
     */
     for(int i = 0; i < scan.size(); i++){
         for(int j = 0; j < scan[i].size(); j++){
-            if(scan[i](j) <= thresh)scan[i](j) = 0;
+            if(scan[i](j) < thresh)scan[i](j) = 0;
         }
         int localMax = INT_MIN;
         int localMaxID = -1;
-        for(int j = 0; j < scan[i].size(); j++){
+        for(int j = 10; j < scan[i].size(); j++){
             if(scan[i](j) > localMax){
                 localMax = scan[i](j);
                 localMaxID = j;
@@ -35,10 +43,11 @@ void ScanFormer::BeamSegment(int thresh = 80){
         }
         scan[i](localMaxID) = localMax;
         if(localMaxID != -1){
-            Eigen::Vector2d z_hat(0.1*localMaxID*cos(365/200*i),0.1*localMaxID*sin(365/200*i));
+            double r=0.0503*localMaxID, theta=2*PI/200*i;
+            Eigen::Vector2d z_hat(r*cos(theta),r*sin(theta));
             Eigen::Matrix2d z_P = Eigen::Matrix2d::Zero(2,2);
             z.push_back(point(z_hat,z_P));
-            // std::cout<<z_hat<<std::endl;
+            // std::cout<<"pushed "<<r<<","<<theta<<" and "<<z_hat<<std::endl;
         }else{
             std::cout<<"row: "<<i<<" no useful information"<<std::endl;
         //     z.push_back(KeyFrame(Eigen::VectroXd(0,0,0),
@@ -54,14 +63,14 @@ motion ScanFormer::D(int i){
     if(i == C) return res;
     else if(i > C){
         for(int j = C+1; j <= i; j++){
-            Eigen::VectorXd x_ = x_s[j].GetPos();
+            Eigen::VectorXd x_ = x_s[j].GetPose().hat;
             Eigen::Vector3d d_(x_(0), x_(1), 0);
             res.hat = res.hat + d_;
         }
     }else{
         for(int j = i; j < C; j++){
-            Eigen::VectorXd x_ = x_s[j].GetPos();
-            // std::cout<<"here2:"<<x_s[j].GetPos()<<std::endl;
+            Eigen::VectorXd x_ = x_s[j].GetPose().hat;
+            // std::cout<<"here2:"<<x_s[j].GetPose().hat<<std::endl;
             Eigen::Vector3d d_(x_(0), x_(1), 0);
             res.hat = res.hat - d_;
         }
@@ -83,14 +92,17 @@ void ScanFormer::Undistort(int thresh=80){
     // std::cout<<"----Start BeamSegment"<<std::endl;
     BeamSegment(thresh);//对该轮声纳Segment之后得到点云
     // std::cout<<"----End BeamSegment"<<std::endl;
-    for(int i = 0;i < z.size(); i++){
-        if(i == C)continue;
-        motion r_(Eigen::Vector3d(0,0,x_s[i].GetPos()(2)), Eigen::Matrix3d::Zero(3,3));
-        motion r_c(Eigen::Vector3d(0,0,x_s[C].GetPos()(2)), Eigen::Matrix3d::Zero(3,3));
-        // std::cout<<"rc:\n"<<r_c.P<<"\nD(i):"<<D(i).P<<std::endl;
-        //std::cout<<"------undistorting beam "<<i<<std::endl;
-        z[i] = (r_c.tail2tail(D(i))).compoundP(r_.compoundP(z[i]));
-    }
+    // for(int i = 0;i < z.size(); i++){
+    //     if(i == C)continue;
+    //     std::cout<<z[i].hat<<std::endl;
+    //     motion r_(Eigen::Vector3d(0,0,x_s[i].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
+    //     motion r_c(Eigen::Vector3d(0,0,x_s[C].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
+    //     // std::cout<<"rc:\n"<<r_c.P<<"\nD(i):"<<D(i).P<<std::endl;
+    //     //std::cout<<"------undistorting beam "<<i<<std::endl;
+    //     // z[i] = (r_c.tail2tail(D(i))).compoundP(r_.compoundP(z[i]));
+    //     z[i] = (r_c.tail2tail(x_s[i].GetPose())).compoundP(r_.compoundP(z[i]));
+    //     std::cout<<"after undistort"<< z[i].hat<<std::endl;
+    // }
     // std::cout<<"--End Undistort"<<std::endl;
     return ;
 }
@@ -226,17 +238,17 @@ void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
 
 motion ScanFormer::GetFullMotion(){
     // motion ans = D(NUM_BEAMS-1).tail2tail(D(0));
-    motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
-    // motion ans = motion(x_s[0].GetPos(),x_s[0].GetPosP()).tail2tail(motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP()));
-    // motion ans = motion(x_s[NUM_BEAMS-1].GetPos(),x_s[NUM_BEAMS-1].GetPosP());
+    motion ans = motion(x_s[NUM_BEAMS-1].GetPose().hat,x_s[NUM_BEAMS-1].GetPose().P);//该行表示x_s为一轮累积运动
+    // motion ans = motion(x_s[0].GetPose().hat,x_s[0].GetPose().P).tail2tail(motion(x_s[NUM_BEAMS-1].GetPose().hat,x_s[NUM_BEAMS-1].GetPose().P));
+    // motion ans = motion(x_s[NUM_BEAMS-1].GetPose().hat,x_s[NUM_BEAMS-1].GetPose().P);
     // for(int i=0;i<x_s.size();i++){
-    //     std::cout<<"x_s "<<i<<":"<<x_s[i].GetPos()<<std::endl;
+    //     std::cout<<"x_s "<<i<<":"<<x_s[i].GetPose().hat<<std::endl;
     // }
     
     // for(int i = 0; i < 5;i++){
-    //     std::cout<<"see "<<i<<" "<<x_s[i].GetPos()<<std::endl;
+    //     std::cout<<"see "<<i<<" "<<x_s[i].GetPose().hat<<std::endl;
     // }
-    // <<D(0).hat<<" =? "<<x_s[0].GetPos()<<" vs "<<x_s[1].GetPos();
+    // <<D(0).hat<<" =? "<<x_s[0].GetPose().hat<<" vs "<<x_s[1].GetPose().hat;
     // std::cout<<"while "<<D(199).hat<<std::endl;
 
     // std::cout<<ans.hat<<std::endl;
@@ -271,7 +283,7 @@ Eigen::VectorXd ScanFormer::getx_ss(){
     ans.resize(x_s.size()*3);
     std::cout<<"tot x_s.size"<<x_s.size()<<std::endl;
     for(int i = 0; i< x_s.size();i++){
-        ans.block(3*i,0,3,1) = x_s[i].GetPos();
+        ans.block(3*i,0,3,1) = x_s[i].GetPose().hat;
     }
     return ans;
 }
@@ -280,26 +292,26 @@ Eigen::VectorXd ScanFormer::getx_ss(){
 }
 
 
-    // void BeamSegment(int thresh = 80){
-    //     /*
-    //     输入：beam的一轮完整scan, 强度阈值thresh
-    //     输出(内隐)：阈值化并局部最大化后的scan
-    //     */
-    //     for(int i = 0; i < scan.rows(); i++){
-    //         for(int j = 0; j < scan.cols(); j++){
-    //             if(scan(i,j) <= thresh)
-    //                 scan(i,j) = 0;
-    //             }
-    //             int localMax = INT_MIN;
-    //             int localMaxID = -1;
-    //             for(int j = 0; j < scan.cols(); j++){
-    //             if(scan(i,j) > localMax){
-    //                 localMax = scan(i,j);
-    //                 localMaxID = j;
-    //             }
-    //             scan(i,j) = 0;
-    //         }
-    //         scan(i, localMaxID) = localMax;
-    //     }
-    //     return ;
-    // }
+// void BeamSegment(int thresh = 80){
+//     /*
+//     输入：beam的一轮完整scan, 强度阈值thresh
+//     输出(内隐)：阈值化并局部最大化后的scan
+//     */
+//     for(int i = 0; i < scan.rows(); i++){
+//         for(int j = 0; j < scan.cols(); j++){
+//             if(scan(i,j) <= thresh)
+//                 scan(i,j) = 0;
+//             }
+//             int localMax = INT_MIN;
+//             int localMaxID = -1;
+//             for(int j = 0; j < scan.cols(); j++){
+//             if(scan(i,j) > localMax){
+//                 localMax = scan(i,j);
+//                 localMaxID = j;
+//             }
+//             scan(i,j) = 0;
+//         }
+//         scan(i, localMaxID) = localMax;
+//     }
+//     return ;
+// }

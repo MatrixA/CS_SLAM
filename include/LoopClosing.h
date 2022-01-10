@@ -21,7 +21,7 @@ public:
     ~LoopClosing();
     void SetTracker();
     void Run();
-    motion ScanMatching(KeyFrame kfn, KeyFrame kfi);
+    motion ScanMatching(KeyFrame* kfn, KeyFrame* kfi);
 private:
     // ScanFormer* mpScanFormer;
     Frames* mpKeyFrameDatabase;

@@ -18,26 +18,30 @@ KeyFrame::KeyFrame(pose kf){
 
 KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,kfPosP){}
 
-void KeyFrame::SetPos(Eigen::VectorXd kfPos){
-    mKfPose.hat = kfPos;
+void KeyFrame::SetPose(pose kfPose){
+    mKfPose = kfPose;
 };
-void KeyFrame::SetPosP(Eigen::MatrixXd kfPosP){
-    mKfPose.P = kfPosP;
-};
-Eigen::VectorXd KeyFrame::GetPos(){
-    return mKfPose.hat;
-}
 
-Eigen::MatrixXd KeyFrame::GetPosP(){
-    return mKfPose.P;
+pose KeyFrame::GetPose(){
+    return mKfPose;
 }
 
 void KeyFrame::SetSonarFullScan(std::vector<point> fs){
     mvSonarFullScan.assign(fs.begin(),fs.end());
+    // std::cout<<"check "<<mvSonarFullScan[1].hat(0)<<","<<mvSonarFullScan[1].hat(1)<<std::endl;
+    // std::cout<<"verse "<<fs[1].hat(0)<<","<<fs[1].hat(1)<<std::endl;
 }
 
-std::vector<point> KeyFrame::GetSonarFullScan(){
+const std::vector<point>& KeyFrame::GetSonarFullScan(){
     return mvSonarFullScan;
+}
+
+void KeyFrame::SetSonarMeasurements(const std::vector<Eigen::VectorXd>& fsm){
+    mvFsm.assign(fsm.begin(),fsm.end());
+}
+
+const std::vector<Eigen::VectorXd>& KeyFrame::GetSonarMeasurements(){
+    return mvFsm;
 }
 
 void KeyFrame::Print(){

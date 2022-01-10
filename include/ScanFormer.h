@@ -11,6 +11,8 @@
 #define FSCAN_SIZE 20
 #define NUM_BEAMS 200
 #define NUM_BINS 397
+#define PI acos(-1)
+
 
 namespace CS_SLAM{
 /*
@@ -28,6 +30,9 @@ public:
     void Reset();
     bool IsFull();
 
+    const std::vector<point>& GetFullScan();
+    const std::vector<Eigen::VectorXd>& GetScan();
+
     void BeamSegment(int thresh);
     //把Ii平移到Ic
     motion D(int i);
@@ -43,6 +48,8 @@ public:
     //使用DS数据更新EKF
     void UseDS(Eigen::VectorXd data_ds, double dt);
     
+
+
     Eigen::VectorXd getx_ss();
 
     void SetEKF(EKF* ekf);
@@ -55,7 +62,7 @@ private:
     std::vector<Eigen::VectorXd> scan; //一个full_scan是NUM_BEAMS * NUM_BINS的强度矩阵
     EKF* mpEKF;
     // Eigen::Matrix<int, NUM_BEAMS, NUM_BINS> scan; //一个full_scan是NUM_BEAMS * NUM_BINS的强度矩阵
-    std::vector<point> z; //从full_scan能够得到扫描点
+    std::vector<point> z; //从full_scan能够得到扫描点,z各点坐标为x,y
     std::vector<KeyFrame> x_s; //声纳full_scan的每帧位姿
     const int C = NUM_BEAMS/2;
 

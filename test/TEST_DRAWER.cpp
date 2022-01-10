@@ -1,6 +1,6 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include <Eigen/Core>
+#include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 //容器vector的头文件，vector是可以存放任意类型的动态数组
 #include <vector>
@@ -124,14 +124,14 @@ int main(){
         glBegin(GL_LINE_LOOP);
         int cnt=0;
         while(cnt < fdbs->Size()){
-            Eigen::Vector3d tmpPoseHat = (fdbs->GetKeyFrameByID(cnt)).GetPos();
+            Eigen::Vector3d tmpPoseHat = fdbs->GetKeyFrameByID(cnt)->GetPose().hat;
             glColor3f(0.4f,0.4f,0.2f);
             glPointSize(4);
             glVertex3d(tmpPoseHat(0), tmpPoseHat(1), 0);
             cnt++;
         }
+        
         glEnd();
-
         d_cam2.Activate(s_cam_sonar);
         //画声纳源数据
         glBegin(GL_LINE_STRIP);

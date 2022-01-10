@@ -11,11 +11,12 @@ namespace CS_SLAM
 class Drawer{
 public:
     // Drawer(LocalMap* pMap, const std::string &strSettingPath);
-    Drawer(LocalMap* pMap);
+    Drawer(LocalMap* pMap, Frames* pFrames);
 
     void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
-    void DrawMapPoints();
+    void DrawMapPoints(KeyFrame* kf, const float * color);
     void DrawSonar();
+    void DrawFrame(KeyFrame *kf, const float* color);
     void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
 
 private:

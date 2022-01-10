@@ -113,6 +113,21 @@ RandomVector RandomVector::tail2tail(RandomVector b){
 }
 
 /**
+ * @brief get Isometry of 2D state
+ * 
+ * @return Eigen::Isometry3d 
+ */
+Eigen::Isometry3d RandomVector::toSE3(){
+    assert(hat.size()==3);
+    Eigen::Isometry3d ret;
+    ret(0,0)=1;ret(0,1)=0;ret(0,2)=0;ret(0,3)=hat(0);
+    ret(1,0)=0;ret(1,1)=cos(hat(2));ret(1,2)=sin(hat(2));ret(1,3)=hat(1);
+    ret(2,0)=0;ret(2,1)=sin(hat(2));ret(2,2)=cos(hat(2));ret(2,3)=0;
+    ret(3,0)=0;ret(3,1)=0;ret(3,2)=0;ret(3,3)=1;
+    return ret;
+}
+
+/**
  * @brief check if two random vectors are equal
  * Note: use isApprox in Eigen
  * @param b - the random vector to be compared with

@@ -113,7 +113,7 @@ int main(int argc, char **argv){
     std::vector<CS_SLAM::MeasurementPackage> dataSequence;
     YAML::Node sensorConfig;
     InputDataset(argv, dataSequence, sensorConfig);
-    
+
     CS_SLAM::System SLAM(sensorConfig);
     // for(int i=0;i<3;i++){
     //     std::cout<<data[i].sensor_type_<<": "<<data[i].timestamp_<<std::endl;
@@ -171,6 +171,7 @@ int main(int argc, char **argv){
     SLAM.SaveTrajectoryFromDatabase("../poses.txt");
     // SLAM.SaveTrajectory("../poses.txt");
     std::cout<<"nothing wrong"<<std::endl;
+    usleep(5e6);
     return 0;
 }
 
@@ -190,6 +191,7 @@ void LoadImages(const std::string &strPathToSequence, std::vector<std::string> &
             ss << s;
             double t;
             ss >> t;
+        
             vTimestamps.push_back(t);
         }
     }

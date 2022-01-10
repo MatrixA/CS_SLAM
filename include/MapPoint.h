@@ -12,7 +12,7 @@ class MapPoint{
 public:
     MapPoint(){}
     Eigen::Vector2d GetWorldPos();
-
+    
 private:
     Eigen::Vector2d worldPose;
     Eigen::Matrix2d worldPoseP;

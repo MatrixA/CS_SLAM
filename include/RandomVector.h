@@ -5,6 +5,8 @@
 #include <limits.h>
 #include <algorithm>
 #include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <boost/math/distributions.hpp>
 #include <utility>
 
@@ -26,6 +28,8 @@ public:
     RandomVector rinverse();
 
     RandomVector tail2tail(RandomVector b);
+
+    Eigen::Isometry3d toSE3();
 
     bool operator ==(const RandomVector& b);
     Eigen::VectorXd hat;

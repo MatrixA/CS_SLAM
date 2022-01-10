@@ -69,7 +69,7 @@ void ASEKF::Prediction(motion q_n){
     X_.resize(N+3, 1);
     X_ = tmp_mu;
     //TO Modify P:
-    AddToDatabase(pose(tmp_mu.block(0,0,3,1),0.1*Eigen::MatrixXd::Identity(3,3)));
+    // AddToDatabase(pose(tmp_mu.block(0,0,3,1),0.1*Eigen::MatrixXd::Identity(3,3)));
     //X_.topRows(3)=Utils::Odot(X_.block(0,0,3,1), q_n.hat);
 
     /*方差*/
@@ -115,35 +115,35 @@ void ASEKF::Update(int xi, int xn, motion ob){
 }
 
 void ASEKF::AddPose(KeyFrame xn){
-    // Eigen::VectorXd X_new(X_.rows()+(xn.GetPos()).rows());
-    // X_new.middleRows(0,3) = xn.GetPos();
+    // Eigen::VectorXd X_new(X_.rows()+(xn.GetPose().hat).rows());
+    // X_new.middleRows(0,3) = xn.GetPose().hat;
     // X_new.middleRows(3,X_new.size()-3) = X_;
-    // X_.resize(X_.rows()+xn.GetPos().size());
+    // X_.resize(X_.rows()+xn.GetPose().hat.size());
     int N = X_.rows();
     Eigen::MatrixXd tmp_mu(N+3, 1);
     Eigen::Vector3d a=X_.block(0,0,3,1);
-    Eigen::Vector3d b=xn.GetPos();
+    Eigen::Vector3d b=xn.GetPose().hat;
 
     tmp_mu.block(0,0,3,1) = Eigen::Vector3d(a(0)+b(0),a(1)+b(1),b(2));
     tmp_mu.block(3,0,N,1) = X_;
     X_.resize(N+3, 1);
     X_ = tmp_mu;
-    // X_.tail(X_.rows()-xn.GetPos().size()) = X_.head(X_.rows()-xn.GetPos().size());
+    // X_.tail(X_.rows()-xn.GetPose().hat.size()) = X_.head(X_.rows()-xn.GetPose().hat.size());
     // std::cout<<"------Start Add a Pose"<<std::endl;
-    // std::cout<<"------Adding a Pose then:\n"<<X_<<"\n xn:\n"<<xn.GetPos()<<std::endl;
-    // X_.head(3) = xn.GetPos();
-    // X_new << xn.GetPos(),X_;
+    // std::cout<<"------Adding a Pose then:\n"<<X_<<"\n xn:\n"<<xn.GetPose().hat<<std::endl;
+    // X_.head(3) = xn.GetPose().hat;
+    // X_new << xn.GetPose().hat,X_;
     // X_ = X_new;
     // const int N = X_.rows();
     // Eigen::MatrixXd P_new = Eigen::MatrixXd::Zero(N,N);
-    // P_new.block(0,0,3,3) = xn.GetPosP();
+    // P_new.block(0,0,3,3) = xn.GetPose().P;
     // P_new.block(3,3,N-3,N-3) = P_;
     // P_ = P_new;
     // F_ = Eigen::MatrixXd::Identity(N, N);
     // F_(2,2)=0;
     // Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
     // Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
-    // Eigen::MatrixXd tmp = F*P_*F.transpose() + G * xn.GetPosP() * G.transpose();
+    // Eigen::MatrixXd tmp = F*P_*F.transpose() + G * xn.GetPose().P * G.transpose();
     // P_.resize(N+3,N+3);
     // P_ = tmp;
     // std::cout<<"------End Add a Pose"<<std::endl;
@@ -151,10 +151,10 @@ void ASEKF::AddPose(KeyFrame xn){
 }
 
 
-void ASEKF::AddToDatabase(motion q){
-    mpFramesDatabase->add(KeyFrame(q));
-    return ;
-}
+// void ASEKF::AddToDatabase(motion q){
+//     mpFramesDatabase->add(KeyFrame(q));
+//     return ;
+// }
 
 
 Eigen::VectorXd ASEKF::GetX(){

@@ -2,10 +2,13 @@
 #define VIEWER_H
 
 #include <thread>
+#include <cstdlib>
 #include <pangolin/pangolin.h>
 #include "KeyFrame.h"
 #include "LocalMap.h"
+#include "Frames.h"
 #include "Drawer.h"
+#include "Utils.h"
 
 namespace CS_SLAM{
 
@@ -13,30 +16,29 @@ class Viewer{
 
 public:
     Viewer();
-    Viewer(LocalMap* pMap);
+    Viewer(LocalMap* pMap, Frames* pFrames);
     void Close();
     void UpdateMap();
-    void AddCurrentFrame(KeyFrame* current_frame);
+    void AddCurrentFrame(KeyFrame* current_frame, unsigned long long timestamp_);
     void ThreadLoop();
-    // void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
+    void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
     // cv::Mat PlotFrameImage();
 
-
 private:
-    
     // void DrawFrame();
     // void DrawMapPoints();
-
 
     Drawer* mpDrawer = nullptr;
     LocalMap* mpMap = nullptr;
 
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
-    
-    std::mutex viewer_data_mutex_;
 
-    KeyFrame* current_frame_ = nullptr;
-    bool mbViewerRunning;
+
+    std::mutex mMutexViwerData;
+
+    unsigned long long mlTimestamp;
+    KeyFrame* mKfCurrent = nullptr;
+    bool mbViewerRunning=true;
     bool mbMapUpdated=false;
 };
 
