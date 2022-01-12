@@ -7,8 +7,8 @@ KeyFrame类
 关键帧，包括位姿，以及该帧坐标系下的声纳图像和视觉图像。
 
 */
-
-#include "Eigen/Core"
+#include <opencv2/opencv.hpp>
+#include <Eigen/Core>
 #include "RandomVector.h"
 #include "MapPoint.h"
 
@@ -27,6 +27,10 @@ public:
     void SetSonarFullScan(std::vector<point> fs);
     const std::vector<Eigen::VectorXd>& GetSonarMeasurements();
     void SetSonarMeasurements(const std::vector<Eigen::VectorXd>& fsm);
+    const bool HaveSonarFullScan();
+    void LoadCameraImg(std::string filename);
+    const cv::Mat& GetCameraImage();
+    const bool HaveCameraImage();
 
     void Transform(motion transform);
     void Print();
@@ -36,7 +40,7 @@ private:
     std::vector<point> mvSonarFullScan;
     std::vector<Eigen::VectorXd> mvFsm;
     // Eigen::MatrixXd* Simg;
-    // cv::mat* Cimg;
+    cv::Mat mCimg;
 };
 
 }

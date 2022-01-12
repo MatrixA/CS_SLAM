@@ -28,7 +28,8 @@ public:
     } sensor_type_;
     bool operator< (const MeasurementPackage& meas)const ;
     Eigen::VectorXd raw_measurements_;
-    cv::Mat raw_image;
+    std::string filename;
+    // cv::Mat raw_image;
 };
 
 }

@@ -23,15 +23,15 @@ const std::vector<Eigen::VectorXd>& ScanFormer::GetScan(){
     return scan;
 }
 
-void ScanFormer::BeamSegment(int thresh = 10){
+void ScanFormer::BeamSegment(int thresh = 40){
     /*
     输入：beam的一轮完整scan, 强度阈值thresh
     输出(内隐)：阈值化并局部最大化后的scan
     */
     for(int i = 0; i < scan.size(); i++){
-        for(int j = 0; j < scan[i].size(); j++){
-            if(scan[i](j) < thresh)scan[i](j) = 0;
-        }
+        // for(int j = 0; j < scan[i].size(); j++){
+        //     if(scan[i](j) < thresh)scan[i](j) = 0;
+        // }
         int localMax = INT_MIN;
         int localMaxID = -1;
         for(int j = 10; j < scan[i].size(); j++){
@@ -39,20 +39,29 @@ void ScanFormer::BeamSegment(int thresh = 10){
                 localMax = scan[i](j);
                 localMaxID = j;
             }
-            scan[i](j) = 0;
+            // scan[i](j) = 0;
         }
-        scan[i](localMaxID) = localMax;
-        if(localMaxID != -1){
+        // scan[i](localMaxID) = localMax;
+        if(localMax>=thresh){
             double r=0.0503*localMaxID, theta=2*PI/200*i;
             Eigen::Vector2d z_hat(r*cos(theta),r*sin(theta));
             Eigen::Matrix2d z_P = Eigen::Matrix2d::Zero(2,2);
             z.push_back(point(z_hat,z_P));
-            // std::cout<<"pushed "<<r<<","<<theta<<" and "<<z_hat<<std::endl;
         }else{
-            std::cout<<"row: "<<i<<" no useful information"<<std::endl;
+            // std::cout<<"row: "<<i<<" no useful information"<<std::endl;
+            continue;
+        }
+        // if(localMaxID != -1){
+        //     double r=0.0503*localMaxID, theta=2*PI/200*i;
+        //     Eigen::Vector2d z_hat(r*cos(theta),r*sin(theta));
+        //     Eigen::Matrix2d z_P = Eigen::Matrix2d::Zero(2,2);
+        //     z.push_back(point(z_hat,z_P));
+        //     // std::cout<<"pushed "<<r<<","<<theta<<" and "<<z_hat<<std::endl;
+        // }else{
+        //     std::cout<<"row: "<<i<<" no useful information"<<std::endl;
         //     z.push_back(KeyFrame(Eigen::VectroXd(0,0,0),
         //                    Eigen::Zero(3,3)));//(0,0)表示无有效样本点
-        }
+        // }
     }
     return ;
 }
@@ -84,7 +93,7 @@ bool ScanFormer::IsFull(){
 
 
 //根据相对运动估计生成生成完整的scan
-void ScanFormer::Undistort(int thresh=80){
+void ScanFormer::Undistort(int thresh=40){
     //输入(内隐)：scan
     //输出(内隐)：修正好的scan
     //先阈值化

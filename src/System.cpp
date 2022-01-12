@@ -61,6 +61,7 @@ void System::SaveTrajectoryFromDatabase(const std::string &filename){
 void System::TrackAHRS(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
+        std::cout<<"first is "<<meas.sensor_type_<<std::endl;
         return ;
     }
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -80,6 +81,7 @@ void System::TrackAHRS(MeasurementPackage meas){
 void System::TrackDVL(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
+        std::cout<<"first is "<<meas.sensor_type_<<std::endl;
         return ;
     }
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -98,6 +100,7 @@ void System::TrackDVL(MeasurementPackage meas){
 void System::TrackDS(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
+        std::cout<<"first is "<<meas.sensor_type_<<std::endl;
         return ;
     }    
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -117,6 +120,7 @@ void System::TrackDS(MeasurementPackage meas){
 void System::TrackSonar(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
+        std::cout<<"first is "<<meas.sensor_type_<<std::endl;
     }
     // std::cout<<"dt:";
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -165,6 +169,30 @@ void System::TrackSonar(MeasurementPackage meas){
     return ;
 }
 
+void System::TrackMono(MeasurementPackage meas){
+    if(timestamp_now == 0){
+        timestamp_now = meas.timestamp_;
+        std::cout<<"first is "<<meas.sensor_type_<<std::endl;
+        return ;
+    }    
+    double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
+    // std::cout<<"dt:"<<dt<<std::endl;
+    if(dt < 0){
+        std::cerr << "ERROR: datas not sequential." << std::endl;
+        exit(-1);
+    }
+    // std::cout<<"--Start mpScanFormer->UseDS"<<std::endl;
+    // mpASEKF->Prediction(mpScanFormer->GetFullMotion());
+    KeyFrame* curP=new KeyFrame();
+    // std::cout<<"try "<<meas.filename<<std::endl;
+    curP->SetPose(mpFramesDatabase->GetCurrentKeyFrame()->GetPose());
+    curP->LoadCameraImg(meas.filename);
+    mpViewer->AddCurrentFrame(curP, timestamp_now);
+    // std::cout<<"Add curP OK"<<std::endl;
+    timestamp_now = meas.timestamp_;
+    return ;
+}
+
 void System::SetUp(){
     // pangolin::CreateWindowAndBind(window_name, 640,480);
     // glEnable(GL_DEPTH_TEST);
@@ -194,26 +222,26 @@ void System::SetUp(){
 // }
 
 //绘制轨迹
-void System::PlotTrajectory(){
-    if(!mpScanFormer->IsFull()){
-        std::cout<<"not Full no Plot"<<std::endl;
-        return ;
-    }
-    if(!mbSetUp){
-        SetUp();
-    }else{
-        std::cout<<"Full Start Plot"<<std::endl;
-        //std::thread render_loop(Plot);
-        //std::thread render_loop;
-        //render_loop = std::thread(System::Plot);
-        //render_loop.detach();
-        //std::thread(std::bind(&Viewer::ThreadLoop, this)
-        //render_loop.join();
-        std::cout<<"Full End Plot"<<std::endl; 
-        mpScanFormer->Reset();
-    }
-    return ;//
-}
+// void System::PlotTrajectory(){
+//     if(!mpScanFormer->IsFull()){
+//         std::cout<<"not Full no Plot"<<std::endl;
+//         return ;
+//     }
+//     if(!mbSetUp){
+//         SetUp();
+//     }else{
+//         std::cout<<"Full Start Plot"<<std::endl;
+//         //std::thread render_loop(Plot);
+//         //std::thread render_loop;
+//         //render_loop = std::thread(System::Plot);
+//         //render_loop.detach();
+//         //std::thread(std::bind(&Viewer::ThreadLoop, this)
+//         //render_loop.join();
+//         std::cout<<"Full End Plot"<<std::endl; 
+//         mpScanFormer->Reset();
+//     }
+//     return ;//
+// }
 
 
 // std::vector<std::vector<point> > all_scan;

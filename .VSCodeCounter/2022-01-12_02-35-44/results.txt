@@ -1,0 +1,90 @@
+Date : 2022-01-12 02:35:44
+Directory : /home/fernando/Code/CS_SLAM
+Total : 57 files,  481118 codes, 1315 comments, 688 blanks, all 483121 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| Django txt |         10 |    479,073 |          0 |         41 |    479,114 |
+| C++        |         43 |      1,998 |      1,303 |        631 |      3,932 |
+| Python     |          1 |         26 |         12 |          7 |         45 |
+| Markdown   |          2 |         19 |          0 |          9 |         28 |
+| YAML       |          1 |          2 |          0 |          0 |          2 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                       | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                          |         57 |    481,118 |      1,315 |        688 |    483,121 |
+| data                                                       |          9 |    478,719 |          0 |          8 |    478,727 |
+| examples                                                   |          1 |        130 |         86 |         21 |        237 |
+| include                                                    |         22 |        603 |        236 |        210 |      1,049 |
+| src                                                        |         17 |      1,100 |        923 |        340 |      2,363 |
+| test                                                       |          3 |        165 |         58 |         60 |        283 |
++------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                   | language   | code       | comment    | blank      | total      |
++------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /home/fernando/Code/CS_SLAM/CMakeLists.txt                 | Django txt |        130 |          0 |         32 |        162 |
+| /home/fernando/Code/CS_SLAM/README.md                      | Markdown   |          3 |          0 |          3 |          6 |
+| /home/fernando/Code/CS_SLAM/data/SensorsConfiguration.yaml | YAML       |          2 |          0 |          0 |          2 |
+| /home/fernando/Code/CS_SLAM/data/depth_sensor.txt          | Django txt |     19,554 |          0 |          1 |     19,555 |
+| /home/fernando/Code/CS_SLAM/data/dvl_linkquest.txt         | Django txt |      5,565 |          0 |          1 |      5,566 |
+| /home/fernando/Code/CS_SLAM/data/imu_adis.txt              | Django txt |     19,966 |          0 |          1 |     19,967 |
+| /home/fernando/Code/CS_SLAM/data/imu_xsens_mti.txt         | Django txt |     19,554 |          0 |          1 |     19,555 |
+| /home/fernando/Code/CS_SLAM/data/odometry.txt              | Django txt |     21,844 |          0 |          1 |     21,845 |
+| /home/fernando/Code/CS_SLAM/data/sonar_micron.txt          | Django txt |     45,600 |          0 |          1 |     45,601 |
+| /home/fernando/Code/CS_SLAM/data/sonar_seaking.txt         | Django txt |     97,502 |          0 |          1 |     97,503 |
+| /home/fernando/Code/CS_SLAM/data/tf.txt                    | Django txt |    249,132 |          0 |          1 |    249,133 |
+| /home/fernando/Code/CS_SLAM/examples/cave.cpp              | C++        |        130 |         86 |         21 |        237 |
+| /home/fernando/Code/CS_SLAM/include/ASEKF.h                | C++        |         49 |          1 |         14 |         64 |
+| /home/fernando/Code/CS_SLAM/include/Atlas.h                | C++        |         25 |          0 |          8 |         33 |
+| /home/fernando/Code/CS_SLAM/include/Converter.h            | C++        |         11 |         46 |         14 |         71 |
+| /home/fernando/Code/CS_SLAM/include/Drawer.h               | C++        |         27 |          1 |          9 |         37 |
+| /home/fernando/Code/CS_SLAM/include/EKF.h                  | C++        |         40 |          1 |         11 |         52 |
+| /home/fernando/Code/CS_SLAM/include/FrameDrawer.h          | C++        |         17 |          0 |          5 |         22 |
+| /home/fernando/Code/CS_SLAM/include/Frames.h               | C++        |         30 |          1 |          9 |         40 |
+| /home/fernando/Code/CS_SLAM/include/KeyFrame.h             | C++        |         33 |          8 |          8 |         49 |
+| /home/fernando/Code/CS_SLAM/include/LocalMap.h             | C++        |         25 |          0 |          6 |         31 |
+| /home/fernando/Code/CS_SLAM/include/LocalMapping.h         | C++        |         22 |          0 |          7 |         29 |
+| /home/fernando/Code/CS_SLAM/include/LoopClosing.h          | C++        |         26 |          1 |          5 |         32 |
+| /home/fernando/Code/CS_SLAM/include/MapDrawer.h            | C++        |         18 |          0 |          5 |         23 |
+| /home/fernando/Code/CS_SLAM/include/MapPoint.h             | C++        |         16 |          1 |          8 |         25 |
+| /home/fernando/Code/CS_SLAM/include/MeasurementPackage.h   | C++        |         27 |          5 |          5 |         37 |
+| /home/fernando/Code/CS_SLAM/include/PoseGraph.h            | C++        |         24 |          4 |          4 |         32 |
+| /home/fernando/Code/CS_SLAM/include/RandomVector.h         | C++        |         29 |        146 |         34 |        209 |
+| /home/fernando/Code/CS_SLAM/include/ScanFormer.h           | C++        |         42 |         14 |         18 |         74 |
+| /home/fernando/Code/CS_SLAM/include/SetParameters.h        | C++        |         11 |          0 |          6 |         17 |
+| /home/fernando/Code/CS_SLAM/include/SonarDrawer.h          | C++        |         16 |          0 |          5 |         21 |
+| /home/fernando/Code/CS_SLAM/include/System.h               | C++        |         60 |          3 |         10 |         73 |
+| /home/fernando/Code/CS_SLAM/include/Utils.h                | C++        |         21 |          1 |          6 |         28 |
+| /home/fernando/Code/CS_SLAM/include/Viewer.h               | C++        |         34 |          3 |         13 |         50 |
+| /home/fernando/Code/CS_SLAM/plot.py                        | Python     |         26 |         12 |          7 |         45 |
+| /home/fernando/Code/CS_SLAM/poses.txt                      | Django txt |        226 |          0 |          1 |        227 |
+| /home/fernando/Code/CS_SLAM/src/ASEKF.cpp                  | C++        |         81 |         60 |         28 |        169 |
+| /home/fernando/Code/CS_SLAM/src/Atlas.cpp                  | C++        |         18 |          0 |          7 |         25 |
+| /home/fernando/Code/CS_SLAM/src/Converter.cpp              | C++        |          3 |          7 |          6 |         16 |
+| /home/fernando/Code/CS_SLAM/src/Drawer.cpp                 | C++        |         89 |        409 |        102 |        600 |
+| /home/fernando/Code/CS_SLAM/src/EKF.cpp                    | C++        |         90 |         48 |         14 |        152 |
+| /home/fernando/Code/CS_SLAM/src/Frames.cpp                 | C++        |         77 |          4 |         16 |         97 |
+| /home/fernando/Code/CS_SLAM/src/KeyFrame.cpp               | C++        |         59 |          2 |         21 |         82 |
+| /home/fernando/Code/CS_SLAM/src/LocalMap.cpp               | C++        |         18 |          0 |          7 |         25 |
+| /home/fernando/Code/CS_SLAM/src/LoopClosing.cpp            | C++        |        115 |         69 |         14 |        198 |
+| /home/fernando/Code/CS_SLAM/src/MapPoint.cpp               | C++        |          9 |          0 |          5 |         14 |
+| /home/fernando/Code/CS_SLAM/src/MeasurementPackage.cpp     | C++        |          8 |          0 |          8 |         16 |
+| /home/fernando/Code/CS_SLAM/src/RandomVector.cpp           | C++        |         82 |         45 |         16 |        143 |
+| /home/fernando/Code/CS_SLAM/src/ScanFormer.cpp             | C++        |        128 |        162 |         27 |        317 |
+| /home/fernando/Code/CS_SLAM/src/System.cpp                 | C++        |        149 |         79 |         35 |        263 |
+| /home/fernando/Code/CS_SLAM/src/Utils.cpp                  | C++        |         33 |         14 |          6 |         53 |
+| /home/fernando/Code/CS_SLAM/src/Viewer.cpp                 | C++        |         95 |         21 |         24 |        140 |
+| /home/fernando/Code/CS_SLAM/src/draw.cpp                   | C++        |         46 |          3 |          4 |         53 |
+| /home/fernando/Code/CS_SLAM/test/TEST_ASEKF.cpp            | C++        |         18 |         12 |         13 |         43 |
+| /home/fernando/Code/CS_SLAM/test/TEST_DRAWER.cpp           | C++        |        104 |         34 |         30 |        168 |
+| /home/fernando/Code/CS_SLAM/test/TEST_SCANMATCHING.cpp     | C++        |         43 |         12 |         17 |         72 |
+| /home/fernando/Code/CS_SLAM/基本的架构.md                       | Markdown   |         16 |          0 |          6 |         22 |
+| Total                                                      |            |    481,118 |      1,315 |        688 |    483,121 |
++------------------------------------------------------------+------------+------------+------------+------------+------------+

@@ -38,6 +38,8 @@ private:
 
     unsigned long long mlTimestamp;
     KeyFrame* mKfCurrent = nullptr;
+    KeyFrame* mKfLast = nullptr;
+    bool mbInitKf = false;
     bool mbViewerRunning=true;
     bool mbMapUpdated=false;
 };

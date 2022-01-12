@@ -37,7 +37,8 @@ int Frames::Size(){
 
 KeyFrame* Frames::GetCurrentKeyFrame(){
     std::unique_lock<std::mutex> lock(mMutex);
-    return &(KeyFrameDatabase.back());
+    if(KeyFrameDatabase.size()==0)return new KeyFrame();
+    else return &(KeyFrameDatabase.back());
 }
 
 KeyFrame* Frames::GetKeyFrameByID(int id){

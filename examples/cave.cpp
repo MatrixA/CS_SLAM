@@ -9,8 +9,7 @@
 #include "MeasurementPackage.h"
 
 
-void LoadImages(const std::string &strSequence, std::vector<std::string> &vstrImageFilenames,
-                std::vector<double> &vTimestamps);
+void LoadImages(const std::string &strCameraFolder, std::vector<CS_SLAM::MeasurementPackage> &data, enum CS_SLAM::MeasurementPackage::SensorType sensor);
 
 void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage> &data, std::vector<int> &data_ind, enum CS_SLAM::MeasurementPackage::SensorType sensor, bool tags){
     std::ifstream infile;
@@ -77,8 +76,9 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YA
     std::string datafile_DS = std::string(argv[1]) + "depth_sensor.txt";
     std::vector<int> datacols_DS = {2,3};
 
+    std::string datafile_Camera = std::string(argv[1]) + "camera/";
     // for(int i=0;i<datacols_Sonar.size();i++)std::cout<<datacols_Sonar[i]<<":";
-    std::vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS;
+    std::vector<CS_SLAM::MeasurementPackage> data_DVL, data_AHRS, data_Sonar, data_DS, data_Camera;
 
     Eigen::VectorXd sonarParam, DVLParam, AHRSParam, DSParam;
     // ConfigSensor(string(argv[1]) + "SensorsConfiguration.yaml",sonarParam);
@@ -90,11 +90,15 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YA
     Import(datafile_DVL,data_DVL,datacols_DVL,CS_SLAM::MeasurementPackage::DVL,true);
     Import(datafile_AHRS,data_AHRS,datacols_AHRS,CS_SLAM::MeasurementPackage::AHRS,true);
     Import(datafile_DS,data_DS,datacols_DS,CS_SLAM::MeasurementPackage::DS,true);
+    LoadImages(datafile_Camera, data_Camera,CS_SLAM::MeasurementPackage::CAMERA);
+
+    //相机读取时间戳和图像试试
 
     data.insert(data.end(),data_DVL.begin(),data_DVL.end());
     data.insert(data.end(),data_AHRS.begin(),data_AHRS.end());
     data.insert(data.end(),data_Sonar.begin(),data_Sonar.end());
     data.insert(data.end(),data_DS.begin(),data_DS.end());
+    data.insert(data.end(),data_Camera.begin(),data_Camera.end());
     std::sort(data.begin(),data.end());
 }
 
@@ -127,6 +131,11 @@ int main(int argc, char **argv){
     for(int i=0;i< dataSequence.size();i++){
 //         //DVL或AHRS来了，就更新状态。Sonara来了，就用预测来估计状态。
         switch(dataSequence[i].sensor_type_){
+            case CS_SLAM::MeasurementPackage::CAMERA:
+                // std::cout<<"Camera Start"<<std::endl;
+                SLAM.TrackMono(dataSequence[i]);
+                // std::cout<<"Camera End"<<std::endl;
+                break;
             case CS_SLAM::MeasurementPackage::SONAR:
                 // std::cout<<"Sonar Start"<<std::endl;
                 SLAM.TrackSonar(dataSequence[i]);
@@ -144,6 +153,7 @@ int main(int argc, char **argv){
                 break;
             case CS_SLAM::MeasurementPackage::DS:
                 // std::cout<<"DS Start"<<std::endl;
+                // LoadImage(dataSequence);
                 SLAM.TrackDS(dataSequence[i]);
                 // std::cout<<"DS End"<<std::endl;
                 break;
@@ -175,12 +185,17 @@ int main(int argc, char **argv){
     return 0;
 }
 
-
-void LoadImages(const std::string &strPathToSequence, std::vector<std::string> &vstrImageFilenames, std::vector<double> &vTimestamps)
+/**
+ * @brief load image filename and timestamp using folder path.
+ * 
+ * @param strCameraFolder 
+ * @param data 
+ */
+void LoadImages(const std::string &strCameraFolder, std::vector<CS_SLAM::MeasurementPackage> &data, enum CS_SLAM::MeasurementPackage::SensorType sensor)
 {
     std::ifstream fTimes;
-    std::string strPathTimeFile = strPathToSequence + "/times.txt";
-    fTimes.open(strPathTimeFile.c_str());
+    fTimes.open((strCameraFolder+"undistorted_frames_timestamps.txt").c_str());
+    int cnt = 0;
     while(!fTimes.eof())
     {
         std::string s;
@@ -189,22 +204,33 @@ void LoadImages(const std::string &strPathToSequence, std::vector<std::string> &
         {
             std::stringstream ss;
             ss << s;
-            double t;
-            ss >> t;
-        
-            vTimestamps.push_back(t);
+            std::string cameraImageFileName;
+            double dTimeStamp;
+            ss >> cameraImageFileName >> dTimeStamp;
+            CS_SLAM::MeasurementPackage meas_package;
+            meas_package.timestamp_ = 1000*(unsigned long long)(dTimeStamp*1e6);
+            meas_package.filename = strCameraFolder+cameraImageFileName;//读取图像文件名
+            // meas_package.raw_image = cv::imread(strCameraFolder+cameraImageFileName);//读取图像
+            meas_package.sensor_type_ = sensor;
+            // if(meas_package.raw_image.data == nullptr){
+            //     std::cerr<<"camera image not exist"<<std::endl;
+            //     return;
+            // }
+            data.push_back(meas_package);
+            // std::cout<<"pushed "<< strCameraFolder+cameraImageFileName<< meas_package.sensor_type_<<std::endl;
         }
     }
 
-    std::string strPrefixLeft = strPathToSequence + "/image_0/";
+    std::cout<<"tot:"<<data.size()<<std::endl;
+    // std::string strPrefixLeft = strPathToSequence + "/image_0/";
 
-    const int nTimes = vTimestamps.size();
-    vstrImageFilenames.resize(nTimes);
+    // const int nTimes = vTimestamps.size();
+    // vstrImageFilenames.resize(nTimes);
 
-    for(int i=0; i<nTimes; i++)
-    {
-        std::stringstream ss;
-        ss << std::setfill('0') << std::setw(6) << i;
-        vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
-    }
+    // for(int i=0; i<nTimes; i++)
+    // {
+    //     std::stringstream ss;
+    //     ss << std::setfill('0') << std::setw(6) << i;
+    //     vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
+    // }
 }

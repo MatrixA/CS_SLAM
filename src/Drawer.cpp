@@ -10,7 +10,7 @@ Drawer::Drawer(LocalMap* pMap, Frames* pFrames):mpMap(pMap),mpFrames(pFrames){
     mCameraLineWidth = 1;
     mKeyFrameSize = 2;
     mKeyFrameLineWidth = 2;
-    mPointSize = 2;
+    mPointSize = 0.15f;
     // if(!is_correct){
     //     std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
     //     try{
@@ -21,9 +21,9 @@ Drawer::Drawer(LocalMap* pMap, Frames* pFrames):mpMap(pMap),mpFrames(pFrames){
     // }
 }
 
-void Drawer::DrawFrame(KeyFrame *kf, const float* color){
-    const float sz = 1.0;
-    const int lineWidth = 2.0;
+void Drawer::DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFrames, const bool bDrawSonarPoints){
+    const float sz = 1.5;
+    const int lineWidth = 1.5;
     const float fx = 400;
     const float fy = 400;
     const float cx = 512;
@@ -39,40 +39,59 @@ void Drawer::DrawFrame(KeyFrame *kf, const float* color){
 
     glLineWidth(lineWidth);
     glBegin(GL_LINES);
-    glVertex3f(0,0,0);
-    glVertex3f(sz * (0-cx)/fx, sz*(0-cy)/fy, sz);
-    glVertex3f(0,0,0);
-    glVertex3f(sz * (0-cx)/fx, sz*(height -1 - cy) /fy, sz);
-    glVertex3f(0,0,0);
-    glVertex3f(sz * (width - 1 -cx)/fx, sz*(height -1-cy)/fy, sz);
-    glVertex3f(0,0,0);
-    glVertex3f(sz * (width -1 -cx)/fx, sz* (0-cy)/fy, sz);
+    glVertex3f(0, 0, 0);
+    glVertex3f(sz * (0-cx) / fx, sz * (0-cy) / fy, sz);
+    
+    if(bDrawKeyFrames){
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (0-cx) / fx, sz * (height - 1 - cy) / fy, sz);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz * (height -1- cy) / fy, sz);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz* (0-cy) / fy, sz);
 
-    glVertex3f(sz * (width - 1 - cx)/ fx, sz*(0-cy)/fy, sz);
-    glVertex3f(sz*(width -1- cx)/fx, sz * (height -1 -cy)/fy, sz);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz * (0-cy) / fy, sz);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz * (height - 1 - cy) / fy, sz);
 
-    glVertex3f(sz*(width-1-cx)/fx, sz*(height -1 -cy)/fy, sz);
-    glVertex3f(sz*(0-cx)/fx, sz*(0-cy)/fy,sz);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz * (height - 1 - cy) / fy, sz);
+        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
 
-    glVertex3f(sz*(0-cx)/fx, sz*(0-cy)/fy,sz);
-    glVertex3f(sz*(width - 1 - cx)/fx, sz * (0- cy)/ fy, sz);
-
-    glEnd();
-
-    glBegin(GL_POINTS);
-    glColor3f(!color[0],!color[1],color[2]); //坐标与landmark为首二反色
-    glPointSize(mPointSize);
-    std::vector<point> landmarks = kf->GetSonarFullScan();
-    for(point &p:landmarks){
-        glVertex3d(p.hat[0],p.hat[1],0);
+        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f(sz * (width - 1 - cx) / fx, sz * (0- cy) / fy, sz);
     }
     glEnd();
-    
+
+    if(bDrawSonarPoints){
+        glBegin(GL_POINTS);
+        glColor3f(color[0]/2,(color[1]+1.0)/2,(color[2]+1.0)/2); //坐标与landmark的颜色有关系
+        glPointSize(mPointSize);
+        std::vector<point> landmarks = kf->GetSonarFullScan();
+        for(point &p:landmarks){
+            // glColor3f(1,0,0);
+            // glVertex3d(5,0,0);
+            // glColor3f(0,1,0);
+            // glVertex3d(0,5,0);
+            // glColor3f(0,0,1);
+            // glVertex3d(0,0,5);
+
+            // glVertex3d(p.hat[0],p.hat[1],0);
+            // glVertex3d(1,0,0);
+            glVertex3d(p.hat[1],0,p.hat[0]);
+        }
+        glEnd();
+    }
+
     glPopMatrix();
 
     return ;
 }
 
+void Drawer::PlotImage(KeyFrame *kf){
+    pangolin::GlTexture cameraImgTexture(384/* d */, 288, GL_RGB, false, 0, GL_BGR, GL_UNSIGNED_BYTE);
+    cameraImgTexture.Upload(kf->GetCameraImage().data, GL_BGR, GL_UNSIGNED_BYTE);
+    // glColor3f(1.0f, 1.0f, 1.0f);
+    cameraImgTexture.RenderToViewportFlipY();
+}
 
 // bool Drawer::ParseViewerParamFile(cv::FileStorage &fSettings){
 //     bool b_miss_params = false;
@@ -188,8 +207,9 @@ void Drawer::DrawMapPoints(KeyFrame* kf, const float * color){
  * 
  * @param rvs vectors of RandomVector rype points
  */
-void Drawer::DrawSonar() {
-    std::vector<point> rvs = mpFrames->GetCurrentKeyFrame()->GetSonarFullScan();
+void Drawer::DrawSonar(KeyFrame* kf) {
+    // std::vector<point> rvs = mpFrames->GetCurrentKeyFrame()->GetSonarFullScan();
+    std::vector<point> rvs = kf->GetSonarFullScan();
     if (rvs.empty()) {
         std::cerr << "Point cloud is empty!" << std::endl;
         return;
@@ -219,7 +239,6 @@ void Drawer::DrawSonar() {
             glColor3f(0, 0, 0);
             // glVertex2d(p.hat[0], p.hat[1]);
             glVertex2d(p.hat[0], p.hat[1]);
-
         }
         glEnd();
         // pangolin::FinishFrame();
@@ -232,10 +251,10 @@ void Drawer::DrawSonar() {
  * @brief draw Keyframes and mappoints
  * 
  * @param bDrawKF whether draw Keyframes
- * @param bDrawGraph whether draw mappoints
+ * @param bDrawSonarPoints whether draw mappoints
  * @param bDrawInertialGraph whether draw inertial graph
  */
-void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph){
+void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, const bool bDrawInertialGraph){
     const float &w = mKeyFrameSize;
     const float h = w*0.75;
     const float z = w*0.6;
@@ -245,7 +264,7 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool
     if(bDrawKF){
         for(int i=0;i<mpFrames->Size();i++){
             KeyFrame* cur = mpFrames->GetKeyFrameByID(i);
-            DrawFrame(cur, red);
+            DrawFrame(cur, red, bDrawKF, bDrawSonarPoints);
             // DrawMapPoints(cur, red);
         }
     }

@@ -44,10 +44,31 @@ const std::vector<Eigen::VectorXd>& KeyFrame::GetSonarMeasurements(){
     return mvFsm;
 }
 
+const bool KeyFrame::HaveSonarFullScan(){
+    return mvSonarFullScan.size()!=0;
+}
+
+const cv::Mat& KeyFrame::GetCameraImage(){
+    return mCimg;
+}
+
+const bool KeyFrame::HaveCameraImage(){
+    return mCimg.data!=nullptr;
+}
+
 void KeyFrame::Print(){
     std::cout<<"KeyFrame info:";
     mKfPose.Print();
     std::cout<<std::endl;
+}
+
+void KeyFrame::LoadCameraImg(std::string filename){
+    mCimg = cv::imread(filename);
+    if(mCimg.data == nullptr){
+        std::cerr<<"camera image not exist"<<std::endl;
+        return;
+    }
+    // std::cout<<"load ok"<<std::endl;
 }
 
 void KeyFrame::Transform(motion transform){

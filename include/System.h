@@ -37,7 +37,7 @@ public:
     void TrackMono(MeasurementPackage meas);
     void SetUp();
     //void Plot();
-    void PlotTrajectory();
+    // void PlotTrajectory();
     void Reset();
     void SaveTrajectory(const std::string &filename);
     void SaveTrajectoryFromDatabase(const std::string &filename);

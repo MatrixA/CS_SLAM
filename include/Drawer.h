@@ -15,9 +15,10 @@ public:
 
     void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
     void DrawMapPoints(KeyFrame* kf, const float * color);
-    void DrawSonar();
-    void DrawFrame(KeyFrame *kf, const float* color);
-    void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
+    void DrawSonar(KeyFrame *kf);
+    void DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFrames, const bool bDrawSonarPoints);
+    void DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, const bool bDrawInertialGraph);
+    void PlotImage(KeyFrame *kf);
 
 private:
     float mCameraSize;

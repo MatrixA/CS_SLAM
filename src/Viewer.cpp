@@ -19,6 +19,7 @@ void Viewer::AddCurrentFrame(KeyFrame* KfCurrent, unsigned long long timestamp_)
     mlTimestamp = timestamp_;
 }
 
+
 void Viewer::UpdateMap(){
     std::unique_lock<std::mutex> lock(mMutexViwerData);
     assert(mpMap != nullptr);
@@ -34,7 +35,7 @@ void Viewer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera){
 }
 
 void Viewer::ThreadLoop(){
-    pangolin::CreateWindowAndBind("MySLAM", 1024, 768);
+    pangolin::CreateWindowAndBind("MySLAM", 1710, 768);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -69,10 +70,10 @@ void Viewer::ThreadLoop(){
         .SetAspect(1024.0f/768.0f)
         .SetHandler(new pangolin::Handler3D(vis_sonar));
 
-
     pangolin::View& d_camera = pangolin::CreateDisplay()
         .SetBounds(0, 0.5, 0.0, 1.0)
-        .SetAspect(1024.0f/768.0f);
+        // .SetAspect(1024.0f/768.0f)
+        .SetLock(pangolin::LockRight, pangolin::LockBottom);
 
     pangolin::Display("Camera_Sonar")
         .SetBounds(0,1,0.7,1)
@@ -92,24 +93,35 @@ void Viewer::ThreadLoop(){
         std::unique_lock<std::mutex> lock(mMutexViwerData);
         
         if(mKfCurrent){
-            mpDrawer->DrawFrame(mKfCurrent, blue);//画关键帧以及观测点
-            FollowCurrentFrame(vis_pose);//视角移动
+            mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
+            if(menuFollowCamera){
+                FollowCurrentFrame(vis_pose);//视角移动
+            }
             // mpDrawer->DrawKeyFrames(true,false,false);
-            // if()
             d_sonar.Activate(vis_sonar);
-            mpDrawer->DrawSonar();//画声纳图像
-            // vis_cam.Activate();
-            // mpDrawer->PlotImage();//画相机
-            
+            if(mKfCurrent->HaveSonarFullScan()){
+                mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
+                mKfLast = mKfCurrent;
+                mbInitKf = true;
+            }else if(mbInitKf){
+                mpDrawer->DrawSonar(mKfLast);//draw backed sonar image
+            }
+            // std::cout<<"have "<<(mKfCurrent->GetCameraImage().data != nullptr)<<std::endl;
+            if(mKfCurrent->HaveCameraImage()){
+                // std::cout<<"have pic"<<std::endl;
+                d_camera.Activate();
+                glColor3f(1.0f, 1.0f, 1.0f);
+                mpDrawer->PlotImage(mKfCurrent);//画相机
+            }
             // std::cout<<"ok?"<<std::endl;
-//             cv::Mat img = PlotFrameImage();
-//             cv::imshow("image", img);
-//             cv::waitKey(1);
+            // cv::Mat img = PlotFrameImage();
+            // cv::imshow("image", img);
+            // cv::waitKey(1);
         }
 
         if(mpMap){
             d_display.Activate(vis_pose);
-            mpDrawer->DrawKeyFrames(true,false,false);
+            mpDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowPoints,false);
             // mpDrawer->DrawFrame();
             // mpDrawer->DrawMapPoints();
         }
