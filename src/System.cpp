@@ -12,16 +12,27 @@ System::System(YAML::Node SensorConfig){
     mpFramesDatabase = new Frames();
     mpViewer = new Viewer(mpMap, mpFramesDatabase);
     mptViewer = new std::thread(&Viewer::ThreadLoop,mpViewer);
-    mpScanFormer = new ScanFormer();
-    
-    mpASEKF = new ASEKF(mpFramesDatabase);
+
+    mpEKF = new EKF();
+    mpMSCKF = new MSCKF(mpFramesDatabase);
+    mpScanFormer = new ScanFormer(mpEKF);
     mpLoopClosing = new LoopClosing(mpFramesDatabase);
+    mpLocalMapper = new LocalMapper(mpEKF, mpMSCKF, mpFramesDatabase);
 }
 
 System::~System(){
     
 }
 
+void System::Initialize(){
+
+    mbInit = true;
+}
+/**
+ * @brief save Trajectory from MSCKF using filename
+ *        format : id x y z
+ * @param filename 
+ */
 void System::SaveTrajectory(const std::string &filename){
     std::ofstream outfile;
     outfile.open(filename);
@@ -29,8 +40,8 @@ void System::SaveTrajectory(const std::string &filename){
         std::cout<<"open file fail"<<std::endl;
         return;
     }
-//ASEKF
-    Eigen::VectorXd poses = mpASEKF->GetX();
+//MSCKF
+    Eigen::VectorXd poses = mpMSCKF->GetX();
 //DR
     // Eigen::VectorXd poses = mpScanFormer->getx_ss();
     int tot = poses.size()/3;
@@ -43,6 +54,11 @@ void System::SaveTrajectory(const std::string &filename){
     outfile.close();
 }
 
+/**
+ * @brief save Trajectory from Database
+ *        format : id x y z
+ * @param filename 
+ */
 void System::SaveTrajectoryFromDatabase(const std::string &filename){
     std::ofstream outfile;
     outfile.open(filename);
@@ -58,6 +74,11 @@ void System::SaveTrajectoryFromDatabase(const std::string &filename){
     outfile.close();
 }
 
+/**
+ * @brief using AHRS measurement to update EKF in ScanFormer 
+ * 
+ * @param meas - AHRS measurement
+ */
 void System::TrackAHRS(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
@@ -78,6 +99,11 @@ void System::TrackAHRS(MeasurementPackage meas){
     return ;
 }
 
+/**
+ * @brief using DVL measurement to update EKF in ScanFormer
+ * 
+ * @param meas - DVL measurement
+ */
 void System::TrackDVL(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
@@ -97,6 +123,11 @@ void System::TrackDVL(MeasurementPackage meas){
     return ;
 }
 
+/**
+ * @brief using DS measurement to update EKF in ScanFormer
+ * 
+ * @param meas - DS measurement
+ */
 void System::TrackDS(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
@@ -116,11 +147,17 @@ void System::TrackDS(MeasurementPackage meas){
     return ;
 }
 
-
+/**
+ * @brief using sonar measurement to update EKF in Scan Former and form full scan
+ * 
+ * @param meas - sonar data
+ */
 void System::TrackSonar(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
         std::cout<<"first is "<<meas.sensor_type_<<std::endl;
+        // mpFramesDatabase->add(KeyFrame());
+        // mpViewer->RefreshCurrentFrame(timestamp_now);
     }
     // std::cout<<"dt:";
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
@@ -129,35 +166,36 @@ void System::TrackSonar(MeasurementPackage meas){
         std::cerr << "ERROR: datas not sequential." << std::endl;
         exit(-1);
     }
-    
     // std::cout<<"--Start mpScanFormer->UseSonar"<<std::endl;
     // std::cout<<"In TrackSonar raw:"<<meas.raw_measurements_.size()<<std::endl;
     mpScanFormer->UseSonar(meas.raw_measurements_,dt);
     // std::cout<<"--Over mpScanFormer->UseSonar"<<std::endl;
     scnt++;
     if(mpScanFormer->IsFull()){
-        if(!mpASEKF->IsInitialized()){
-            std::cout<<"Initialize ASEKF:"<<(mpScanFormer->GetFullMotion().hat)<<std::endl;
-            mpASEKF->Initialize(mpScanFormer->GetFullMotion());
+        if(!mpMSCKF->IsInitialized()){
+            std::cout<<"Initialize MSCKF:"<<(mpScanFormer->GetFullMotion().hat)<<std::endl;
+            mpMSCKF->Initialize(mpScanFormer->GetFullMotion());
         }else{
             // std::cout<<"AddPose"<< mpScanFormer->GetFullMotion().GetPose().hat<< std::endl;
             // std::cout<<"predict "<<std::endl;
-            mpASEKF->Prediction(mpScanFormer->GetFullMotion());
-            KeyFrame* curP=new KeyFrame();
-            curP->SetPose(mpASEKF->GetCurrentPose());
+            mpMSCKF->Prediction(mpScanFormer->GetFullMotion());
+            KeyFrame* curP=new KeyFrame(mpMSCKF->GetCurrentPose());
+            // std::cout<<"fs size:"<<(mpScanFormer->GetFullScan()).size()<<std::endl;
             curP->SetSonarFullScan(mpScanFormer->GetFullScan());
-            curP->SetSonarMeasurements(mpScanFormer->GetScan());
+            // curP->SetSonarMeasurements(mpScanFormer->GetScan());
             mpFramesDatabase->add(*curP);
+            // std::cout<<"added in Sonar:"<<std::endl;
+            // curP->Print();
             // KeyFrame* curP = mpFramesDatabase->GetCurrentKeyFrame();
-            mpViewer->AddCurrentFrame(curP, timestamp_now);
+            mpViewer->RefreshCurrentFrame(timestamp_now);
             const std::vector<int>& alternative = mpFramesDatabase->GetCurrentOverlaps(0.1);
             for(int i=0; i<alternative.size(); i++){
                 KeyFrame* agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
                 motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
-                mpASEKF->Update(alternative[i],1,estimate);
+                mpMSCKF->Update(alternative[i],1,estimate);
             }
         }
-        // mpASEKF.Update(mpScanFormer->GetFullMotion());
+        // mpMSCKF.Update(mpScanFormer->GetFullMotion());
         mpScanFormer->Reset();
     }
 //         if(scnt == FSCAN_SIZE){
@@ -174,7 +212,7 @@ void System::TrackMono(MeasurementPackage meas){
         timestamp_now = meas.timestamp_;
         std::cout<<"first is "<<meas.sensor_type_<<std::endl;
         return ;
-    }    
+    }
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
     if(dt < 0){
@@ -182,12 +220,17 @@ void System::TrackMono(MeasurementPackage meas){
         exit(-1);
     }
     // std::cout<<"--Start mpScanFormer->UseDS"<<std::endl;
-    // mpASEKF->Prediction(mpScanFormer->GetFullMotion());
-    KeyFrame* curP=new KeyFrame();
+    // mpMSCKF->Prediction(mpScanFormer->GetFullMotion());
+    KeyFrame* curP=new KeyFrame(mpMSCKF->GetCurrentPose());
     // std::cout<<"try "<<meas.filename<<std::endl;
-    curP->SetPose(mpFramesDatabase->GetCurrentKeyFrame()->GetPose());
     curP->LoadCameraImg(meas.filename);
-    mpViewer->AddCurrentFrame(curP, timestamp_now);
+    //至少第二帧图像时才刷新
+    mpLocalMapper->UseMono(curP, dt, 50);
+    //     mpFramesDatabase->add(*curP, 1);
+    // }
+    // mpViewer->add(*curP, 1);
+    mpViewer->RefreshCurrentFrame(timestamp_now);
+    
     // std::cout<<"Add curP OK"<<std::endl;
     timestamp_now = meas.timestamp_;
     return ;
@@ -201,11 +244,17 @@ void System::SetUp(){
     return ;
 }
 
+bool System::isInitialized(){
+    return mbInit;
+}
+
+
+
 // void System::Plot(){
 //     pangolin::BindToContext(window_name);
 //     glEnable(GL_DEPTH_TEST);
 //     while( !pangolin::ShouldQuit() ){
-//         Eigen::VectorXd all_pose=mpASEKF.GetX();
+//         Eigen::VectorXd all_pose=mpMSCKF.GetX();
 //         int pointNums =  all_pose.size()/3;
 //         glPointSize(20.0);
 //         glBegin(GL_POINTS);
@@ -260,4 +309,4 @@ void System::SetUp(){
 
 
 
-}
+}//namespace CS_SLAM

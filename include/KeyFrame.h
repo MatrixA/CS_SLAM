@@ -25,7 +25,7 @@ public:
     void SetPose(pose kfPose);
     const std::vector<point>& GetSonarFullScan();
     void SetSonarFullScan(std::vector<point> fs);
-    const std::vector<Eigen::VectorXd>& GetSonarMeasurements();
+    // const std::vector<Eigen::VectorXd>& GetSonarMeasurements();
     void SetSonarMeasurements(const std::vector<Eigen::VectorXd>& fsm);
     const bool HaveSonarFullScan();
     void LoadCameraImg(std::string filename);

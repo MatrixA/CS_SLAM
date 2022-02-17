@@ -176,9 +176,9 @@ motion LoopClosing::ScanMatching(KeyFrame* kfn, KeyFrame* kfi){
 //对两full scan做扫描匹配得到相对运动及其不确定性估计
     motion d;
     std::cout<<"start scan matching, new kf is:"<<std::endl;
-    kfn->Print();
+    // kfn->Print();
     std::cout<<"old kfi is:"<<std::endl;
-    kfi->Print();
+    // kfi->Print();
     //获得初始位移估计hat_q
     motion q = pose(kfi->GetPose().hat,kfi->GetPose().P).tail2tail(pose(kfn->GetPose().hat,kfn
     ->GetPose().P));

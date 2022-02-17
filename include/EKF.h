@@ -23,6 +23,7 @@ public:
     ~EKF();
     Eigen::VectorXd GetX();
     Eigen::MatrixXd GetP();
+    pose GetPose();
 
     void initialize(const Eigen::VectorXd x_in);
     bool isInitialized();

@@ -14,7 +14,7 @@ class Frames{
 public:
     Frames();
     ~Frames();
-    void add(KeyFrame pKF);
+    void add(KeyFrame pKF, int status=0);
     // void erase(KeyFrame* pKF);
     void erase(int ind);
 
@@ -24,6 +24,10 @@ public:
     int Size();
     KeyFrame* GetCurrentKeyFrame();
     KeyFrame* GetKeyFrameByID(int id);
+    KeyFrame* GetLastCameraKeyFrame();
+
+    bool IsInitiliedCam();
+    bool HaveFrames();
 
     std::vector<int> GetOverlaps(KeyFrame kf, int threshold /*=1*/);
     std::vector<int> GetCurrentOverlaps(int threshold /*=1*/);
@@ -33,6 +37,7 @@ public:
 private:
     std::mutex mMutex;
     std::vector<KeyFrame> KeyFrameDatabase;
+    KeyFrame* mpLastCameraKeyFrame;
 };
 
 }

@@ -4,13 +4,22 @@ namespace CS_SLAM{
 
 Frames::Frames(){
     KeyFrameDatabase.resize(0);
+    mpLastCameraKeyFrame = nullptr;
 }
 
 
-
-void Frames::add(KeyFrame kf){
+/**
+ * @brief add KeyFrame to FramesDatabase, typeID specify types.
+ *        
+ * @param kf - KeyFrame to add
+ * @param status - 1:camera
+ */
+void Frames::add(KeyFrame kf, int typeID){
     std::unique_lock<std::mutex> lock(mMutex);
     KeyFrameDatabase.push_back(kf);
+    if(typeID==1){
+        mpLastCameraKeyFrame = &KeyFrameDatabase.back();
+    }
     return ;
 }
 
@@ -37,14 +46,27 @@ int Frames::Size(){
 
 KeyFrame* Frames::GetCurrentKeyFrame(){
     std::unique_lock<std::mutex> lock(mMutex);
-    if(KeyFrameDatabase.size()==0)return new KeyFrame();
-    else return &(KeyFrameDatabase.back());
+    return &(KeyFrameDatabase.back());
 }
 
 KeyFrame* Frames::GetKeyFrameByID(int id){
     std::unique_lock<std::mutex> lock(mMutex);
     return &KeyFrameDatabase[id];
 }
+
+KeyFrame* Frames::GetLastCameraKeyFrame(){
+    std::unique_lock<std::mutex> lock(mMutex);
+    return mpLastCameraKeyFrame;
+}
+
+bool Frames::IsInitiliedCam(){
+    return mpLastCameraKeyFrame!=nullptr;
+}
+
+bool Frames::HaveFrames(){
+    return KeyFrameDatabase.size()>0;
+}
+
 
 std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
 /*

@@ -19,7 +19,7 @@ public:
     Viewer(LocalMap* pMap, Frames* pFrames);
     void Close();
     void UpdateMap();
-    void AddCurrentFrame(KeyFrame* current_frame, unsigned long long timestamp_);
+    void RefreshCurrentFrame(unsigned long long timestamp_);
     void ThreadLoop();
     void FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera);
     // cv::Mat PlotFrameImage();

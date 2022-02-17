@@ -6,7 +6,8 @@ namespace CS_SLAM{
 KeyFrame::KeyFrame(){
     mKfPose.hat = Eigen::Vector3d::Zero(3);
     mKfPose.P = Eigen::Matrix3d::Zero(3,3);
-    mvSonarFullScan.resize(0);
+    // mvSonarFullScan.resize(0);
+    mCimg = cv::Mat::zeros(mCimg.rows, mCimg.cols, CV_32S);
     return ;
 }
 
@@ -14,15 +15,21 @@ KeyFrame::~KeyFrame(){};
 KeyFrame::KeyFrame(pose kf){
     mKfPose.hat = kf.hat;
     mKfPose.P = kf.P;
+    // mvSonarFullScan.resize(0);
+    mCimg = cv::Mat::zeros(mCimg.rows, mCimg.cols, CV_32S);
 }
 
-KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,kfPosP){}
+KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,kfPosP){
+    // mvSonarFullScan.resize(0);
+    mCimg = cv::Mat::zeros(mCimg.rows, mCimg.cols, CV_32S);
+}
 
 void KeyFrame::SetPose(pose kfPose){
     mKfPose = kfPose;
 };
 
 pose KeyFrame::GetPose(){
+    // std::cout<<"Try to "<<mKfPose.hat<<mKfPose.P<<std::endl;
     return mKfPose;
 }
 
@@ -40,12 +47,12 @@ void KeyFrame::SetSonarMeasurements(const std::vector<Eigen::VectorXd>& fsm){
     mvFsm.assign(fsm.begin(),fsm.end());
 }
 
-const std::vector<Eigen::VectorXd>& KeyFrame::GetSonarMeasurements(){
-    return mvFsm;
-}
+// const std::vector<Eigen::VectorXd>& KeyFrame::GetSonarMeasurements(){
+//     return mvFsm;
+// }
 
 const bool KeyFrame::HaveSonarFullScan(){
-    return mvSonarFullScan.size()!=0;
+    return mvSonarFullScan.size()>0 && mvSonarFullScan.size()<500;
 }
 
 const cv::Mat& KeyFrame::GetCameraImage(){
@@ -57,9 +64,9 @@ const bool KeyFrame::HaveCameraImage(){
 }
 
 void KeyFrame::Print(){
-    std::cout<<"KeyFrame info:";
+    // std::cout<<"KeyFrame info:";
     mKfPose.Print();
-    std::cout<<std::endl;
+    // std::cout<<std::endl;
 }
 
 void KeyFrame::LoadCameraImg(std::string filename){
@@ -72,7 +79,7 @@ void KeyFrame::LoadCameraImg(std::string filename){
 }
 
 void KeyFrame::Transform(motion transform){
-    mKfPose = transform.tail2tail(mKfPose);
+    mKfPose = mKfPose.compound(transform);
     return ;
 }
 

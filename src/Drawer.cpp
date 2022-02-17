@@ -4,7 +4,6 @@ namespace CS_SLAM{
     
 Drawer::Drawer(LocalMap* pMap, Frames* pFrames):mpMap(pMap),mpFrames(pFrames){
     // cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
-
     // bool is_correct = ParseViewerParamFile(fSettings);
     mCameraSize = 1;
     mCameraLineWidth = 1;
@@ -32,6 +31,9 @@ void Drawer::DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFram
     const float height = 768;
 
     glPushMatrix();
+    assert(kf!=nullptr);
+    // std::cout<<"have!!!!!"<<mpFrames->Size()<<" KeyFrames in total"<<std::endl;
+    // kf->Print();
     pangolin::OpenGlMatrix Twc((kf->GetPose()).toSE3().matrix());
     glMultMatrixd(Twc.m);
 
@@ -61,12 +63,13 @@ void Drawer::DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFram
     }
     glEnd();
 
-    if(bDrawSonarPoints){
+    if(bDrawSonarPoints && kf->HaveSonarFullScan()){
         glBegin(GL_POINTS);
         glColor3f(color[0]/2,(color[1]+1.0)/2,(color[2]+1.0)/2); //坐标与landmark的颜色有关系
         glPointSize(mPointSize);
-        std::vector<point> landmarks = kf->GetSonarFullScan();
-        for(point &p:landmarks){
+        const std::vector<point> landmarks = kf->GetSonarFullScan();
+        // std::cout<<"draw "<<landmarks.size()<<" sonar points"<<std::endl;
+        for(int i=0;i<landmarks.size();i++){
             // glColor3f(1,0,0);
             // glVertex3d(5,0,0);
             // glColor3f(0,1,0);
@@ -76,7 +79,7 @@ void Drawer::DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFram
 
             // glVertex3d(p.hat[0],p.hat[1],0);
             // glVertex3d(1,0,0);
-            glVertex3d(p.hat[1],0,p.hat[0]);
+            glVertex3d(landmarks[i].hat[1],0,landmarks[i].hat[0]);
         }
         glEnd();
     }
@@ -88,6 +91,7 @@ void Drawer::DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFram
 
 void Drawer::PlotImage(KeyFrame *kf){
     pangolin::GlTexture cameraImgTexture(384/* d */, 288, GL_RGB, false, 0, GL_BGR, GL_UNSIGNED_BYTE);
+    // std::cout<<"size: "<<(kf->GetCameraImage()).rows<<" | "<<(kf->GetCameraImage()).cols<<std::endl;
     cameraImgTexture.Upload(kf->GetCameraImage().data, GL_BGR, GL_UNSIGNED_BYTE);
     // glColor3f(1.0f, 1.0f, 1.0f);
     cameraImgTexture.RenderToViewportFlipY();
@@ -214,13 +218,10 @@ void Drawer::DrawSonar(KeyFrame* kf) {
         std::cerr << "Point cloud is empty!" << std::endl;
         return;
     }
-
     // pangolin::OpenGlRenderState s_cam(
     //         pangolin::ProjectionMatrix(1024, 768, 25, 25, 512, 389, 0.1, 1000),
     //         pangolin::ModelViewLookAt(0, 0, 5, 0, 0, 0, pangolin::AxisY)
     // );
-
-
     // pangolin::View &d_cam = pangolin::CreateDisplay()
     //     .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
     //     .SetHandler(new pangolin::Handler3D(s_cam));
@@ -229,20 +230,21 @@ void Drawer::DrawSonar(KeyFrame* kf) {
         // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // d_cam.Activate(s_cam);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        glPointSize(2);
-        glBegin(GL_LINE_STRIP);
-        for (auto &p: rvs) {
-            // std::cout<<"("<<p.hat[0]<<","<<p.hat[1]<<")"<<std::endl;
-            // std::cout<<"("<<r<<","<<theta<<")"<<std::endl;
-            glColor3f(0, 0, 0);
-            // glVertex2d(p.hat[0], p.hat[1]);
-            glVertex2d(p.hat[0], p.hat[1]);
-        }
-        glEnd();
-        // pangolin::FinishFrame();
-        usleep(5000);   // sleep 5 ms
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glPointSize(2);
+    glBegin(GL_LINE_STRIP);
+    std::cout<<"tot---"<<rvs.size()<<std::endl;
+    for(int i=0;i<rvs.size();i++){
+        glColor3f(0, 0, 0);
+        // glVertex2d(p.hat[0], p.hat[1]);
+        std::cout<<"wrong i:"<<i<<std::endl;
+        // std::cout<<"sonar points:"<<rvs->size()<<std::endl;
+        glVertex2d(rvs[i].hat(0),rvs[i].hat(1));
+        // glVertex2d((rvs->begin()+i)->hat(0), (rvs->begin()+i)->hat(1));
+    }
+    glEnd();
+    // pangolin::FinishFrame();
+    usleep(5000);   // sleep 5 ms
     // }
     return;
 }
@@ -262,8 +264,9 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, cons
 
     // const std::vector<KeyFrame> vpKFs = mpFrames->GetAllKeyFrames();
     if(bDrawKF){
-        for(int i=0;i<mpFrames->Size();i++){
+        for(int i=0;i<mpFrames->Size();i+=30){
             KeyFrame* cur = mpFrames->GetKeyFrameByID(i);
+            std::cout<<"id "<<i<<std::endl;
             DrawFrame(cur, red, bDrawKF, bDrawSonarPoints);
             // DrawMapPoints(cur, red);
         }
@@ -490,6 +493,10 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, cons
     // }
 }
 
+KeyFrame* Drawer::GetCurrentFrame(){
+    assert(mpFrames->HaveFrames()==true);
+    return mpFrames->GetCurrentKeyFrame();
+}
 // void Drawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc){
 //     const float &w = mCameraSize;
 //     const float h = w*0.75;

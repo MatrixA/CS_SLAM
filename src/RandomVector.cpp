@@ -109,6 +109,7 @@ RandomVector RandomVector::rinverse(){
  * @return resultant random vector 
  */
 RandomVector RandomVector::tail2tail(RandomVector b){
+    std::cout<<hat<<"|"<<P<<std::endl;
     return (this->rinverse()).compound(b);
 }
 
@@ -118,6 +119,8 @@ RandomVector RandomVector::tail2tail(RandomVector b){
  * @return Eigen::Isometry3d 
  */
 Eigen::Isometry3d RandomVector::toSE3(){
+    Print();
+    if(hat.size()!=3)std::cout<<"bu = 3 de"<<hat<<std::endl;
     assert(hat.size()==3);
     Eigen::Isometry3d ret;
     ret(0,0)=1;ret(0,1)=0;ret(0,2)=0;ret(0,3)=hat(0);

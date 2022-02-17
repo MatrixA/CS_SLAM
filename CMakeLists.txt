@@ -77,15 +77,16 @@ ${GTEST_INCLUDE_DIRS}
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 add_library(${PROJECT_NAME} SHARED
-src/EKF.cpp
 # src/Atlas.cpp
+src/Converter.cpp
+src/EKF.cpp
 src/LocalMap.cpp
-src/ASEKF.cpp
+src/LocalMapper.cpp
+src/MSCKF.cpp
 src/RandomVector.cpp
 src/MapPoint.cpp
 src/KeyFrame.cpp
 src/ScanFormer.cpp
-src/Converter.cpp
 # src/MapDrawer.cpp
 src/LoopClosing.cpp
 src/MeasurementPackage.cpp
@@ -95,12 +96,13 @@ src/Viewer.cpp
 src/Drawer.cpp
 src/Frames.cpp
 # src/FrameDrawer.cpp
-include/ASEKF.h
-include/LocalMap.h
+include/Converter.h
 include/EKF.h
+include/LocalMap.h
+include/LocalMapper.h
+include/MSCKF.h
 include/RandomVector.h
 include/KeyFrame.h
-include/LocalMap.h
 include/Drawer.h
 # include/MapDrawer.ha
 # include/MapPoint.h
@@ -115,7 +117,6 @@ include/Frames.h
 include/Viewer.h
 include/LoopClosing.h
 # include/SetParameters.h
-include/Converter.h
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/examples)
@@ -143,10 +144,10 @@ examples/cave.cpp)
 target_link_libraries(cave ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
-add_executable(TEST_ASEKF
-test/TEST_ASEKF.cpp)
-target_link_libraries(TEST_ASEKF ${PROJECT_NAME})
-# asekf_no_problem
+add_executable(TEST_MSCKF
+test/TEST_MSCKF.cpp)
+target_link_libraries(TEST_MSCKF ${PROJECT_NAME})
+# MSCKF_no_problem
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
 add_executable(TEST_SCANMATCHING
@@ -158,4 +159,7 @@ add_executable(TEST_DRAWER
 test/TEST_DRAWER.cpp)
 target_link_libraries(TEST_DRAWER ${PROJECT_NAME})
 
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+add_executable(TEST_EKF
+test/TEST_EKF.cpp)
+target_link_libraries(TEST_EKF ${PROJECT_NAME})

@@ -24,13 +24,14 @@ class EKF;
 class ScanFormer{
 public:
     ScanFormer();
+    ScanFormer(EKF* mpEKF_);
     ~ScanFormer();
     
     //重置ScanFormer
     void Reset();
     bool IsFull();
 
-    const std::vector<point>& GetFullScan();
+    std::vector<point> GetFullScan();
     const std::vector<Eigen::VectorXd>& GetScan();
 
     void BeamSegment(int thresh);
@@ -47,12 +48,11 @@ public:
     void UseSonar(Eigen::VectorXd data_sonar, double dt);
     //使用DS数据更新EKF
     void UseDS(Eigen::VectorXd data_ds, double dt);
-    
+
 
 
     Eigen::VectorXd getx_ss();
 
-    void SetEKF(EKF* ekf);
     //获得EKF的当前位姿(一般只在扫描一轮结束后调用)
     motion GetFullMotion();
     // void ScanFormer::DrawFullScan();

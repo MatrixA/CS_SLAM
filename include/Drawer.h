@@ -3,6 +3,7 @@
 
 #include "LocalMap.h"
 #include "Frames.h"
+#include "KeyFrame.h"
 #include <pangolin/pangolin.h>
 
 namespace CS_SLAM
@@ -19,6 +20,7 @@ public:
     void DrawFrame(KeyFrame *kf, const float* color, const bool bDrawKeyFrames, const bool bDrawSonarPoints);
     void DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, const bool bDrawInertialGraph);
     void PlotImage(KeyFrame *kf);
+    KeyFrame* GetCurrentFrame();
 
 private:
     float mCameraSize;

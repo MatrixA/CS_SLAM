@@ -7,15 +7,14 @@ ScanFormer类定义
 */
 class KeyFrame;
 
-ScanFormer::ScanFormer(){
+ScanFormer::ScanFormer(EKF* mpEKF_):mpEKF(mpEKF_){
     scan.resize(0);
     x_s.resize(0);
-    mpEKF = new EKF();
 }
 
 ScanFormer::~ScanFormer(){}
 
-const std::vector<point>& ScanFormer::GetFullScan(){
+std::vector<point> ScanFormer::GetFullScan(){
     return z;
 }
 
@@ -275,18 +274,7 @@ void ScanFormer::Reset(){
     // std::cout<<"x_s是"<<x_s.size()<<std::endl;
 }
 
-// void ScanFormer::DrawFullScan(){
-//     glBegin(L_POINTS);
-//     for (int i=0;i<scan.size();i++){
-//         for(int j=0;j<scan[i].rows();j++){
-//             glColor3f(0, 0, 0);
-//             double theta=0.0503*i;
-//             double r=0.2*j;
-//             glVertex3d(r*cos(theta), r*sin(theta), scan[i](j));
-//         }
-//     }
-//     glEnd();
-// }
+
 Eigen::VectorXd ScanFormer::getx_ss(){
     Eigen::VectorXd ans;
     ans.resize(x_s.size()*3);

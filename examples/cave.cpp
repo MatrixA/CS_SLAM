@@ -93,7 +93,6 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YA
     LoadImages(datafile_Camera, data_Camera,CS_SLAM::MeasurementPackage::CAMERA);
 
     //相机读取时间戳和图像试试
-
     data.insert(data.end(),data_DVL.begin(),data_DVL.end());
     data.insert(data.end(),data_AHRS.begin(),data_AHRS.end());
     data.insert(data.end(),data_Sonar.begin(),data_Sonar.end());
@@ -126,7 +125,7 @@ int main(int argc, char **argv){
     int scnt=0;//统计声纳帧以形成fullscan触发不同的滤波器
 
 //     scanFormer.reset();
-//     ASEKF.reset();
+//     MSCKF.reset();
     // std::cout<<dataSequence[1].sensor_type_<<std::endl;
     for(int i=0;i< dataSequence.size();i++){
 //         //DVL或AHRS来了，就更新状态。Sonara来了，就用预测来估计状态。

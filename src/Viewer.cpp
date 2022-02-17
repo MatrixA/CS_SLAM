@@ -2,6 +2,12 @@
 
 namespace CS_SLAM{
 
+/**
+ * @brief Construct a new Viewer:: Viewer object
+ * 
+ * @param pMap - localmap for display
+ * @param pFrames - frames database for display
+ */
 Viewer::Viewer(LocalMap* pMap, Frames* pFrames):mpMap(pMap){
     //viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
     mpDrawer = new Drawer(pMap, pFrames);
@@ -9,16 +15,25 @@ Viewer::Viewer(LocalMap* pMap, Frames* pFrames):mpMap(pMap){
     mViewpointF = 10;
 }
 
+/**
+ * @brief do sth when Viewer close
+ * 
+ */
 void Viewer::Close(){
     mbViewerRunning = false;
 }
 
-void Viewer::AddCurrentFrame(KeyFrame* KfCurrent, unsigned long long timestamp_){
+/**
+ * @brief refresh current keyframe and timestamp to Viewer
+ * 
+ * @param timestamp_ - transport timestamp to Viewer
+ */
+void Viewer::RefreshCurrentFrame(unsigned long long timestamp_){
     std::unique_lock<std::mutex> lock(mMutexViwerData);
-    mKfCurrent = KfCurrent;
+    mKfCurrent = mpDrawer->GetCurrentFrame();
+    if(mKfCurrent==nullptr)std::cout<<"empth current keyframe"<<std::endl;
     mlTimestamp = timestamp_;
 }
-
 
 void Viewer::UpdateMap(){
     std::unique_lock<std::mutex> lock(mMutexViwerData);
@@ -28,12 +43,22 @@ void Viewer::UpdateMap(){
     mbMapUpdated = true;
 }
 
+/**
+ * @brief keep current framed centered in the screen
+ * 
+ * @param vis_camera 
+ */
 void Viewer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera){
+    mKfCurrent->Print();
     Eigen::Matrix4d dos = (mKfCurrent->GetPose()).toSE3().matrix();
     pangolin::OpenGlMatrix m(dos);
     vis_camera.Follow(m, true);
 }
 
+/**
+ * @brief Viewer's main loop
+ * 
+ */
 void Viewer::ThreadLoop(){
     pangolin::CreateWindowAndBind("MySLAM", 1710, 768);
     glEnable(GL_DEPTH_TEST);
@@ -91,20 +116,20 @@ void Viewer::ThreadLoop(){
         menuTimeStamp=Utils::TimeStamp2TimeString(mlTimestamp);
         d_display.Activate(vis_pose);
         std::unique_lock<std::mutex> lock(mMutexViwerData);
-        
+
         if(mKfCurrent){
-            mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
+            // mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
             if(menuFollowCamera){
                 FollowCurrentFrame(vis_pose);//视角移动
             }
             // mpDrawer->DrawKeyFrames(true,false,false);
             d_sonar.Activate(vis_sonar);
+            // std::cout<<"have sonar? "<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
             if(mKfCurrent->HaveSonarFullScan()){
+                // std::cout<<"sonar full scan"<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
                 mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
                 mKfLast = mKfCurrent;
                 mbInitKf = true;
-            }else if(mbInitKf){
-                mpDrawer->DrawSonar(mKfLast);//draw backed sonar image
             }
             // std::cout<<"have "<<(mKfCurrent->GetCameraImage().data != nullptr)<<std::endl;
             if(mKfCurrent->HaveCameraImage()){
@@ -112,7 +137,14 @@ void Viewer::ThreadLoop(){
                 d_camera.Activate();
                 glColor3f(1.0f, 1.0f, 1.0f);
                 mpDrawer->PlotImage(mKfCurrent);//画相机
+                mKfLast = mKfCurrent;
+                mbInitKf = true;
             }
+            // else if(mbInitKf && mKfLast->HaveSonarFullScan()){
+            //     std::cout<<"draw backed Sonar"<<std::endl;
+            //     mpDrawer->DrawSonar(mKfLast);//draw backed sonar image
+            // }
+
             // std::cout<<"ok?"<<std::endl;
             // cv::Mat img = PlotFrameImage();
             // cv::imshow("image", img);
