@@ -42,7 +42,16 @@ namespace CS_SLAM
     //     std::cout<<"angle:"<<euler<<std::endl;
     //     return 1;
     // }
-
+/**
+ * @brief track optical flow using img1 and img2
+ * 
+ * @param img1 
+ * @param img2 
+ * @param R 
+ * @param t 
+ * @param feat_thresh 
+ * @return int 
+ */
     int LocalMapper::Track(cv::Mat img1, cv::Mat img2, cv::Mat& R, cv::Mat& t, int feat_thresh){
         int num_good_pts=0;
         std::vector<cv::Point2f> pts1, pts2;

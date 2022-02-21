@@ -49,7 +49,7 @@ void Viewer::UpdateMap(){
  * @param vis_camera 
  */
 void Viewer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera){
-    mKfCurrent->Print();
+    // mKfCurrent->Print();
     Eigen::Matrix4d dos = (mKfCurrent->GetPose()).toSE3().matrix();
     pangolin::OpenGlMatrix m(dos);
     vis_camera.Follow(m, true);

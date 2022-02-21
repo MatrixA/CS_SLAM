@@ -119,7 +119,7 @@ RandomVector RandomVector::tail2tail(RandomVector b){
  * @return Eigen::Isometry3d 
  */
 Eigen::Isometry3d RandomVector::toSE3(){
-    Print();
+    // Print();
     if(hat.size()!=3)std::cout<<"bu = 3 de"<<hat<<std::endl;
     assert(hat.size()==3);
     Eigen::Isometry3d ret;

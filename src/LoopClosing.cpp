@@ -90,7 +90,7 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
         std::cout<<"start to match, m="<<m<<std::endl;
         for(int i = 0; i<m; i++){
             std::cout<<"here is qk and p"<<std::endl;
-            qk.Print();
+            // qk.Print();
             RandomVector::CompoundP(qk,S_new[i]).Print();
             Eigen::Vector2d n_i=(RandomVector::CompoundP(qk,S_new[i])).hat;
             //找到S_ref中与n_i马氏距离小于X的点

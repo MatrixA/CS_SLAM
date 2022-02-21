@@ -68,17 +68,7 @@ pose EKF::prediction(const double dt){
             sin(x_(3)), cos(x_(3)), 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1;
-    // const double mean=0.0, stddev=0.1;
-    // std::default_random_engine generator;
-    // std::normal_distribution<double> dist(mean, stddev);
-    // double nk0=dist(generator), nk1=dist(generator),nk2=dist(generator), nk3=dist(generator);
-    // std::cout<<nk0<<" "<<nk1<<" "<<nk2<<" "<<nk3<<std::endl;
-    x_.middleRows(0,4) = x_.middleRows(0,4)+R*(dt*x_.middleRows(4,4));
 
-    // x_next<< x_(0)+cos(x_(3))*(x_(4)*dt+nk0*dt*dt/2)-sin(x_(3))*(x_(5)*dt+nk1*dt*dt/2), x_(1)+sin(x_(3))*(x_(4)*dt+nk0*dt*dt/2)+cos(x_(3))*(x_(5)*dt+nk1*dt*dt/2), 
-    //         x_(2)+x_(6)*dt+nk2*dt*dt/2, x_(3)+x_(7)*dt+nk3*dt*dt/2,
-    //         x_(4)+nk0*dt, x_(5)+nk1*dt, x_(6)+nk2*dt, x_(7)+nk3*dt;
-    // x_ = x_next;
     Eigen::Matrix<double, 8, 4>W;    
     W << cos(x_(3))*dt*dt/2,-sin(x_(3))*dt*dt/2,0,0,
          sin(x_(3))*dt*dt/2,cos(x_(3))*dt*dt/2,0,0,
@@ -97,6 +87,18 @@ pose EKF::prediction(const double dt){
             0,0,0,0,0,1,0,0,
             0,0,0,0,0,0,1,0,
             0,0,0,0,0,0,0,1;
+    // const double mean=0.0, stddev=0.1;
+    // std::default_random_engine generator;
+    // std::normal_distribution<double> dist(mean, stddev);
+    // double nk0=dist(generator), nk1=dist(generator),nk2=dist(generator), nk3=dist(generator);
+    // std::cout<<nk0<<" "<<nk1<<" "<<nk2<<" "<<nk3<<std::endl;
+    x_.middleRows(0,4) = x_.middleRows(0,4)+R*(dt*x_.middleRows(4,4));
+
+    // x_next<< x_(0)+cos(x_(3))*(x_(4)*dt+nk0*dt*dt/2)-sin(x_(3))*(x_(5)*dt+nk1*dt*dt/2), x_(1)+sin(x_(3))*(x_(4)*dt+nk0*dt*dt/2)+cos(x_(3))*(x_(5)*dt+nk1*dt*dt/2), 
+    //         x_(2)+x_(6)*dt+nk2*dt*dt/2, x_(3)+x_(7)*dt+nk3*dt*dt/2,
+    //         x_(4)+nk0*dt, x_(5)+nk1*dt, x_(6)+nk2*dt, x_(7)+nk3*dt;
+    // x_ = x_next;
+
 
     Q_ =0.0001*Eigen::MatrixXd::Identity(4,4);
     P_ = F_ * P_ * F_.transpose()+ W*Q_*W.transpose();
