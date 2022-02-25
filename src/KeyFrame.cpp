@@ -83,6 +83,13 @@ void KeyFrame::Transform(motion transform){
     return ;
 }
 
+unsigned long long KeyFrame::GetTimeStamp(){
+    return mTimeStamp;
+}
+
+void KeyFrame::SetTimeStamp(unsigned long long timestamp){
+    mTimeStamp = timestamp;
+}
 
 }
 

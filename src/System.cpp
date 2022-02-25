@@ -46,12 +46,11 @@ void System::SaveTrajectory(const std::string &filename){
     // Eigen::VectorXd poses = mpScanFormer->getx_ss();
     int tot = poses.size()/3;
     std::cout<<"total "<<tot<<" poses. "<<std::endl;
-
     for(int i = 0; i<poses.size()/3;i++){
         outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
     }
-    std::cout<<"write OK"<<std::endl;
     outfile.close();
+    std::cout<<"write OK"<<std::endl;
 }
 
 /**
@@ -67,8 +66,11 @@ void System::SaveTrajectoryFromDatabase(const std::string &filename){
         return;
     }
     for(int i=0;i < mpFramesDatabase->Size();i++){
-        Eigen::Vector3d tmp = (mpFramesDatabase->GetKeyFrameByID(i)->GetPose()).hat;
-        outfile<< i+1 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<std::endl;
+        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i);
+        Eigen::Vector3d tmp = (tmpKF->GetPose()).hat;
+        // outfile<< i+1 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<" "<<1<<" "<<0<<" "<<0<<" "<<0<<std::endl;
+        //tum: time, x,y,z,qx,qy,qz,qw;
+        outfile<<std::setprecision(12)<<(double)tmpKF->GetTimeStamp()/1e9 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<" "<<1<<" "<<0<<" "<<0<<" "<<0<<std::endl;
     }
     std::cout<<"write OK"<<std::endl;
     outfile.close();
@@ -180,6 +182,7 @@ void System::TrackSonar(MeasurementPackage meas){
             // std::cout<<"predict "<<std::endl;
             mpMSCKF->Prediction(mpScanFormer->GetFullMotion());
             KeyFrame* curP=new KeyFrame(mpMSCKF->GetCurrentPose());
+            curP->SetTimeStamp(meas.timestamp_);
             // std::cout<<"fs size:"<<(mpScanFormer->GetFullScan()).size()<<std::endl;
             curP->SetSonarFullScan(mpScanFormer->GetFullScan());
             // curP->SetSonarMeasurements(mpScanFormer->GetScan());
@@ -222,6 +225,7 @@ void System::TrackMono(MeasurementPackage meas){
     // std::cout<<"--Start mpScanFormer->UseDS"<<std::endl;
     // mpMSCKF->Prediction(mpScanFormer->GetFullMotion());
     KeyFrame* curP=new KeyFrame(mpMSCKF->GetCurrentPose());
+    curP->SetTimeStamp(meas.timestamp_);
     // std::cout<<"try "<<meas.filename<<std::endl;
     curP->LoadCameraImg(meas.filename);
     //至少第二帧图像时才刷新

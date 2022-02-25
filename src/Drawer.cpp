@@ -232,12 +232,12 @@ void Drawer::DrawSonar(KeyFrame* kf) {
         // d_cam.Activate(s_cam);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glPointSize(2);
-    glBegin(GL_LINE_STRIP);
+    glBegin(GL_POINTS);
     std::cout<<"tot---"<<rvs.size()<<std::endl;
     for(int i=0;i<rvs.size();i++){
         glColor3f(0, 0, 0);
         // glVertex2d(p.hat[0], p.hat[1]);
-        std::cout<<"wrong i:"<<i<<std::endl;
+        // std::cout<<"wrong i:"<<i<<std::endl;
         // std::cout<<"sonar points:"<<rvs->size()<<std::endl;
         glVertex2d(rvs[i].hat(0),rvs[i].hat(1));
         // glVertex2d((rvs->begin()+i)->hat(0), (rvs->begin()+i)->hat(1));
@@ -264,12 +264,16 @@ void Drawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawSonarPoints, cons
 
     // const std::vector<KeyFrame> vpKFs = mpFrames->GetAllKeyFrames();
     if(bDrawKF){
-        for(int i=0;i<mpFrames->Size();i+=30){
+        glBegin(GL_LINE_STRIP);
+    
+        for(int i=0;i<mpFrames->Size();i++){
             KeyFrame* cur = mpFrames->GetKeyFrameByID(i);
-            std::cout<<"id "<<i<<std::endl;
-            DrawFrame(cur, red, bDrawKF, bDrawSonarPoints);
+            // std::cout<<"id "<<i<<std::endl;
+            glVertex3f(cur->GetPose().hat(0),cur->GetPose().hat(1),cur->GetPose().hat(2));
+            // DrawFrame(cur, red, bDrawKF, bDrawSonarPoints);
             // DrawMapPoints(cur, red);
         }
+        glEnd();
     }
     // if(bDrawKF){
     //     for(int i=0; i<mpFrames->size(); i++)

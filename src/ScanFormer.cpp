@@ -100,17 +100,17 @@ void ScanFormer::Undistort(int thresh=40){
     // std::cout<<"----Start BeamSegment"<<std::endl;
     BeamSegment(thresh);//对该轮声纳Segment之后得到点云
     // std::cout<<"----End BeamSegment"<<std::endl;
-    // for(int i = 0;i < z.size(); i++){
-    //     if(i == C)continue;
-    //     std::cout<<z[i].hat<<std::endl;
-    //     motion r_(Eigen::Vector3d(0,0,x_s[i].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
-    //     motion r_c(Eigen::Vector3d(0,0,x_s[C].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
-    //     // std::cout<<"rc:\n"<<r_c.P<<"\nD(i):"<<D(i).P<<std::endl;
-    //     //std::cout<<"------undistorting beam "<<i<<std::endl;
-    //     // z[i] = (r_c.tail2tail(D(i))).compoundP(r_.compoundP(z[i]));
-    //     z[i] = (r_c.tail2tail(x_s[i].GetPose())).compoundP(r_.compoundP(z[i]));
-    //     std::cout<<"after undistort"<< z[i].hat<<std::endl;
-    // }
+    for(int i = 0;i < z.size(); i++){
+        if(i == C)continue;
+        // std::cout<<z[i].hat<<std::endl;
+        motion r_(Eigen::Vector3d(0,0,x_s[i].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
+        motion r_c(Eigen::Vector3d(0,0,x_s[C].GetPose().hat(2)), Eigen::Matrix3d::Zero(3,3));
+        // std::cout<<"rc:\n"<<r_c.P<<"\nD(i):"<<D(i).P<<std::endl;
+        //std::cout<<"------undistorting beam "<<i<<std::endl;
+        // z[i] = (r_c.tail2tail(D(i))).compoundP(r_.compoundP(z[i]));
+        z[i] = (r_c.tail2tail(x_s[i].GetPose())).compoundP(r_.compoundP(z[i]));
+        // std::cout<<"after undistort"<< z[i].hat<<std::endl;
+    }
     // std::cout<<"--End Undistort"<<std::endl;
     return ;
 }

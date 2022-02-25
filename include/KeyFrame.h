@@ -21,6 +21,8 @@ public:
     KeyFrame(pose kf);
     KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP);
 
+    void SetTimeStamp(unsigned long long timestamp);
+    unsigned long long GetTimeStamp();
     pose GetPose();
     void SetPose(pose kfPose);
     const std::vector<point>& GetSonarFullScan();
@@ -36,6 +38,7 @@ public:
     void Print();
 
 private:
+    unsigned long long mTimeStamp;
     pose mKfPose;
     std::vector<point> mvSonarFullScan;
     std::vector<Eigen::VectorXd> mvFsm;

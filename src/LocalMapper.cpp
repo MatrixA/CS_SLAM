@@ -135,7 +135,7 @@ namespace CS_SLAM
             oMotionVec(2)=Converter::RotationMatrixToEulerAngles(Ro)[0];
             //光流估计结果
             motion oMotion(oMotionVec,0.01*Eigen::MatrixXd::Identity(3,3));
-            motion fMotion = Converter::FusionMotions(dMotion,oMotion);
+            motion fMotion = Converter::FusionMotions(dMotion, oMotion, 0.9);
             nwKeyFrame->SetPose((lastKeyFrame->GetPose()).compound(fMotion));
             mpFramesDatabase->add(*nwKeyFrame,1);
             // std::cout<<"pushed first cam in FramesDatabase2:";

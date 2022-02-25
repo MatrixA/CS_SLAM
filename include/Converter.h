@@ -47,7 +47,7 @@ public:
     // }
     static bool isRotationMatrix(cv::Mat &R);
     static cv::Vec3f RotationMatrixToEulerAngles(cv::Mat &R);
-    static motion FusionMotions(motion a, motion b);
+    static motion FusionMotions(motion a, motion b, double alpha);
 
 };
 

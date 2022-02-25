@@ -114,20 +114,21 @@ void Viewer::ThreadLoop(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         menuTimeStamp=Utils::TimeStamp2TimeString(mlTimestamp);
-        d_display.Activate(vis_pose);
+        
         std::unique_lock<std::mutex> lock(mMutexViwerData);
-
+        d_display.Activate(vis_pose);
         if(mKfCurrent){
             // mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
             if(menuFollowCamera){
                 FollowCurrentFrame(vis_pose);//视角移动
             }
             // mpDrawer->DrawKeyFrames(true,false,false);
-            d_sonar.Activate(vis_sonar);
+            
             // std::cout<<"have sonar? "<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
             if(mKfCurrent->HaveSonarFullScan()){
+                d_sonar.Activate(vis_sonar);
                 // std::cout<<"sonar full scan"<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
-                mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
+                // mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
                 mKfLast = mKfCurrent;
                 mbInitKf = true;
             }
@@ -137,7 +138,7 @@ void Viewer::ThreadLoop(){
                 d_camera.Activate();
                 glColor3f(1.0f, 1.0f, 1.0f);
                 mpDrawer->PlotImage(mKfCurrent);//画相机
-                mKfLast = mKfCurrent;
+                // mKfLast = mKfCurrent;
                 mbInitKf = true;
             }
             // else if(mbInitKf && mKfLast->HaveSonarFullScan()){
@@ -153,7 +154,7 @@ void Viewer::ThreadLoop(){
 
         if(mpMap){
             d_display.Activate(vis_pose);
-            mpDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowPoints,false);
+            // mpDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowPoints,false);
             // mpDrawer->DrawFrame();
             // mpDrawer->DrawMapPoints();
         }

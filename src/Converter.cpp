@@ -38,8 +38,8 @@ cv::Vec3f Converter::RotationMatrixToEulerAngles(cv::Mat &R){
     return cv::Vec3f(x, y, z);
 }
 
-motion Converter::FusionMotions(motion a, motion b){
-    return motion(a.hat+b.hat,a.P);
+motion Converter::FusionMotions(motion a, motion b, double alpha){
+    return motion(alpha*a.hat+(1-alpha)*b.hat,a.P);
 }
 
 }//namespace CS_SLAM
