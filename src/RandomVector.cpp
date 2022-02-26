@@ -79,7 +79,7 @@ RandomVector RandomVector::CompoundP(RandomVector q, RandomVector b){
             sin(oi(2)), cos(oi(2));
     // std::cout<<"compoundP \n"<<this->P;
     Eigen::Matrix<double, 2, 2> P = J1*q.P*J1.transpose()+J2*b.P*J2.transpose();
-    std::cout<<"what's wrong"<<std::endl;
+    // std::cout<<"what's wrong"<<std::endl;
     RandomVector ret(hat,P);
     return ret;
 }
@@ -109,7 +109,7 @@ RandomVector RandomVector::rinverse(){
  * @return resultant random vector 
  */
 RandomVector RandomVector::tail2tail(RandomVector b){
-    std::cout<<hat<<"|"<<P<<std::endl;
+    // std::cout<<hat<<"|"<<P<<std::endl;
     return (this->rinverse()).compound(b);
 }
 

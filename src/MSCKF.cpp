@@ -8,6 +8,7 @@ MSCKF::MSCKF(){
     is_initialized_ = false;
     X_ = Eigen::Vector3d(0,0,0);
     P_ = 0.001*Eigen::Matrix3d::Identity(3,3);
+    R_ = 0.001*Eigen::Matrix3d::Identity(3,3);
     // std::cout<<"init OK"<<std::endl;
     //初始化在整个实验的起点，x,y,phi
 }
@@ -16,6 +17,7 @@ MSCKF::MSCKF(Frames *pFramesDatabase):mpFramesDatabase(pFramesDatabase){
     is_initialized_ = false;
     X_ = Eigen::Vector3d(0,0,0);
     P_ = 0.001*Eigen::Matrix3d::Identity(3,3);
+    R_ = 0.001*Eigen::Matrix3d::Identity(3,3);
 }
 
 MSCKF::~MSCKF(){}
@@ -80,6 +82,9 @@ void MSCKF::Prediction(motion q_n){
     //X_.topRows(3)=Utils::Odot(X_.block(0,0,3,1), q_n.hat);
 
     /*方差*/
+    Eigen::MatrixXd P = Eigen::MatrixXd::Zero(N+3,N+3);
+    P.block(0,0,3,3) = q_n.P;P.block(3,3,N,N)=P_;
+    P_ = P;
     // Eigen::MatrixXd F = Eigen::MatrixXd::Identity(N+3, N+3);F(2,2)=0;//TODO
     // Eigen::MatrixXd G = Eigen::MatrixXd(N+3, 3);G(0,0)=1;G(1,1)=1;G(2,2)=1;//TODO
     // P_ = F*P_*F.transpose() + G * q_n.P * G.transpose();
@@ -111,13 +116,28 @@ void MSCKF::Print(){
 
 void MSCKF::Update(int xi, int xn, motion ob){
     //scan matching结果作为实际观测进行更新
+    int N = X_.size()/3;
     Eigen::VectorXd z = ob.hat;
+    H_ = Eigen::MatrixXd::Zero(3, X_.size());
+    std::cout<<"Update "<<xi<<" with "<<xn<<" = "<<X_.size()<<std::endl;
+    Eigen::Matrix3d tmp;
+    tmp<<-cos(X_(3*xi+2)), -sin(X_(3*xi+2)), (X_(3*xi)-X_(3*xn))*sin(X_(3*xi+2))+(X_(3*xn+1)-X_(3*xi+1))*sin(X_(3*xi+2)),
+         sin(X_(3*xi+2)), -cos(X_(3*xi+2)), (X_(3*xi+1)-X_(3*xn+1))*sin(X_(3*xi+2))-(X_(3*xn)-X_(3*xi))*cos(X_(3*xi+2)),
+         0,0,-1;
+    H_.block(0,3*xi,3,3) = tmp;
+    tmp<<cos(X_(3*xi+2)), sin(X_(3*xi+2)), 0,
+          -sin(X_(3*xi+2)), cos(X_(3*xi+2)), 0,
+          0,0,1;
+    H_.block(0,3*xn,3,3) = tmp;
     Eigen::VectorXd y = z - H_ * X_;
     Eigen::MatrixXd S = H_ * P_ * H_.transpose() + R_;
     Eigen::MatrixXd K = P_ * H_.transpose() * S.inverse();
     X_ = X_ + (K*y);
+    mpFramesDatabase->AlterPose(0, pose(X_.topRows(3), 0.1*Eigen::Matrix3d::Identity()));
+    mpFramesDatabase->AlterPose(N-1-xi, pose(X_.middleRows(3*xi,3), 0.1*Eigen::Matrix3d::Identity()));
     Eigen::MatrixXd I = Eigen::MatrixXd::Identity(X_.size(),X_.size());
     P_ = (I - K * H_) * P_;
+
     return ;
 }
 

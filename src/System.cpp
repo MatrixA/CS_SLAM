@@ -47,7 +47,10 @@ void System::SaveTrajectory(const std::string &filename){
     int tot = poses.size()/3;
     std::cout<<"total "<<tot<<" poses. "<<std::endl;
     for(int i = 0; i<poses.size()/3;i++){
-        outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
+        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i);
+        
+        outfile << std::setprecision(12)<<(double)tmpKF->GetTimeStamp()/1e9 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
+        // outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
     }
     outfile.close();
     std::cout<<"write OK"<<std::endl;
@@ -191,11 +194,13 @@ void System::TrackSonar(MeasurementPackage meas){
             // curP->Print();
             // KeyFrame* curP = mpFramesDatabase->GetCurrentKeyFrame();
             mpViewer->RefreshCurrentFrame(timestamp_now);
-            const std::vector<int>& alternative = mpFramesDatabase->GetCurrentOverlaps(0.1);
+            const std::vector<int>& alternative = mpFramesDatabase->GetCurrentOverlaps(1);
             for(int i=0; i<alternative.size(); i++){
                 KeyFrame* agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
                 motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
-                mpMSCKF->Update(alternative[i],1,estimate);
+                std::cout<<"detected "<<alternative[i]<<std::endl;
+                //FrameDatabase里的第i个pose是MSCKF里的第n-1-i个pose】
+                mpMSCKF->Update(mpFramesDatabase->Size()-1-alternative[i],0,estimate);
             }
         }
         // mpMSCKF.Update(mpScanFormer->GetFullMotion());

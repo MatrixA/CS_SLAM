@@ -68,7 +68,7 @@ private:
  * @param maxIterations : max Iterations during optimization
  * @return Eigen::Vector3d 
  */
-Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motion q, int maxIterations = 5){
+Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motion q, int maxIterations = 20){
 /*!!!!!!
     输入：参考帧S_ref，新帧S_new，初始位移估计q(包含期望和方差)
     输出：更优的位移估计(仅期望)
@@ -80,21 +80,21 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
     qk.P = q.P;
     // Eigen::Vector3d hat_qk = q.hat;
     // Eigen::Vector3d q;
-    std::cout<<"start to cycle"<<std::endl;
+    // std::cout<<"start to cycle"<<std::endl;
     do{
         if(k!=0)qk = q;
         //找到S_new中每个点的匹配点(可能不存在)
         // std::vector<Eigen::Vector3d> hat_e[m];
         // Eigen::Vector3d hat_a;
         std::vector<std::pair<int, int> >Match;
-        std::cout<<"start to match, m="<<m<<std::endl;
+        // std::cout<<"start to match, m="<<m<<std::endl;
         for(int i = 0; i<m; i++){
-            std::cout<<"here is qk and p"<<std::endl;
+            // std::cout<<"here is qk and p"<<std::endl;
             // qk.Print();
-            RandomVector::CompoundP(qk,S_new[i]).Print();
+            // RandomVector::CompoundP(qk,S_new[i]).Print();
             Eigen::Vector2d n_i=(RandomVector::CompoundP(qk,S_new[i])).hat;
             //找到S_ref中与n_i马氏距离小于X的点
-            std::cout<<"point "<<i<<":"<<S_new[i].hat<<" with motion "<<qk.hat << "to be "<<n_i<<std::endl;
+            // std::cout<<"point "<<i<<":"<<S_new[i].hat<<" with motion "<<qk.hat << "to be "<<n_i<<std::endl;
             double mindis = DBL_MAX;
             int minid=-1;
             boost::math::chi_squared mydist(2);
@@ -107,10 +107,10 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
                     0, 1, ci.hat(0)*cos(qk.hat(2))+ci.hat(1)*sin(qk.hat(2));
                 J_c << cos(qk.hat(2)), -sin(qk.hat(2)),
                     sin(qk.hat(2)), -cos(qk.hat(2));
-                std::cout<<" with ref "<<j<<std::endl;
+                // std::cout<<" with ref "<<j<<std::endl;
 
                 Eigen::MatrixXd C = rj.P + J_q*q.P*J_q.transpose() + J_c*ci.P*J_c.transpose();
-                std::cout<<"calc mahdis"<<std::endl;
+                // std::cout<<"calc mahdis"<<std::endl;
                 double mahdis = Utils::MahDistance(rj.hat, C, n_i);
                 if(mahdis < mindis && mahdis <= thresh){
                     mindis = mahdis;
@@ -129,9 +129,11 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
         std::cout<<"tot "<<Match.size()<<" matches"<<std::endl;
         ceres::Problem problem;
         for(int i=0; i<Match.size(); i++){
-            point sr = S_ref[Match[i].first];
-            point sn = S_new[Match[i].second];
-            std::cout<<"add residual block "<<i<<": point"<<Match[i].first<<"with point"<<Match[i].second<<std::endl;
+            // point sr = S_ref[Match[i].first];
+            // point sn = S_new[Match[i].second];
+            point sr = S_ref[Match[i].second];
+            point sn = S_new[Match[i].first];
+            // std::cout<<"add residual block "<<i<<": point"<<Match[i].first<<"with point"<<Match[i].second<<std::endl;
             // sr.Print();
             // sn.Print();
             ceres::LossFunction* loss_function = new ceres::HuberLoss(1.0);
@@ -144,9 +146,9 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
         options.linear_solver_type = ceres::DENSE_QR;
         options.minimizer_progress_to_stdout = true;
         ceres::Solver::Summary summary;
-        std::cout<<"start a solving"<<std::endl;
+        // std::cout<<"start a solving"<<std::endl;
         Solve(options, &problem, &summary);
-        std::cout<<"end a solving"<<std::endl;
+        // std::cout<<"end a solving"<<std::endl;
         q.hat << q0,q1,q2;
         // std::cout<<"now q.hat"<<q.hat<<std::endl;
         k++;
@@ -175,9 +177,9 @@ Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motio
 motion LoopClosing::ScanMatching(KeyFrame* kfn, KeyFrame* kfi){
 //对两full scan做扫描匹配得到相对运动及其不确定性估计
     motion d;
-    std::cout<<"start scan matching, new kf is:"<<std::endl;
+    // std::cout<<"start scan matching, new kf is:"<<std::endl;
     // kfn->Print();
-    std::cout<<"old kfi is:"<<std::endl;
+    // std::cout<<"old kfi is:"<<std::endl;
     // kfi->Print();
     //获得初始位移估计hat_q
     motion q = pose(kfi->GetPose().hat,kfi->GetPose().P).tail2tail(pose(kfn->GetPose().hat,kfn
@@ -187,7 +189,7 @@ motion LoopClosing::ScanMatching(KeyFrame* kfn, KeyFrame* kfi){
     // Eigen::Matrix<double, 3, 3> H_k;
     // Eigen::Matrix<double, 3, 3> P_k;
     // P_q = H_k * P_k * H_k.transpose();
-    std::cout<<"start modpIC with init_q "<<q.hat<<std::endl;
+    // std::cout<<"start modpIC with init_q "<<q.hat<<std::endl;
     d.hat = modpIC(kfn->GetSonarFullScan(),kfi->GetSonarFullScan(),q);
     d.P = 0.1*Eigen::Matrix3d::Identity(3,3);//TODO;
     return d;

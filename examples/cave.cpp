@@ -99,6 +99,8 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YA
     data.insert(data.end(),data_DS.begin(),data_DS.end());
     data.insert(data.end(),data_Camera.begin(),data_Camera.end());
     std::sort(data.begin(),data.end());
+
+    
 }
 
 int main(int argc, char **argv){
@@ -132,7 +134,7 @@ int main(int argc, char **argv){
         switch(dataSequence[i].sensor_type_){
             case CS_SLAM::MeasurementPackage::CAMERA:
                 // std::cout<<"Camera Start"<<std::endl;
-                SLAM.TrackMono(dataSequence[i]);
+                // SLAM.TrackMono(dataSequence[i]);
                 // std::cout<<"Camera End"<<std::endl;
                 break;
             case CS_SLAM::MeasurementPackage::SONAR:

@@ -20,6 +20,7 @@ public:
 
     void clear();
     void clearMap(LocalMap* pMap);
+    void AlterPose(int id, pose ps);
 
     int Size();
     KeyFrame* GetCurrentKeyFrame();

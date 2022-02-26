@@ -87,8 +87,10 @@ std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
 std::vector<int> Frames::GetCurrentOverlaps(int threshold){
     Eigen::Vector3d x_nk= GetCurrentKeyFrame()->GetPose().hat;
     std::vector<int> ans;
-    for(int i = 0; i < KeyFrameDatabase.size(); i++){
-        double dis = (KeyFrameDatabase[i].GetPose().hat - x_nk).norm();
+    for(int i = 0; i < KeyFrameDatabase.size()-1; i++){
+        Eigen::Vector3d tmp = KeyFrameDatabase[i].GetPose().hat - x_nk;
+        double dis = sqrt(tmp(0)*tmp(0)+tmp(1)*tmp(1));
+        // double dis = (KeyFrameDatabase[i].GetPose().hat - x_nk).norm();
         if(dis < threshold){
             ans.push_back(i);
         }
@@ -113,6 +115,11 @@ void Frames::Init2DFromFile(std::string filename, bool haveObs){
         }
     }
     return ;
+}
+
+void Frames::AlterPose(int ind, pose ps){
+    // ps.Print();
+    KeyFrameDatabase[ind].SetPose(ps);
 }
 
 

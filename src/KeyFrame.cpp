@@ -25,6 +25,10 @@ KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,k
 }
 
 void KeyFrame::SetPose(pose kfPose){
+    std::cout<<"KF ";
+    kfPose.Print();
+    std::cout<<"mKf ";
+    mKfPose.Print();
     mKfPose = kfPose;
 };
 
