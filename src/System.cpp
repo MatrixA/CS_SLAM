@@ -47,8 +47,7 @@ void System::SaveTrajectory(const std::string &filename){
     int tot = poses.size()/3;
     std::cout<<"total "<<tot<<" poses. "<<std::endl;
     for(int i = 0; i<poses.size()/3;i++){
-        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i);
-        
+        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i,false);
         outfile << std::setprecision(12)<<(double)tmpKF->GetTimeStamp()/1e9 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
         // outfile << i+1 << " "<< poses(3*i) <<" "<< poses(3*i+1) <<" "<< poses(3*i+2) << std::endl;
     }
@@ -69,7 +68,7 @@ void System::SaveTrajectoryFromDatabase(const std::string &filename){
         return;
     }
     for(int i=0;i < mpFramesDatabase->Size();i++){
-        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i);
+        KeyFrame* tmpKF = mpFramesDatabase->GetKeyFrameByID(i,false);
         Eigen::Vector3d tmp = (tmpKF->GetPose()).hat;
         // outfile<< i+1 << " " << tmp(0)<<" "<< tmp(1) <<" "<< tmp(2)<<" "<<1<<" "<<0<<" "<<0<<" "<<0<<std::endl;
         //tum: time, x,y,z,qx,qy,qz,qw;
@@ -92,12 +91,15 @@ void System::TrackAHRS(MeasurementPackage meas){
     }
     double dt = (double)(meas.timestamp_ - timestamp_now)/1e9;
     // std::cout<<"dt:"<<dt<<std::endl;
+
     if(dt < 0){
         std::cerr << "ERROR: datas not sequential." << std::endl;
         exit(-1);
     }
 
     // std::cout<<"--Start mpScanFormer->UseAHRS"<<std::endl;
+    //\考虑AHRS外参
+    meas.raw_measurements_(0) = PI/2-meas.raw_measurements_(0);
     mpScanFormer->UseAHRS(meas.raw_measurements_,dt);
     // std::cout<<"--Start mpScanFormer->UseAHRS"<<std::endl;
     timestamp_now = meas.timestamp_;
@@ -146,6 +148,8 @@ void System::TrackDS(MeasurementPackage meas){
         exit(-1);
     }
     // std::cout<<"--Start mpScanFormer->UseDS"<<std::endl;
+    //\考虑depth sensor外参
+    meas.raw_measurements_(0) += 0.1;
     mpScanFormer->UseDS(meas.raw_measurements_,dt);
     // std::cout<<"--Over mpScanFormer->UseDS"<<std::endl;
     timestamp_now = meas.timestamp_;
@@ -194,14 +198,16 @@ void System::TrackSonar(MeasurementPackage meas){
             // curP->Print();
             // KeyFrame* curP = mpFramesDatabase->GetCurrentKeyFrame();
             mpViewer->RefreshCurrentFrame(timestamp_now);
+            //根据位置检测回环
             const std::vector<int>& alternative = mpFramesDatabase->GetCurrentOverlaps(1);
-            for(int i=0; i<alternative.size(); i++){
-                KeyFrame* agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i]);
-                motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
-                std::cout<<"detected "<<alternative[i]<<std::endl;
-                //FrameDatabase里的第i个pose是MSCKF里的第n-1-i个pose】
-                mpMSCKF->Update(mpFramesDatabase->Size()-1-alternative[i],0,estimate);
-            }
+            // for(int i=0; i<alternative.size(); i++){
+            //     KeyFrame* agoP = mpFramesDatabase-> GetKeyFrameByID(alternative[i],true);
+            //     motion estimate = mpLoopClosing->ScanMatching(curP,agoP);
+            //     // std::cout<<"detected "<<alternative[i]<<std::endl;
+            // //     //FrameDatabase里的第i个pose是MSCKF里的第n-1-i个pose
+            //     // estimate.hat = -estimate.hat;
+            //     mpMSCKF->Update(alternative[i],0,estimate);
+            // }
         }
         // mpMSCKF.Update(mpScanFormer->GetFullMotion());
         mpScanFormer->Reset();
@@ -215,6 +221,11 @@ void System::TrackSonar(MeasurementPackage meas){
     return ;
 }
 
+/**
+ * @brief 利用单目相机进行运动估计
+ * 
+ * @param meas 
+ */
 void System::TrackMono(MeasurementPackage meas){
     if(timestamp_now == 0){
         timestamp_now = meas.timestamp_;
@@ -234,7 +245,7 @@ void System::TrackMono(MeasurementPackage meas){
     // std::cout<<"try "<<meas.filename<<std::endl;
     curP->LoadCameraImg(meas.filename);
     //至少第二帧图像时才刷新
-    mpLocalMapper->UseMono(curP, dt, 50);
+    mpLocalMapper->UseMono(curP, dt, 30);
     //     mpFramesDatabase->add(*curP, 1);
     // }
     // mpViewer->add(*curP, 1);
