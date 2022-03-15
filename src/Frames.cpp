@@ -19,6 +19,8 @@ void Frames::add(KeyFrame kf, int typeID){
     KeyFrameDatabase.push_back(kf);
     if(typeID==1){
         mpLastCameraKeyFrame = &KeyFrameDatabase.back();
+    }else{
+        IndOfSonarKeyFrames.push_back(KeyFrameDatabase.size()-1);
     }
     return ;
 }
@@ -49,9 +51,10 @@ KeyFrame* Frames::GetCurrentKeyFrame(){
     return &(KeyFrameDatabase.back());
 }
 
-KeyFrame* Frames::GetKeyFrameByID(int id){
+KeyFrame* Frames::GetKeyFrameByID(int id, bool sonar=true){
     std::unique_lock<std::mutex> lock(mMutex);
-    return &KeyFrameDatabase[id];
+    if(sonar)return &KeyFrameDatabase[IndOfSonarKeyFrames[id]];
+    else return &KeyFrameDatabase[id];
 }
 
 KeyFrame* Frames::GetLastCameraKeyFrame(){
@@ -87,8 +90,9 @@ std::vector<int> Frames::GetOverlaps(KeyFrame kf, int threshold){
 std::vector<int> Frames::GetCurrentOverlaps(int threshold){
     Eigen::Vector3d x_nk= GetCurrentKeyFrame()->GetPose().hat;
     std::vector<int> ans;
-    for(int i = 0; i < KeyFrameDatabase.size()-1; i++){
-        Eigen::Vector3d tmp = KeyFrameDatabase[i].GetPose().hat - x_nk;
+    for(int i = 0; i < IndOfSonarKeyFrames.size()-1; i++){
+        KeyFrame tmpKF = KeyFrameDatabase[IndOfSonarKeyFrames[i]];
+        Eigen::Vector3d tmp = tmpKF.GetPose().hat - x_nk;
         double dis = sqrt(tmp(0)*tmp(0)+tmp(1)*tmp(1));
         // double dis = (KeyFrameDatabase[i].GetPose().hat - x_nk).norm();
         if(dis < threshold){

@@ -52,7 +52,9 @@ namespace CS_SLAM
  * @param feat_thresh 
  * @return int 
  */
-    int LocalMapper::Track(cv::Mat img1, cv::Mat img2, cv::Mat& R, cv::Mat& t, int feat_thresh){
+    bool LocalMapper::Track(KeyFrame* lastKF, KeyFrame* nowKF, cv::Mat& R, cv::Mat& t, int feat_thresh){
+        cv::Mat img1 = lastKF->GetCameraImage();
+        cv::Mat img2 = nowKF->GetCameraImage();
         int num_good_pts=0;
         std::vector<cv::Point2f> pts1, pts2;
         // cv::Mat desc1,desc2;
@@ -85,6 +87,8 @@ namespace CS_SLAM
                 num_good_pts++;
             }
         }
+        // if(num_good_pts>= feat_thresh)std::cout<<"should be"<<std::endl;
+        // std::cout<<"only "<<num_good_pts<<std::endl;
         if(num_good_pts< feat_thresh)return false;
         // cv::Mat img;
         // cv::add(img2, mask, img);
@@ -92,16 +96,31 @@ namespace CS_SLAM
         //pts1和pts2为img1和img2的对应匹配点
         //calculate motion
         cv::Mat essential_matrix = cv::findEssentialMat(pts1,pts2,cameraMatrix);
-        cv::recoverPose(essential_matrix, pts1, pts2, cameraMatrix,R,t);
-        cv::Vec3f euler= Converter::RotationMatrixToEulerAngles(R);
+        cv::Mat Rtmp,ttmp;
+        cv::recoverPose(essential_matrix, pts1, pts2, cameraMatrix,Rtmp,ttmp);
+
+        //转化为DVL之间的运动
+        t = (cv::Mat_<double>(3,1)<<0.02*Rtmp.at<double>(0,1)-0.26*Rtmp.at<double>(0,0)+ttmp.at<double>(0,0)+0.26,
+                                    0.02*Rtmp.at<double>(2,1)-0.26*Rtmp.at<double>(2,0)+ttmp.at<double>(2,0),
+                                    0.02*Rtmp.at<double>(1,1)-0.26*Rtmp.at<double>(1,0)+ttmp.at<double>(1,0)-0.02);
+        // t.at<double>(0,0)=0.02*Rtmp.at<double>(0,1)-0.26*Rtmp.at<double>(0,0)+ttmp.at<double>(0,0)+0.26;
+        // t.at<double>(1,0)=0.02*Rtmp.at<double>(2,1)-0.26*Rtmp.at<double>(2,0)+ttmp.at<double>(2,0);
+        // t.at<double>(2,0)=0.02*Rtmp.at<double>(1,1)-0.26*Rtmp.at<double>(1,0)+ttmp.at<double>(1,0)-0.02;
+        cv::Mat assis=(cv::Mat_<double>(3,3)<< 0,-1,0,1,0,0,0,0,1);
+        R = assis*Rtmp*assis;
+        // Toc<< 1,0,0,0.26,
+        //       0,0,1,0,
+        //       0,1,0,-0.02,
+        //       0,0,0,1;
+        
+        // cv::Vec3f euler= Converter::RotationMatrixToEulerAngles(R);
         // std::cout<<R<<std::endl;
         // std::cout<<t<<std::endl;
-
         return true;
     }
 
 /**
- * @brief 
+ * @brief 使用相机图像更新位姿
  * 
  * @param nwKeyFrame 
  * @param featThresh 
@@ -123,24 +142,26 @@ namespace CS_SLAM
         // std::cout<<"lastCamera address:"<<lastKeyFrame<<std::endl;
         
         cv::Mat Ro,to;
-        bool ret=Track(lastKeyFrame->GetCameraImage(),nwKeyFrame->GetCameraImage(),Ro,to,featThresh) >= featThresh;
+        bool ret=Track(lastKeyFrame,nwKeyFrame,Ro,to,featThresh);
+        // std::cout<<"can of "<<ret<<std::endl;
         if(ret){
             motion dMotion = lastKeyFrame->GetPose().tail2tail(nwKeyFrame->GetPose());
-            // Eigen::MatrixXd Roe(3,3),toe(3,1);
-            // cv::cv2eigen(Ro,Roe);
-            // cv::cv2eigen(to,toe);
+            // tranform camera motion to DVL motion
+            // Converter::CameraToDVL(Ro,to,Rodvl,todvl);
+            // std::cout<<"use optical"<<std::endl;
             Eigen::Vector3d oMotionVec;
             oMotionVec(0)=to.at<double>(0,0);
-            oMotionVec(1)=to.at<double>(0,1);
-            oMotionVec(2)=Converter::RotationMatrixToEulerAngles(Ro)[0];
+            oMotionVec(1)=to.at<double>(1,0);
+            oMotionVec(2)=Converter::RotationMatrixToEulerAngles(Ro)[2];
             //光流估计结果
             motion oMotion(oMotionVec,0.01*Eigen::MatrixXd::Identity(3,3));
-            motion fMotion = Converter::FusionMotions(dMotion, oMotion, 0.9);
+            motion fMotion = Converter::FusionMotions(dMotion, oMotion, 0.2);
             nwKeyFrame->SetPose((lastKeyFrame->GetPose()).compound(fMotion));
             mpFramesDatabase->add(*nwKeyFrame,1);
             // std::cout<<"pushed first cam in FramesDatabase2:";
             // nwKeyFrame->Print();
         }else{
+            // std::cout<<"no optical flow is used"<<std::endl;
             mpFramesDatabase->add(*nwKeyFrame,1);
             // std::cout<<"pushed first cam in FramesDatabase3:";
             // nwKeyFrame->Print();

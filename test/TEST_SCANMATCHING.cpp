@@ -47,8 +47,8 @@ int main(){
     
     CS_SLAM::LoopClosing loopClosing(fdbs);
     std::cout<<"full scan ok"<<std::endl;
-    CS_SLAM::KeyFrame* x = fdbs->GetKeyFrameByID(0);
-    CS_SLAM::KeyFrame* y = fdbs->GetKeyFrameByID(1);
+    CS_SLAM::KeyFrame* x = fdbs->GetKeyFrameByID(0,false);
+    CS_SLAM::KeyFrame* y = fdbs->GetKeyFrameByID(1,false);
     std::cout<<x->GetPose().hat<<"----"<<y->GetPose().hat<<std::endl;
     CS_SLAM::motion estimate = loopClosing.ScanMatching(y,x);
     estimate.Print();

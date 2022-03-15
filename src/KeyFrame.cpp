@@ -25,10 +25,10 @@ KeyFrame::KeyFrame(Eigen::VectorXd kfPos,Eigen::MatrixXd kfPosP):mKfPose(kfPos,k
 }
 
 void KeyFrame::SetPose(pose kfPose){
-    std::cout<<"KF ";
-    kfPose.Print();
-    std::cout<<"mKf ";
-    mKfPose.Print();
+    // std::cout<<"KF ";
+    // kfPose.Print();
+    // std::cout<<"mKf ";
+    // mKfPose.Print();
     mKfPose = kfPose;
 };
 
@@ -83,7 +83,10 @@ void KeyFrame::LoadCameraImg(std::string filename){
 }
 
 void KeyFrame::Transform(motion transform){
-    mKfPose = mKfPose.compound(transform);
+    mKfPose.hat(0) = mKfPose.hat(0)+transform.hat(0);
+    mKfPose.hat(1) = mKfPose.hat(1)+transform.hat(1);
+    mKfPose.hat(2) = transform.hat(2);
+    // mKfPose = mKfPose.compound(transform);
     return ;
 }
 

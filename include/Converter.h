@@ -3,6 +3,7 @@
 
 #include<opencv2/core/core.hpp>
 #include<Eigen/Dense>
+#include<opencv2/core/eigen.hpp>
 #include"RandomVector.h"
 
 // #include "KeyFrame.h"
@@ -48,7 +49,7 @@ public:
     static bool isRotationMatrix(cv::Mat &R);
     static cv::Vec3f RotationMatrixToEulerAngles(cv::Mat &R);
     static motion FusionMotions(motion a, motion b, double alpha);
-
+    static void CameraToDVL(cv::Mat R, cv::Mat t, cv::Mat& RDvl, cv::Mat& tDvl);
 };
 
 }// namespace CS_SLAM

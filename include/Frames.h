@@ -24,7 +24,7 @@ public:
 
     int Size();
     KeyFrame* GetCurrentKeyFrame();
-    KeyFrame* GetKeyFrameByID(int id);
+    KeyFrame* GetKeyFrameByID(int id, bool sonar/*=true*/);
     KeyFrame* GetLastCameraKeyFrame();
 
     bool IsInitiliedCam();
@@ -38,6 +38,7 @@ public:
 private:
     std::mutex mMutex;
     std::vector<KeyFrame> KeyFrameDatabase;
+    std::vector<int> IndOfSonarKeyFrames;
     KeyFrame* mpLastCameraKeyFrame;
 };
 

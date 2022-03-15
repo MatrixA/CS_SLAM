@@ -42,9 +42,12 @@ void ScanFormer::BeamSegment(int thresh = 40){
         }
         // scan[i](localMaxID) = localMax;
         if(localMax>=thresh){
-            double r=0.0503*localMaxID, theta=2*PI/200*i;
+            //外参决定的角度关系
+            double r=0.0503*localMaxID, theta=2*PI/200*i+PI;
             Eigen::Vector2d z_hat(r*cos(theta),r*sin(theta));
-            Eigen::Matrix2d z_P = Eigen::Matrix2d::Zero(2,2);
+            //best
+            // Eigen::Vector2d z_hat(r*cos(theta-PI),r*sin(theta-PI));
+            Eigen::Matrix2d z_P = Eigen::Matrix2d::Identity(2,2);
             z.push_back(point(z_hat,z_P));
         }else{
             // std::cout<<"row: "<<i<<" no useful information"<<std::endl;
@@ -91,7 +94,11 @@ bool ScanFormer::IsFull(){
 }
 
 
-//根据相对运动估计生成生成完整的scan
+/**
+ * @brief 根据相对运动估计生成生成完整的scan
+ * 
+ * @param thresh 
+ */
 void ScanFormer::Undistort(int thresh=40){
     //输入(内隐)：scan
     //输出(内隐)：修正好的scan
@@ -114,6 +121,7 @@ void ScanFormer::Undistort(int thresh=40){
     // std::cout<<"--End Undistort"<<std::endl;
     return ;
 }
+
 /**
  * @brief use DVL to update local pose
  * 
@@ -130,7 +138,7 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt){
             0,0,0,0,0,0,1,0;
             // 0,0,1,0,0,0,0,0;
     mpEKF->setH(H_DVL);
-    mpEKF->setR(Eigen::MatrixXd::Identity(3,3));
+    mpEKF->setR(0.01*Eigen::MatrixXd::Identity(3,3));
     // std::cout<<"----start DVL update"<<std::endl;
     mpEKF->update(data_dvl, dt);
     // std::cout<<"----end DVL update"<<std::endl;
@@ -145,6 +153,12 @@ void ScanFormer::UseDVL(Eigen::VectorXd data_dvl, double dt){
     // x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
+/**
+ * @brief use AHRS to update local pose
+ * 
+ * @param data_ahrs 
+ * @param dt 
+ */
 void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt){
     // if(!mpEKF->isInitialized()){
     //     Eigen::VectorXd tmp=Eigen::VectorXd::Zero(8);
@@ -169,6 +183,12 @@ void ScanFormer::UseAHRS(Eigen::VectorXd data_ahrs, double dt){
     // x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
+/**
+ * @brief use depth sensor to update local pose
+ * 
+ * @param data_ds 
+ * @param dt 
+ */
 void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt){
     // if(!mpEKF->isInitialized()){
     //     return ;
@@ -193,6 +213,12 @@ void ScanFormer::UseDS(Eigen::VectorXd data_ds, double dt){
     // x_s.push_back(KeyFrame(x_shat,x_sp));
 }
 
+/**
+ * @brief use sonar to update local pose
+ * 
+ * @param data_sonar 
+ * @param dt 
+ */
 void ScanFormer::UseSonar(Eigen::VectorXd data_sonar, double dt){
     /*
     目的：叠加声纳beam，并用其进行EKF的位姿估计。

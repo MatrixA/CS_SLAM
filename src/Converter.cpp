@@ -39,7 +39,23 @@ cv::Vec3f Converter::RotationMatrixToEulerAngles(cv::Mat &R){
 }
 
 motion Converter::FusionMotions(motion a, motion b, double alpha){
+    // std::cout<<a.hat<<" with "<<b.hat<<" ||| "<<alpha<< std::endl;
+    // std::cout<<a.hat<<" : "<<b.hat<<" ||| alpha"<<std::endl;
     return motion(alpha*a.hat+(1-alpha)*b.hat,a.P);
+}
+
+void Converter::CameraToDVL(cv::Mat R, cv::Mat t, cv::Mat& RDvl, cv::Mat& tDvl){
+    Eigen::MatrixXd Ro(3,3),to(3,1);
+    cv::cv2eigen(R,Ro);
+    cv::cv2eigen(t,to);
+    
+    RDvl.at<double>(0,0)=Ro(0,0); RDvl.at<double>(0,0)=Ro(0,2); RDvl.at<double>(0,0)=Ro(0,1);
+    RDvl.at<double>(0,0)=Ro(2,0); RDvl.at<double>(0,0)=Ro(2,2); RDvl.at<double>(0,0)=Ro(2,1);
+    RDvl.at<double>(0,0)=Ro(1,0); RDvl.at<double>(0,0)=Ro(1,2); RDvl.at<double>(0,0)=Ro(1,1);
+
+    tDvl.at<double>(0,0)=0.02*Ro(0,1)-0.26*Ro(0,0)+to(0)+0.26;
+    tDvl.at<double>(1,0)=0.02*Ro(2,1)-0.26*Ro(2,0)+to(2);
+    tDvl.at<double>(2,0)=0.02*Ro(1,1)-0.26*Ro(1,0)+to(1)-0.02;
 }
 
 }//namespace CS_SLAM

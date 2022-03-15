@@ -68,13 +68,19 @@ private:
  * @param maxIterations : max Iterations during optimization
  * @return Eigen::Vector3d 
  */
-Eigen::Vector3d modpIC(std::vector<point> S_new, std::vector<point> S_ref, motion q, int maxIterations = 20){
+Eigen::Vector3d modpIC(KeyFrame* kfn, std::vector<point> S_new, KeyFrame* kfi, std::vector<point> S_ref, motion q, int maxIterations = 20){
 /*!!!!!!
     输入：参考帧S_ref，新帧S_new，初始位移估计q(包含期望和方差)
     输出：更优的位移估计(仅期望)
 */
     int k = 0;
     unsigned int m = S_new.size();
+    // for(int i=0;i<S_new.size();i++){
+    //     S_new[i]=RandomVector::CompoundP(kfn->GetPose(),S_new[i]);
+    // }
+    // for(int j=0;j<S_ref.size();j++){
+    //     S_ref[j]=RandomVector::CompoundP(kfi->GetPose(),S_ref[j]);
+    // }
     motion qk;
     qk.hat = q.hat;
     qk.P = q.P;
@@ -190,7 +196,7 @@ motion LoopClosing::ScanMatching(KeyFrame* kfn, KeyFrame* kfi){
     // Eigen::Matrix<double, 3, 3> P_k;
     // P_q = H_k * P_k * H_k.transpose();
     // std::cout<<"start modpIC with init_q "<<q.hat<<std::endl;
-    d.hat = modpIC(kfn->GetSonarFullScan(),kfi->GetSonarFullScan(),q);
+    d.hat = modpIC(kfn, kfn->GetSonarFullScan(),kfi, kfi->GetSonarFullScan(),q);
     d.P = 0.1*Eigen::Matrix3d::Identity(3,3);//TODO;
     return d;
 }

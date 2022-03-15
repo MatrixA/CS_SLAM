@@ -11,6 +11,15 @@
 
 void LoadImages(const std::string &strCameraFolder, std::vector<CS_SLAM::MeasurementPackage> &data, enum CS_SLAM::MeasurementPackage::SensorType sensor);
 
+/**
+ * @brief 读取文件
+ * 
+ * @param filename 
+ * @param data 
+ * @param data_ind 
+ * @param sensor 
+ * @param tags 
+ */
 void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage> &data, std::vector<int> &data_ind, enum CS_SLAM::MeasurementPackage::SensorType sensor, bool tags){
     std::ifstream infile;
     infile.open(filename, std::ios::in);
@@ -61,6 +70,13 @@ void Import(const std::string& filename, std::vector<CS_SLAM::MeasurementPackage
 //     return conf;
 // }
 
+/**
+ * @brief 导入数据集
+ * 
+ * @param argv 
+ * @param data 
+ * @param conf 
+ */
 void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YAML::Node conf){
     std::ifstream infile;
     //数据读入模块
@@ -100,7 +116,6 @@ void InputDataset(char **argv,std::vector<CS_SLAM::MeasurementPackage> &data, YA
     data.insert(data.end(),data_Camera.begin(),data_Camera.end());
     std::sort(data.begin(),data.end());
 
-    
 }
 
 int main(int argc, char **argv){
@@ -134,7 +149,7 @@ int main(int argc, char **argv){
         switch(dataSequence[i].sensor_type_){
             case CS_SLAM::MeasurementPackage::CAMERA:
                 // std::cout<<"Camera Start"<<std::endl;
-                // SLAM.TrackMono(dataSequence[i]);
+                SLAM.TrackMono(dataSequence[i]);
                 // std::cout<<"Camera End"<<std::endl;
                 break;
             case CS_SLAM::MeasurementPackage::SONAR:
@@ -174,7 +189,6 @@ int main(int argc, char **argv){
 //         // }else if(data[i].sensor_type_==CS_SLAM::MeasurementPackage::DS){
 //         //     std::cout<<"DS Start"<<std::endl;
 //         //     SLAM.TrackDS(data[i],DSParam);
-
 //         //     std::cout<<"DS End"<<std::endl;
 //         // }
 //         SLAM.PlotTrajectory();

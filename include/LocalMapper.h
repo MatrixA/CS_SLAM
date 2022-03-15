@@ -22,7 +22,7 @@ public:
     ~LocalMapper();
     // void SetLocalMapper(LocalMapping* localMapper);
     // void SetScanFormer(ScanFormer* scanFormer);
-    int Track(cv::Mat img1, cv::Mat img2, cv::Mat& R, cv::Mat& t, int feat_thresh);
+    bool Track(KeyFrame* lastKF, KeyFrame* nowKF, cv::Mat& R, cv::Mat& t, int feat_thresh);
     bool UseMono(KeyFrame* nwKeyFrame, double dt, int featThresh);
 
 private:

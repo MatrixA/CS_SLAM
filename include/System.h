@@ -17,6 +17,7 @@
 #include "LocalMapper.h"
 #include "KeyFrame.h"
 #include "LoopClosing.h"
+#include "Frames.h"
 
 namespace CS_SLAM
 {

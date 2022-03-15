@@ -114,12 +114,25 @@ void MSCKF::Print(){
     std::cout<<"P:"<<P_<<std::endl;
 }
 
+/**
+ * @brief 根据xi到xn的运动更新MSCKF的状态
+ * 
+ * @param xi 
+ * @param xn 
+ * @param ob 
+ */
 void MSCKF::Update(int xi, int xn, motion ob){
     //scan matching结果作为实际观测进行更新
     int N = X_.size()/3;
+
+    std::cout<<"Update "<<xi<<" with "<<xn<<" = "<<X_.size()<<std::endl;
+    //Frames的xi对应到MSCKF里是N-1-xi,xn也是类似;
+    xi = N-1-xi;
+    // xn = N-1-xn;
+
     Eigen::VectorXd z = ob.hat;
     H_ = Eigen::MatrixXd::Zero(3, X_.size());
-    std::cout<<"Update "<<xi<<" with "<<xn<<" = "<<X_.size()<<std::endl;
+    
     Eigen::Matrix3d tmp;
     tmp<<-cos(X_(3*xi+2)), -sin(X_(3*xi+2)), (X_(3*xi)-X_(3*xn))*sin(X_(3*xi+2))+(X_(3*xn+1)-X_(3*xi+1))*sin(X_(3*xi+2)),
          sin(X_(3*xi+2)), -cos(X_(3*xi+2)), (X_(3*xi+1)-X_(3*xn+1))*sin(X_(3*xi+2))-(X_(3*xn)-X_(3*xi))*cos(X_(3*xi+2)),
@@ -133,8 +146,8 @@ void MSCKF::Update(int xi, int xn, motion ob){
     Eigen::MatrixXd S = H_ * P_ * H_.transpose() + R_;
     Eigen::MatrixXd K = P_ * H_.transpose() * S.inverse();
     X_ = X_ + (K*y);
-    mpFramesDatabase->AlterPose(0, pose(X_.topRows(3), 0.1*Eigen::Matrix3d::Identity()));
-    mpFramesDatabase->AlterPose(N-1-xi, pose(X_.middleRows(3*xi,3), 0.1*Eigen::Matrix3d::Identity()));
+    // mpFramesDatabase->AlterPose(0, pose(X_.topRows(3), 0.1*Eigen::Matrix3d::Identity()));
+    // mpFramesDatabase->AlterPose(N-1-xi, pose(X_.middleRows(3*xi,3), 0.1*Eigen::Matrix3d::Identity()));
     Eigen::MatrixXd I = Eigen::MatrixXd::Identity(X_.size(),X_.size());
     P_ = (I - K * H_) * P_;
 

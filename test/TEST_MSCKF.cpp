@@ -14,15 +14,19 @@ using namespace std;
 
 int main(){
     CS_SLAM::MSCKF MSCKF;
-    MSCKF.Initialize(CS_SLAM::motion(Eigen::Vector3d(1,1,2),Eigen::MatrixXd::Zero(3,3)));
+    MSCKF.Initialize(CS_SLAM::motion(Eigen::Vector3d(0,0,0),Eigen::MatrixXd::Zero(3,3)));
+    // MSCKF.Print();
+
+    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(1,0,0),0.1*Eigen::MatrixXd::Identity(3,3)));
+    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(0,1,1.5),0.1*Eigen::MatrixXd::Identity(3,3)));
+    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(-1,0,3.14),0.1*Eigen::MatrixXd::Identity(3,3)));
+    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(-0.2,-1,0.1),0.1*Eigen::MatrixXd::Identity(3,3)));
     MSCKF.Print();
 
-    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(0.1,0.2,1),Eigen::MatrixXd::Zero(3,3)));
+    // MSCKF.Update(4,0,CS_SLAM::motion(Eigen::Vector3d(0.2,0,0.1),Eigen::MatrixXd::Zero(3,3)));
+    MSCKF.Update(0,4,CS_SLAM::motion(Eigen::Vector3d(-0.2,-0.1,0),Eigen::MatrixXd::Zero(3,3)));
     MSCKF.Print();
 
-    MSCKF.Prediction(CS_SLAM::motion(Eigen::Vector3d(-0.1,-0.2,1),Eigen::MatrixXd::Zero(3,3)));
-    MSCKF.Print();
-    
     return 0;
 }
 

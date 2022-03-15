@@ -9,7 +9,7 @@ namespace CS_SLAM{
  * @param pFrames - frames database for display
  */
 Viewer::Viewer(LocalMap* pMap, Frames* pFrames):mpMap(pMap){
-    //viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
+    // viewer_thread_ = std::thread(std::bind(&Viewer::ThreadLoop, this));
     mpDrawer = new Drawer(pMap, pFrames);
     mViewpointX = 0; mViewpointY = 0; mViewpointZ = 100;
     mViewpointF = 10;
@@ -104,7 +104,6 @@ void Viewer::ThreadLoop(){
         .SetBounds(0,1,0.7,1)
         .AddDisplay(d_sonar)
         .AddDisplay(d_camera);
-        // .AddDisplay(d_cam);
 
     const float blue[3] = {0, 0, 1};
     const float green[3] = {0, 1, 0};
@@ -118,20 +117,23 @@ void Viewer::ThreadLoop(){
         std::unique_lock<std::mutex> lock(mMutexViwerData);
         d_display.Activate(vis_pose);
         if(mKfCurrent){
-            // mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
+            mpDrawer->DrawFrame(mKfCurrent, blue, menuShowKeyFrames, menuShowPoints);//画关键帧以及观测点
             if(menuFollowCamera){
                 FollowCurrentFrame(vis_pose);//视角移动
             }
             // mpDrawer->DrawKeyFrames(true,false,false);
-            
-            // std::cout<<"have sonar? "<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
-            if(mKfCurrent->HaveSonarFullScan()){
-                d_sonar.Activate(vis_sonar);
-                // std::cout<<"sonar full scan"<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
-                // mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
-                mKfLast = mKfCurrent;
-                mbInitKf = true;
-            }
+
+            //画声纳观测数据
+            // d_sonar.Activate(vis_sonar);
+            // // std::cout<<"have sonar? "<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
+            // if(mKfCurrent->HaveSonarFullScan()){
+            //     // std::cout<<"sonar full scan"<<(mKfCurrent->GetSonarFullScan()).size()<<std::endl;
+            //     mpDrawer->DrawSonar(mKfCurrent);//画声纳图像
+            //     mKfLast = mKfCurrent;
+            //     mbInitKf = true;
+            // }else if(mbInitKf){
+            //     mpDrawer->DrawSonar(mKfLast);//画声纳图像
+            // }
             // std::cout<<"have "<<(mKfCurrent->GetCameraImage().data != nullptr)<<std::endl;
             if(mKfCurrent->HaveCameraImage()){
                 // std::cout<<"have pic"<<std::endl;
@@ -139,7 +141,7 @@ void Viewer::ThreadLoop(){
                 glColor3f(1.0f, 1.0f, 1.0f);
                 mpDrawer->PlotImage(mKfCurrent);//画相机
                 // mKfLast = mKfCurrent;
-                mbInitKf = true;
+                // mbInitKf = true;
             }
             // else if(mbInitKf && mKfLast->HaveSonarFullScan()){
             //     std::cout<<"draw backed Sonar"<<std::endl;
@@ -154,7 +156,7 @@ void Viewer::ThreadLoop(){
 
         if(mpMap){
             d_display.Activate(vis_pose);
-            // mpDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowPoints,false);
+            mpDrawer->DrawKeyFrames(menuShowKeyFrames,menuShowPoints,false);
             // mpDrawer->DrawFrame();
             // mpDrawer->DrawMapPoints();
         }

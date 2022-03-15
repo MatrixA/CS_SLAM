@@ -124,7 +124,7 @@ int main(){
         glBegin(GL_LINE_LOOP);
         int cnt=0;
         while(cnt < fdbs->Size()){
-            Eigen::Vector3d tmpPoseHat = fdbs->GetKeyFrameByID(cnt)->GetPose().hat;
+            Eigen::Vector3d tmpPoseHat = fdbs->GetKeyFrameByID(cnt,false)->GetPose().hat;
             glColor3f(0.4f,0.4f,0.2f);
             glPointSize(4);
             glVertex3d(tmpPoseHat(0), tmpPoseHat(1), 0);
